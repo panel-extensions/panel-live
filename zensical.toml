@@ -7,9 +7,18 @@ repo_name = "panel-extensions/panel-live"
 edit_uri = "edit/main/docs/"
 nav = [
   {"Home" = "index.md"},
+  {"Demo" = "demo.md"},
   {"Examples" = "examples.md"},
-  {"Reference" = "reference/panel_live.md"}
+  {"Reference" = "reference/panel_live.md"},
+  {"Design" = [
+    {"API Design" = "design/api-design.md"},
+    {"Issues & Roadmap" = "design/live-issues.md"},
+    {"Vision" = "design/live-dream.md"},
+    {"Architecture" = "design/live-analysis.md"},
+  ]},
 ]
+extra_javascript = ["assets/js/panel-live.js"]
+extra_css = ["assets/css/panel-live.css"]
 
 # Theme configuration
 [project.theme]
@@ -75,6 +84,9 @@ url_download = true
 [project.markdown_extensions.admonition]
 
 [project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.formatter" }
+]
 
 # Plugins
 [project.plugins]

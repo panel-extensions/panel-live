@@ -5,14 +5,14 @@
 [![pypi-version](https://img.shields.io/pypi/v/panel-live.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/panel-live)
 [![python-version](https://img.shields.io/pypi/pyversions/panel-live?logoColor=white&logo=python&style=flat-square)](https://pypi.org/project/panel-live)
 
-
-Run your Panel and Python code in the browser with panel-live
+Run your Python code live in the browser with panel-live!
 
 ## Features
 
-panel-live
+- `<panel-live>` web-component to easily embed Python code as live visualizations, interactive editors or even full playgrounds.
+- `panel_live` python package with featuresfor embed Python code as live visualizations, interactive editors or even full playgrounds in your documentation.
 
-## Pin your version!
+## Pin your version
 
 This project is **in its early stages**, so if you find a version that suits your needs, it’s recommended to **pin your version**, as updates may introduce changes.
 
