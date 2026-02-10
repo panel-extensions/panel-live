@@ -8,7 +8,7 @@ Pyodide is loaded once and shared across all instances. Apps execute sequentiall
 
 Renders the Panel app with no editor. Usage: `<panel-live>...code...</panel-live>`
 
-```{.panel mode="app"}
+```{.panel }
 import panel as pn
 pn.extension(sizing_mode="stretch_width")
 
@@ -32,7 +32,7 @@ pn.Column(
 
 Editable code above the output. Usage: `<panel-live mode="editor">`
 
-```{.panel theme="dark"}
+```{.panel mode="editor" theme="dark"}
 import panel as pn
 pn.extension(sizing_mode="stretch_width")
 
@@ -57,7 +57,7 @@ pn.Column(
 
 Side-by-side editor and preview. Usage: `<panel-live mode="playground" layout="horizontal">`
 
-```{.panel mode="playground" layout="horizontal" theme="dark"}
+```{.panel mode="playground" layout="horizontal" code-position="first" theme="dark}
 import panel as pn
 pn.extension(sizing_mode="stretch_width")
 

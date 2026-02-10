@@ -30,10 +30,7 @@ _KNOWN_ATTRS = frozenset(
     }
 )
 
-_DEFAULTS = {
-    "mode": "editor",
-    "code-position": "last",
-}
+_DEFAULTS = {}
 
 
 def _escape(text):
