@@ -1,5 +1,7 @@
 # PyScript Evaluation for Panel Live
 
+> **Note:** This evaluation was conducted against the original `panel-embed.js` POC. The recommendation (stay independent, don't adopt PyScript) was accepted and the implementation now lives in `lib/panel-live.js`. References to `panel-embed.js` are historical.
+
 **Date:** 2025-02-10
 **Status:** POC Complete - Evaluation
 
@@ -242,5 +244,5 @@ panel/live/poc/pyscript/
   panel-pyscript-plugin.js    # PyScript plugin for Panel initialization (reference impl)
 
 # This document
-docs/research/pyscript-evaluation.md
+pyscript-evaluation.md
 ```

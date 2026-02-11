@@ -12,7 +12,7 @@ Save as `test.html` and serve with `python -m http.server`:
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.8.2.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.8.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.8.2.min.js"></script>
@@ -35,7 +35,7 @@ Save as `test.html` and serve with `python -m http.server`:
           slider = pn.widgets.FloatSlider(start=0, end=10, name='Amplitude')
           def callback(new):
               return f'Amplitude is: {new}'
-          pn.Row(slider, pn.bind(callback, slider)).servable(target='app');
+          pn.Column("Pyodide: 0.28.2", slider, pn.bind(callback, slider)).servable(target='app');
         `);
       }
       main();
@@ -52,14 +52,16 @@ The slider app renders and is interactive.
 
 The browser tab crashes (Chrome shows "Aw, Snap!" or similar) during package installation. No errors appear in the console because the crash kills the tab before any output.
 
-## What works
+## What Works Better
 
-Changing the Pyodide version from v0.28.2 to v0.28.2 fixes the crash:
+Changing the Pyodide version from v0.29.3 to v0.28.2 fixes the crash to some extent:
 
 ```diff
--<script src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
+-<script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
 +<script src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
 ```
+
+I do see continued crashes though - especially on Chrome/ Edge. Firefox seems more stable. It also seems worse when serving from my jupyterhub/ behind jupyterhub reverse proxy.
 
 ## Possible causes
 
@@ -77,5 +79,13 @@ Changing the Pyodide version from v0.28.2 to v0.28.2 fixes the crash:
 
 - Panel 1.8.7
 - Bokeh 3.8.2 (JS and wheel)
-- Pyodide v0.28.2 (crashes), v0.28.2 (works)
-- Chrome on Linux
+- Pyodide v0.28.2 (crashes), v0.28.2 (works better)
+- Edge/ Chrome on Linux
+
+## Request
+
+Please
+
+- Fix any issues running with latest versions of pyodide and pyscript
+- Please update the documentation https://panel.holoviz.org/how_to/wasm/standalone.html.
+- Please fix the pyodide version in the pyscript examples to ensure they will work for users.

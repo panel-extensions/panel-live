@@ -9,7 +9,7 @@ Outstanding issues for the Panel Live feature. See also `live-dream.md` for visi
 - **P2 - Important**: Needed for a polished, competitive product.
 - **P3 - Nice-to-have**: Future enhancements and stretch goals.
 
-**Current state:** 28 issues total. 17 resolved, 2 partially resolved, 9 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
+**Current state:** 30 issues total. 21 resolved, 4 partially resolved, 5 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
 
 ---
 
@@ -19,7 +19,7 @@ These issues must be resolved first as they shape everything else.
 
 ### P0 - Design Extensible User/Developer-Facing API [RESOLVED]
 
-**Decision:** The API uses a single `<panel-live>` custom element (Light DOM) with `mode="app|editor|playground"` attribute. Full specification in `docs/api-design.md`.
+**Decision:** The API uses a single `<panel-live>` custom element (Light DOM) with `mode="app|editor|playground"` attribute. Full specification in `api-design.md`.
 
 **Key design decisions:**
 
@@ -158,13 +158,13 @@ Pyodide in the worker **never touches the DOM**. Instead:
 
 ---
 
-### P1 - Folder and File Structure [CONFIRMED]
+### ~~P1 - Folder and File Structure~~ [RESOLVED]
 
 **Problem:** The monolithic `panel-embed.js` (1479 lines IIFE) is hard to maintain, test, or tree-shake.
 
 **Why it matters:** A proper structure is needed before adding features, tests, or build tooling. Technical debt compounds fast.
 
-**Current structure:**
+**Previous structure:**
 
 ```text
 live/
@@ -179,29 +179,24 @@ live/
   examples/            # 2 example .py files
 ```
 
-**Confirmed structure (migrated to dedicated repo):**
+**Resolution:** The repo now matches the confirmed structure exactly:
 
 ```text
 panel-live/
-  src/panel_live/      # Python package
+  src/panel_live/      # Python package (__init__.py, main.py, fences.py)
   lib/                 # Web component library
     panel-live.js
     panel-live.css
   examples/
     *.py
-  dev/                 # Development test pages
-    test-minimal.html
-  docs/                # Documentation + interactive pages
-    demo.md
-    api-explorer.html
-    playground.html
-  tests/               # Tests
-  serve.py             # Dev server
+  docs/                # Documentation site (MkDocs/zensical)
+    index.md, demo.md, examples.md
+    assets/js/, assets/css/
+  tests/               # Tests (conftest.py, test_core.py, ui/)
+  serve.py             # Dev server with COOP/COEP headers
 ```
 
-**Note:** The iframe runner (`panel-runner.html`, `runner.html`) has been removed from the architecture. The refactored `panel-live.js` uses inline-only execution where Pyodide runs on the main thread and Bokeh renders directly into the output container. Future web worker support will use `postMessage` for serialized document exchange, not iframes.
-
-**Acceptance criteria:** Code split into logical modules. Build step produces a single distributable bundle. No functionality regression.
+The iframe runner (`panel-runner.html`, `runner.html`) has been removed from the architecture. The refactored `panel-live.js` uses inline-only execution where Pyodide runs on the main thread and Bokeh renders directly into the output container. Future web worker support will use `postMessage` for serialized document exchange, not iframes.
 
 **Blocked by:** Settle on Name (resolved).
 
@@ -305,6 +300,25 @@ Issues that affect reliability of the current implementation.
 3. If not confirmed: close this issue
 
 **Acceptance criteria:** Browser profiling results documenting memory behavior across 20+ consecutive re-runs. If leak confirmed: memory usage stays stable. If not: issue closed with evidence.
+
+---
+
+### P2 - Docs Theme Toggle Does Not Update Editor/Playground Theme
+
+**Problem:** When switching the docs site theme (light ↔ dark), the `<panel-live>` editor and playground instances do not update their theme to match. The component renders with the theme that was active at page load and does not react to subsequent changes.
+
+**Why it matters:** The docs site (MkDocs/Material) has a theme toggle. Users expect all page content — including embedded interactive examples — to follow the site theme. A mismatch between a dark site chrome and a light editor (or vice versa) looks broken.
+
+**Likely cause:** The `<panel-live>` element resolves `theme="auto"` once during `connectedCallback()` by reading `prefers-color-scheme`, but MkDocs Material toggles theme via a `data-md-color-scheme` attribute on `<body>`, not via the OS media query. The component has no `MutationObserver` or event listener watching for host-page theme changes.
+
+**Suggested approach:**
+
+1. Watch for `prefers-color-scheme` media query changes (`matchMedia.addEventListener('change', ...)`)
+2. Optionally watch for `data-md-color-scheme` attribute changes on `<body>` (MkDocs Material convention) or a configurable CSS selector
+3. When theme changes, update `data-resolved-theme` and re-apply `--pl-*` CSS variable presets
+4. Ensure CodeMirror editor theme switches accordingly (default ↔ Dracula)
+
+**Acceptance criteria:** Toggling the docs site theme immediately updates all `<panel-live>` instances on the page. Works for both `prefers-color-scheme` changes and MkDocs Material theme toggle.
 
 ---
 
@@ -467,20 +481,21 @@ Features needed for a competitive product.
 
 ## Category 4: Documentation & Ecosystem Integration
 
-### P1 - Documentation
+### P1 - Documentation [PARTIALLY RESOLVED]
 
 **Problem:** Zero documentation exists for this feature.
 
 **Why it matters:** Without docs, nobody outside the core team can use it. Docs are required for any public release.
 
-**Suggested content:**
+**Resolution:** A docs site is built with MkDocs/zensical (`pixi run -e docs serve`) and includes: `index.md` (landing page), `demo.md` (interactive demos of all 3 modes), `examples.md` (example gallery), and API reference via the `panel` fence syntax. The custom fence extension (`src/panel_live/fences.py`) enables `` ```panel `` code blocks in Markdown that render as live `<panel-live>` elements.
+
+**Remaining work:**
 
 1. Getting Started guide (embed an app in 5 minutes)
-2. API reference (all script types, attributes, JS API)
+2. Comprehensive API reference (all attributes, JS API, CSS custom properties)
 3. Configuration guide (versions, themes, packages)
-4. Examples gallery
-5. Architecture overview (for contributors)
-6. Migration guide from pyscript.com / raw Pyodide
+4. Architecture overview (for contributors)
+5. Migration guide from pyscript.com / raw Pyodide
 
 **Acceptance criteria:** Complete documentation covering all supported features. Published on panel.holoviz.org.
 
@@ -531,17 +546,36 @@ Features needed for a competitive product.
 
 ---
 
-### P2 - MkDocs Extension
+### ~~P2 - MkDocs Extension~~ [RESOLVED]
 
 **Problem:** No MkDocs extension exists. MkDocs is increasingly popular in the Python ecosystem.
 
 **Why it matters:** Some HoloViz projects and many third-party users use MkDocs. py.cafe has `mkdocs-pycafe` as a reference implementation.
 
+**Resolution:** `src/panel_live/fences.py` implements a custom fence for `pymdownx.superfences` that transforms `` ```panel `` Markdown fences into `<panel-live>` HTML elements. Configured in `zensical.toml` under `custom_fences`. Supports attributes: `mode`, `theme`, `height`, `layout`, `auto-run`, `label`, `code-visibility`, `code-position`. The docs site uses this extension for all interactive examples (see `docs/demo.md`).
+
 **Inspiration:** <https://github.com/py-cafe/mkdocs-pycafe>, <https://mkdocs.py.cafe/en/latest/>
 
-**Acceptance criteria:** Working MkDocs extension with similar capabilities to the Sphinx extension.
+---
 
-**Blocked by:** Build, Distribute.
+### P2 - Document MkDocs Integration for Third-Party Users
+
+**Problem:** The MkDocs custom fence extension (`src/panel_live/fences.py`) works for our own docs site, but there is no documentation explaining how other users can add live Panel code blocks to their own MkDocs projects.
+
+**Why it matters:** The MkDocs extension is one of panel-live's key differentiators. Without a guide, only people who read the source code can figure out the setup. Third-party adoption requires clear, copy-pasteable instructions.
+
+**Suggested content:**
+
+1. **Installation:** `pip install panel-live` (or add to MkDocs project dependencies)
+2. **MkDocs configuration:** How to register the custom fence in `mkdocs.yml` under `pymdownx.superfences` `custom_fences` — validator, formatter, class reference
+3. **Asset loading:** How to include `panel-live.js` and `panel-live.css` in the MkDocs site (CDN `<script>`/`<link>` tags via `extra_javascript`/`extra_css`, or local copy)
+4. **Fence syntax reference:** All supported attributes (`mode`, `theme`, `height`, `layout`, `auto-run`, `label`, `code-visibility`, `code-position`) with examples
+5. **COOP/COEP headers:** Note about required headers for SharedArrayBuffer and how to configure them for common hosting providers (GitHub Pages, Netlify, Cloudflare Pages)
+6. **Troubleshooting:** Common issues (missing assets, headers, pymdownx version requirements)
+
+**Acceptance criteria:** A user with an existing MkDocs site can follow the guide to add live Panel code blocks in under 10 minutes. Guide published in the panel-live docs.
+
+**Related to:** Documentation (P1), MkDocs Extension (resolved).
 
 ---
 
@@ -578,7 +612,7 @@ Features needed for a competitive product.
 
 ---
 
-### P1 - Automated Testing
+### P1 - Automated Testing [PARTIALLY RESOLVED]
 
 **Problem:** Zero tests for the playground/embed feature.
 
@@ -586,12 +620,14 @@ Features needed for a competitive product.
 
 **Reference:** `scripts/panelite/test/test_panelite.py` - Playwright-based test suite for Panelite provides a template.
 
-**Suggested approach:**
+**Resolution:** Test infrastructure is in place with `tests/conftest.py` (autouse fixtures for Panel state reset), `tests/test_core.py` (Python package tests), and `tests/ui/test_ui.py` (Playwright E2E test). Tests run via `pixi run test` and `pixi run -e test-ui test-ui`. CI runs tests on every PR.
 
-1. Playwright end-to-end tests: load page, verify app renders, test editor interaction, test re-run
-2. Unit tests for JS utilities (code parsing, requirements detection, namespace isolation)
-3. Test all three modes (app, editor, playground) — inline execution only (no iframe mode)
-4. Test error handling scenarios
+**Remaining work:**
+
+1. Expand UI test coverage beyond the current basic test (more modes, re-run, error handling)
+2. Unit tests for JS utilities (code parsing, requirements detection)
+3. Test error handling scenarios
+4. Achieve >80% coverage of critical paths
 
 **Acceptance criteria:** Playwright test suite covering core user flows. Tests run in CI. >80% coverage of critical paths.
 
@@ -599,18 +635,20 @@ Features needed for a competitive product.
 
 ---
 
-### P1 - Distribution (CDN / npm)
+### P1 - Distribution (CDN / npm) [PARTIALLY RESOLVED]
 
 **Problem:** Not distributed anywhere. No CDN hosting, no npm package.
 
 **Why it matters:** Users need a stable URL to load the library from. `cdn.holoviz.org` is the standard for HoloViz projects.
 
-**Suggested approach:**
+**Resolution:** CDN hosting is live at `cdn.holoviz.org/panel-live/latest/panel-live.js` and `cdn.holoviz.org/panel-live/latest/panel-live.css`. The docs site loads from these URLs. A Python wheel can be built via `pixi run -e build build-wheel`.
 
-- Host on `cdn.holoviz.org` (like panelite)
+**Remaining work:**
+
 - Publish to npm for JS ecosystem users
-- Version-pinned URLs: `cdn.holoviz.org/panel-live/1.0.0/panel-live.min.js`
-- Latest URL: `cdn.holoviz.org/panel-live/latest/panel-live.min.js`
+- Version-pinned URLs (e.g., `cdn.holoviz.org/panel-live/1.0.0/panel-live.min.js`)
+- Minified production builds (`panel-live.min.js`)
+- Automated release workflow for CDN uploads
 
 **Acceptance criteria:** Stable, versioned CDN URL. Works via `<script src="...">`. npm package published.
 
@@ -618,32 +656,29 @@ Features needed for a competitive product.
 
 ---
 
-### P2 - Pixi Commands
+### ~~P2 - Pixi Commands~~ [RESOLVED]
 
 **Problem:** No pixi commands defined for playground development.
 
 **Why it matters:** Panelite uses `pixi run lite-build` and similar. Developers need consistent tooling.
 
-**Suggested commands:** `pixi run panel-live-dev` (serve with hot reload), `pixi run panel-live-build`, `pixi run panel-live-test`.
-
-**Acceptance criteria:** Pixi tasks defined and documented for dev, build, and test workflows.
+**Resolution:** `pixi.toml` defines comprehensive tasks across multiple environments: `pixi run test` (pytest), `pixi run test-coverage`, `pixi run -e test-ui test-ui` (Playwright), `pixi run lint` (pre-commit), `pixi run -e docs serve` (docs dev server), `pixi run -e docs build` (static site), `pixi run -e build build-wheel`, `pixi run serve` (dev server with COOP/COEP headers), and `pixi run sync-assets` (copy lib/ to docs/assets/).
 
 ---
 
-### P2 - GitHub Actions CI/CD
+### ~~P2 - GitHub Actions CI/CD~~ [RESOLVED]
 
 **Problem:** No CI/CD pipeline for the playground.
 
 **Why it matters:** Need automated testing, building, and deployment. Panelite has `.github/workflows/jupyterlite.yaml` as a template.
 
-**Suggested workflows:**
+**Resolution:** `.github/workflows/ci.yml` implements CI with pytest, Playwright UI tests, and pre-commit linting. Tests run on PRs and pushes to main.
 
-1. **PR checks:** Lint, build, run Playwright tests
-2. **Dev build:** Deploy to dev URL on push to main
-3. **Release:** Build, test, deploy to `cdn.holoviz.org` on tag
-4. **Alpha/Beta/RC:** Pre-release builds similar to panelite
+**Remaining work:**
 
-**Acceptance criteria:** CI runs tests on PR. CD deploys on merge to main (dev) and on release tag (prod).
+1. **Dev build:** Deploy to dev URL on push to main
+2. **Release:** Build, test, deploy to `cdn.holoviz.org` on tag
+3. **Alpha/Beta/RC:** Pre-release builds similar to panelite
 
 **Blocked by:** Build System, Automated Testing.
 
@@ -766,16 +801,16 @@ Distribution ────────────┬──> Documentation ──
 ~~API Design~~ [DONE], ~~Evaluate PyScript~~ [REJECTED], ~~Name~~ [DONE], ~~Repository~~ [DONE], ~~panel-material-ui~~ [DONE], ~~Mouse Selection~~ [DONE], ~~Loading Progress~~ [DONE], ~~Align Styles~~ [DONE], ~~Customizable Styling~~ [DONE], ~~Dark Theme~~ [DONE], ~~Playground Layout~~ [DONE], ~~Duplicate Execution~~ [DONE]
 
 **Phase 2 - Core Architecture:**
-Web Worker Support, Folder/File Structure, ~~Separate CSS~~ [DONE], Build System, CodeMirror 6 Upgrade, Fix Browser Crash (especially Chrome/Edge), ~~Interactive API Explorer~~ [DONE]
+Web Worker Support, ~~Folder/File Structure~~ [DONE], ~~Separate CSS~~ [DONE], Build System, CodeMirror 6 Upgrade, Fix Browser Crash (especially Chrome/Edge), ~~Interactive API Explorer~~ [DONE]
 
 **Phase 3 - Developer Experience:**
 Handle Python Errors (remaining: structured tracebacks, collapsible panel, copy button), Copy Code, Editor Theme (remaining: additional themes, high-contrast), Python string concatenation cleanup
 
 **Phase 4 - Polish & Release:**
-Automated Testing, Distribution, Documentation, Examples Gallery (remaining: 3+ more examples, defaults, gallery page), Pixi Commands, GitHub Actions CI/CD, postMessage Security (for future worker support), Memory Leak investigation, Error Boundaries
+Automated Testing [PARTIAL], Distribution [PARTIAL], Documentation [PARTIAL], Examples Gallery (remaining: 3+ more examples, defaults, gallery page), ~~Pixi Commands~~ [DONE], ~~GitHub Actions CI/CD~~ [DONE], postMessage Security (for future worker support), Memory Leak investigation, Error Boundaries
 
 **Phase 5 - Ecosystem & Deferred Features:**
-Sphinx Extension, MkDocs Extension, Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support
+Sphinx Extension, ~~MkDocs Extension~~ [DONE], Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support
 
 **Phase 6 - Future:**
 React wrapper, Desktop version, Filesystem, Media access, Notebook experience

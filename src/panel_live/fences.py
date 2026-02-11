@@ -1,4 +1,4 @@
-"""Custom pymdownx.superfences fence for panel-live code blocks.
+"""Custom pymdownx.superfences fence for panel-live code blocks in MkDocs.
 
 Allows writing interactive Panel apps in markdown using fenced code blocks:
 

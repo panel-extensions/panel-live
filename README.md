@@ -1,33 +1,119 @@
-# ✨ panel-live
+# panel-live [POC - NOT YET WORKING!]
 
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
 [![pypi-version](https://img.shields.io/pypi/v/panel-live.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/panel-live)
 [![python-version](https://img.shields.io/pypi/pyversions/panel-live?logoColor=white&logo=python&style=flat-square)](https://pypi.org/project/panel-live)
 
-Run your Python code live in the browser with panel-live!
+**Run interactive Panel apps directly in the browser — no server required.**
+
+Embed live, editable Python visualizations in any web page using the `<panel-live>` web component. Code executes client-side via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure. Drop two lines of HTML into your page and your Panel app just works.
+
+## Quick Start
+
+### HTML (any web page)
+
+Include the CSS and JS from the CDN:
+
+```html
+<link rel="stylesheet" href="https://cdn.holoviz.org/panel-live/latest/panel-live.css">
+<script src="https://cdn.holoviz.org/panel-live/latest/panel-live.js"></script>
+```
+
+Then add a `<panel-live>` element with your Panel code inside:
+
+**App mode** — renders the app with no editor:
+
+```html
+<panel-live>
+import panel as pn
+
+slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=50)
+output = pn.pane.Markdown(pn.bind(lambda v: f"## Value: {v}", slider))
+pn.Column(slider, output).servable()
+</panel-live>
+```
+
+**Editor mode** — editable code with a Run button:
+
+```html
+<panel-live mode="editor">
+import panel as pn
+
+name = pn.widgets.TextInput(name="Name", value="World")
+pn.Column(pn.bind(lambda n: f"# Hello, {n}!", name), name).servable()
+</panel-live>
+```
+
+**Playground mode** — side-by-side editor and live preview:
+
+```html
+<panel-live mode="playground" layout="horizontal">
+import panel as pn
+
+slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=50)
+output = pn.pane.Markdown(pn.bind(lambda v: f"## Value: {v}", slider))
+pn.Column(slider, output).servable()
+</panel-live>
+```
+
+See the [full playground](https://panel-extensions.github.io/panel-live/playground.html) for an interactive editing experience.
+
+### MkDocs / Documentation
+
+In your MkDocs docs, use fenced code blocks with the `panel` language:
+
+````markdown
+```panel
+import panel as pn
+
+slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=50)
+output = pn.pane.Markdown(pn.bind(lambda v: f"## Value: {v}", slider))
+pn.Column(slider, output).servable()
+```
+````
+
+Add attributes for other modes:
+
+````markdown
+```{.panel mode="editor" theme="dark"}
+# your code here
+```
+````
+
+Configure the custom fence in your `zensical.toml` (or `mkdocs.yml`):
+
+```toml
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.formatter" }
+]
+```
 
 ## Features
 
-- `<panel-live>` web-component to easily embed Python code as live visualizations, interactive editors or even full playgrounds.
-- `panel_live` python package with featuresfor embed Python code as live visualizations, interactive editors or even full playgrounds in your documentation.
+- **3 modes:** app (output only), editor (code + output), playground (side-by-side)
+- **Light / dark / auto theming** that follows the host page
+- **CSS custom properties** for full branding control
+- **Multi-file support** via `<panel-file>` child elements
+- **Explicit requirements** via `<panel-requirements>`
+- **MkDocs integration** via fenced code blocks and `pymdownx.superfences`
+- **No server needed** — runs entirely in the browser via Pyodide
 
-## Pin your version
+## Live Demos
 
-This project is **in its early stages**, so if you find a version that suits your needs, it’s recommended to **pin your version**, as updates may introduce changes.
+- [Demo](https://panel-extensions.github.io/panel-live/demo/) — all 3 modes in action
+- [API Explorer](https://panel-extensions.github.io/panel-live/api-explorer.html) — interactive configuration
+- [Playground](https://panel-extensions.github.io/panel-live/playground.html) — full-screen editing
+
+## Pin Your Version
+
+This project is **in its early stages**, so if you find a version that suits your needs, it's recommended to **pin your version**, as updates may introduce changes.
 
 ## Installation
 
-Install it via `pip`:
-
 ```bash
 pip install panel-live
-```
-
-## Usage
-
-```python
-import panel_live
 ```
 
 ## Development
@@ -41,13 +127,13 @@ For a simple setup use [`uv`](https://docs.astral.sh/uv/):
 
 ```bash
 uv venv
-source .venv/bin/activate # on linux. Similar commands for windows and osx
+source .venv/bin/activate
 uv pip install -e .[dev]
 pre-commit run install
 pytest tests
 ```
 
-For the full Github Actions setup use [pixi](https://pixi.sh):
+For the full GitHub Actions setup use [pixi](https://pixi.sh):
 
 ```bash
 pixi run pre-commit-install
@@ -55,19 +141,9 @@ pixi run postinstall
 pixi run test
 ```
 
-This repository is based on [copier-template-panel-extension](https://github.com/panel-extensions/copier-template-panel-extension) (you can create your own Panel extension with it)!
+## Contributing
 
-To update to the latest template version run:
-
-```bash
-pixi exec --spec copier --spec ruamel.yaml -- copier update --defaults --trust
-```
-
-Note: `copier` will show `Conflict` for files with manual changes during an update. This is normal. As long as there are no merge conflict markers, all patches applied cleanly.
-
-## ❤️ Contributing
-
-Contributions are welcome! Please follow these steps to contribute:
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch: `git checkout -b feature/YourFeature`.

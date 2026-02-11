@@ -1,5 +1,7 @@
 # Panel Playground - Analysis & Solution
 
+> **Note:** This document analyzes the original `panel-embed.js` POC. The implementation has since been rewritten as `panel-live.js` using a `<panel-live>` custom element (not `<script type="panel">`). The architectural concepts (persistent Pyodide, state reset, execution branches) remain relevant, but API names and element types have changed. See `api-design.md` for the current API specification.
+
 ## Problem Statement
 
 **Make it trivially easy to display, edit, share, and embed live Panel apps in the browser using Pyodide -- with no server required.**

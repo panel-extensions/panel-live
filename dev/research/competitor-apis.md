@@ -1,5 +1,7 @@
 # Competitor API Research: Browser-Embedded Python Apps
 
+> **Note:** This research was conducted during the design phase of panel-live. Since then, many of the recommendations have been implemented: the `<panel-live>` custom element pattern was adopted, child elements (`<panel-file>`, `<panel-requirements>`) are supported, CDN distribution is live at `cdn.holoviz.org`, and theme/layout attributes are implemented. The comparison tables below have been updated to reflect the current state. Web workers remain the primary architectural gap.
+
 Research into **shinylive**, **stlite**, **gradio-lite**, and **PyScript** -- the four leading products for embedding Python apps in the browser. Conducted for the panel-live project to inform API design decisions.
 
 ---
@@ -29,14 +31,14 @@ Research into **shinylive**, **stlite**, **gradio-lite**, and **PyScript** -- th
 | Pattern | Adopted By | Panel-Live Status |
 |---------|-----------|-------------------|
 | Web workers | All 4 | Missing (P0) |
-| Custom HTML element | 3 of 4 | Uses `<script type>` instead |
-| Child elements for files | All 4 | Not supported |
-| Child elements for requirements | 3 of 4 | Not supported |
+| Custom HTML element | 3 of 4 | `<panel-live>` custom element |
+| Child elements for files | All 4 | `<panel-file>` supported |
+| Child elements for requirements | 3 of 4 | `<panel-requirements>` supported |
 | SharedWorker option | 2 of 4 | Not supported |
-| CDN distribution | All 4 | Not distributed |
-| Playground/editor as attribute | 2 of 4 | Separate script types |
-| Theme attribute | 3 of 4 | Not supported |
-| Layout attribute | 2 of 4 | Not supported |
+| CDN distribution | All 4 | `cdn.holoviz.org/panel-live/latest/` |
+| Playground/editor as attribute | 2 of 4 | `mode="app\|editor\|playground"` attribute |
+| Theme attribute | 3 of 4 | `theme="auto\|light\|dark"` supported |
+| Layout attribute | 2 of 4 | `layout="horizontal\|vertical"` supported |
 
 ---
 
@@ -646,7 +648,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | `<streamlit-app>` custom element | `mount()` JS function | Custom element + JS API |
 | **shinylive** | None (Quarto code block) | CLI export | Quarto integration + CLI |
 | **PyScript** | `<script type="py">` | `<script type="py-editor">` | Script type + config files |
-| **panel-live (current)** | `<script type="panel">` | `PanelLive.configure()` | Script type variants |
+| **panel-live (current)** | `<panel-live>` custom element | `PanelLive.mount()` JS API | Custom element + mode attribute |
 
 ### 3.2 Mode/Display Configuration
 
@@ -656,7 +658,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | Default | N/A | N/A | Streamlit handles UI |
 | **shinylive** | `components: [viewer]` | `components: [editor, viewer]` | Same as editor | Quarto chunk attribute |
 | **PyScript** | `<script type="py">` | `<script type="py-editor">` | N/A | Different script types |
-| **panel-live** | `<script type="panel">` | `<script type="panel-editor">` | `<script type="panel-playground">` | Different script types |
+| **panel-live** | `mode="app"` (default) | `mode="editor"` | `mode="playground"` | Attribute on `<panel-live>` element |
 
 ### 3.3 Multi-File Support
 
@@ -666,7 +668,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | `<app-file name="x.py" entrypoint>` child elements OR `files` JS object | Both declarative and programmatic |
 | **shinylive** | `## file: x.py` markers in code block | Text-based markers |
 | **PyScript** | `"files"` config mapping URLs to paths | Config-file based |
-| **panel-live** | Not supported | -- |
+| **panel-live** | `<panel-file name="x.py" entrypoint>` child elements OR `files` JS object | Both declarative and programmatic |
 
 ### 3.4 Requirements Specification
 
@@ -676,7 +678,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | `<app-requirements>` child OR `requirements` JS array | Both declarative and programmatic |
 | **shinylive** | `## file: requirements.txt` in code block | Standard requirements.txt format |
 | **PyScript** | `"packages"` in config JSON/TOML | Config-file based |
-| **panel-live** | Auto-detection only | No explicit specification |
+| **panel-live** | `<panel-requirements>` child OR `requirements` JS array | Both declarative and programmatic; auto-detection as fallback |
 
 ### 3.5 Worker Architecture
 
@@ -686,7 +688,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | Dedicated Worker | Yes (`sharedWorker` option) | No | postMessage |
 | **shinylive** | Web Worker + Service Worker | No | No (service worker handles it) | postMessage |
 | **PyScript** | Main thread (default) or Worker (`worker` attr) | No | For DOM access from workers | coincident (Atomics API) |
-| **panel-live** | Main thread | No | For SharedArrayBuffer | postMessage (iframes) |
+| **panel-live** | Main thread (inline) | No | For SharedArrayBuffer | No iframes; inline execution |
 
 ### 3.6 Distribution
 
@@ -696,7 +698,7 @@ worker = PyWorker("worker.py", type="pyodide")
 | **stlite** | jsdelivr | `@stlite/browser`, `@stlite/react`, `@stlite/desktop` | Desktop app | No official extensions |
 | **shinylive** | Bundled with export | No | Yes (exported site is self-contained) | Quarto (official), Sphinx (community) |
 | **PyScript** | pyscript.net | No | Yes (`offline.zip`) | No official extensions |
-| **panel-live** | Not distributed | No | No | Not yet |
+| **panel-live** | cdn.holoviz.org | No | No | MkDocs (custom fence) |
 
 ### 3.7 Feature Comparison
 
@@ -704,10 +706,10 @@ worker = PyWorker("worker.py", type="pyodide")
 |---------|-------------|--------|-----------|----------|------------|
 | Web Workers | Yes | Yes | Yes | Yes | No |
 | SharedWorker | Yes | Yes | No | No | No |
-| Multi-file | Yes | Yes | Yes | Yes | No |
-| Requirements | Yes | Yes | Yes | Yes | Auto only |
-| Theme control | Yes | Via config | No | No | No |
-| Layout options | Yes | No | Yes (Quarto) | No | No |
+| Multi-file | Yes | Yes | Yes | Yes | Yes |
+| Requirements | Yes | Yes | Yes | Yes | Yes (explicit + auto) |
+| Theme control | Yes | Via config | No | No | Yes (auto/light/dark) |
+| Layout options | Yes | No | Yes (Quarto) | No | Yes (horizontal/vertical) |
 | Editor mode | Yes (playground) | No | Yes | Yes (py-editor) | Yes |
 | URL sharing | No | No | Yes | No | Yes |
 | Offline support | No | Desktop | Exported site | Yes (zip) | No |

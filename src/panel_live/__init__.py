@@ -3,8 +3,6 @@
 import importlib.metadata
 import warnings
 
-from panel_live.main import create_app
-
 try:
     __version__ = importlib.metadata.version(__name__)
 except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
@@ -13,5 +11,4 @@ except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
 
 __all__: list[str] = [
     "__version__",
-    "create_app",
 ]

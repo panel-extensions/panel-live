@@ -1,5 +1,7 @@
 # Current POC Analysis: panel-embed.js
 
+> **Note:** This document analyzes the original `panel-embed.js` POC (1479-line IIFE). This code has been replaced by `lib/panel-live.js`, a `<panel-live>` custom element. This analysis is preserved as historical context for design decisions.
+
 **Analyst:** Software Architect, panel-live-cat1 team
 **Date:** 2026-02-10
 **Scope:** Full analysis of the original panel-live POC codebase (formerly at `panel/live/`)
