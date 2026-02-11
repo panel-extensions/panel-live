@@ -26,17 +26,9 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge. Firefox is mo
 
 ## P1 — Handle Python Errors Properly `PARTIAL`
 
-Errors now display inline with themed styling. **Remaining:** structured traceback formatting with syntax highlighting, collapsible error panel, "Copy error" button, `sys.stderr` capture for async/callback errors.
+Errors display inline with themed styling and a "Copy error" button. `sys.stderr` is captured. **Remaining:** structured traceback formatting with syntax highlighting, collapsible error panel, async/callback error capture.
 
 **Acceptance:** All Python errors visible with file, line number, and error message.
-
----
-
-## P1 — Copy Code Button
-
-No way to copy code from the editor or copy the `<panel-live>` embedding HTML for reuse.
-
-**Acceptance:** Copy Python button on hover. Copy embed action producing minimal and standalone HTML formats.
 
 ---
 
@@ -64,7 +56,7 @@ Test infrastructure is in place. **Remaining:** expanded UI coverage, JS unit te
 
 ## P1 — Distribution `PARTIAL`
 
-CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. **Remaining:** npm package, versioned URLs, minified builds, automated release workflow.
+CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. **Remaining:** CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag, npm package, minified builds, automated release workflow.
 
 ---
 
@@ -76,7 +68,7 @@ Docs site built with MkDocs/zensical. **Remaining:** getting started guide, comp
 
 ## P1 — Examples Gallery `PARTIAL`
 
-14 examples available. **Remaining:** 3+ more to reach 15+ target, default example set, standalone gallery page.
+Review existing examples. Simplify, beautify, comment and use recommended apis (param.bind or @param.depends. not watch). Those examples should represent Panel and the HoloViz ecosystem from its best side. Add a plotly example.
 
 ---
 
@@ -90,7 +82,7 @@ All Python bootstrap code is built as concatenated strings in JavaScript. Fragil
 
 ## P1 — Release v0.1.0
 
-No formal release yet. Depends on: Sphinx extension, browser crash fix, documentation, distribution, testing, known limitations.
+No formal release yet. Depends on: browser crash fix, documentation, distribution, testing, known limitations. (Sphinx extension is P2, not a blocker.)
 
 ---
 
@@ -120,16 +112,10 @@ No mechanism for setup code before user code (e.g. `pn.extension(design="materia
 
 ## P2 — Improve UX (Buttons, Tooltips, Layout)
 
-- Add tooltips (`title` attributes) to all buttons — Run, Share, Reset currently have none
+- Add tooltips (`title` attributes) to Run, Share, Reset, and Code toggle buttons (Copy/Error/Maximize already have them)
 - Redesign the "<> Code" toggle button (icon or better visual)
 - Review button design for consistency (keep compact style)
 - Review button placement (copy/run on top vs code toggle below)
-
----
-
-## P2 — Docs Theme Toggle Does Not Update Instances
-
-MkDocs Material theme toggle doesn't update `<panel-live>` instances. The component needs a `MutationObserver` watching for `data-md-color-scheme` changes.
 
 ---
 
@@ -141,7 +127,7 @@ Pyodide proxy functions may accumulate across runs. Needs browser profiling to c
 
 ## P2 — postMessage Security
 
-No `postMessage` validation currently needed (no iframe/worker mode). Will become relevant when web worker support is added.
+No `postMessage` validation currently needed (no iframe/worker mode). Will become relevant when web worker support is added. **Blocked by:** P0 Web Worker Support.
 
 ---
 
@@ -169,27 +155,15 @@ No way to see runtime versions or switch versions in playground mode.
 
 ---
 
-## P2 — Zero-Install Deployment / Link Sharing
+## P2 — Zero-Install Deployment / Link Sharing `PARTIAL`
 
-No way to share a panel-live app by URL. Need graceful COOP/COEP fallback and a hosted reference deployment.
-
----
-
-## P2 — Landing Page Should Showcase Generic Python Support
-
-The landing page only shows Panel examples. Should include a non-Panel example early to communicate broader value.
+URL sharing via base64-encoded hash is working (playground mode). **Remaining:** graceful COOP/COEP fallback, hosted reference deployment.
 
 ---
 
 ## P2 — Links from Panel Website and README
 
 No links from the Panel website or GitHub README to the playground.
-
----
-
-## P2 — Revise README for Broader Audience
-
-README positions panel-live as Panel-only. Should lead with "any Python" messaging and reduce docs duplication.
 
 ---
 
@@ -205,9 +179,15 @@ One crashing app may prevent subsequent apps from running on the same page.
 
 ---
 
-## P3 — URL Sharing with Compression
+## P2 — Document Claude.ai Usage
 
-Basic URL sharing works (gzip + base64url). Could add a Share button, URL length preview, and better compression.
+Document how to use panel-live in the Claude.ai web page. Covers embedding `<panel-live>` in Claude artifacts and any sandbox-specific constraints.
+
+---
+
+## P3 — URL Sharing with Compression `PARTIAL`
+
+Basic URL sharing works (base64 encoding, no gzip yet). Share button exists in playground mode. **Remaining:** gzip compression, URL length preview, better compression for large snippets.
 
 ---
 
@@ -246,7 +226,3 @@ No browser media device access from Python code.
 Only single-cell execution. No multi-cell notebook workflow.
 
 ---
-
-## P2 — Document Claude.ai Usage
-
-Document how to use panel-live in the Claude.ai web page. Covers embedding `<panel-live>` in Claude artifacts and any sandbox-specific constraints.

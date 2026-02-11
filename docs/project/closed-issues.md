@@ -121,3 +121,27 @@ Resolved and rejected issues from the panel-live project.
 ## ~~P1 — Duplicate Execution Logic~~
 
 **Resolved.** Single `runPanelCode()` function with 3-branch execution strategy. No iframe mode, no duplication.
+
+---
+
+## ~~P1 — Copy Code Button~~
+
+**Resolved.** Copy button with `navigator.clipboard.writeText()` and "Copied!" toast feedback in all editor/playground modes. "Copy error" button on error panels.
+
+---
+
+## ~~P2 — Docs Theme Toggle Does Not Update Instances~~
+
+**Resolved.** `MutationObserver` watches `data-md-color-scheme` on `document.body` and updates CodeMirror theme dynamically. `MediaQuery` listener handles system preference changes.
+
+---
+
+## ~~P2 — Landing Page Should Showcase Generic Python Support~~
+
+**Resolved.** Landing page includes a matplotlib example (no Panel imports) immediately after the default slider demo, under a "Works with any Python" section.
+
+---
+
+## ~~P2 — Revise README for Broader Audience~~
+
+**Resolved.** README leads with "Write, edit, and run Python interactively in the browser" and "Turn any web page into an interactive Python playground". No Panel-centric framing.

@@ -1,6 +1,6 @@
 # panel-live
 
-> **Early-stage development** — APIs may change. If you find a version that works, pin it.
+> **Early-stage development** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
 > **Only works in FireFox** - Issue reported [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737)
 
