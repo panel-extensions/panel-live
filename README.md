@@ -11,7 +11,7 @@
 
 **Write, edit, and run Python interactively in the browser — no server required.**
 
-Turn any web page into an interactive Python playground with the `<panel-live>` web component. Plots, widgets, dashboards, and tools are fully interactive — users can view, explore, edit code, and re-run, all directly in the browser via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure.
+Turn any web page into an interactive Python playground with the `<panel-live>` web component. Works with matplotlib, pandas, scikit-learn, Panel, and 200+ packages from the Python ecosystem. Visualizations, analyses, dashboards, and interactive tools are fully interactive — users can view, explore, edit code, and re-run, all directly in the browser via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure.
 
 ## Quick Start
 
