@@ -6,12 +6,7 @@ Explore interactive examples below. Each example auto-runs on load — expand th
 
 ### Hello World
 
-```{.panel mode="editor" src="../assets/examples/hello.py" code-visibility="collapsed" auto-run="true"}
-```
-
-### Slider
-
-```{.panel mode="editor" src="../assets/examples/slider.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/hello.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Data Visualization
@@ -20,75 +15,94 @@ Explore interactive examples below. Each example auto-runs on load — expand th
 
 Run pure Python — no `.servable()` needed. The last expression is rendered automatically.
 
-```{.panel mode="editor" src="../assets/examples/matplotlib-demo.py" label="Python" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/matplotlib-demo.py" label="Python" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Color Palette Generator
 
-```{.panel mode="editor" src="../assets/examples/color-palette.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/color-palette.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Bokeh Scatter Plot
 
-```{.panel mode="editor" src="../assets/examples/bokeh-scatter.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/bokeh-scatter.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Stock Ticker
 
-```{.panel mode="editor" src="../assets/examples/stock-ticker.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/stock-ticker.py" code-visibility="collapsed" code-position="last" auto-run="true"}
+```
+
+### ECharts Bar Chart
+
+```{.panel mode="editor" src="../assets/examples/echarts-demo.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Dashboards
 
 ### KPI Dashboard
 
-```{.panel mode="editor" src="../assets/examples/kpi-dashboard.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/kpi-dashboard.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Radar Chart
 
-```{.panel mode="editor" src="../assets/examples/radar-chart.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/radar-chart.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Data Exploration
 
 ### Product Inventory Table
 
-```{.panel mode="editor" src="../assets/examples/pandas-table.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/product-inventory.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Sales Dashboard
 
-```{.panel mode="editor" src="../assets/examples/sales-dashboard.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/sales-dashboard.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Data Explorer
 
-```{.panel mode="editor" src="../assets/examples/data-explorer.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/data-explorer.py" code-visibility="collapsed" code-position="last" auto-run="true"}
+```
+
+## Advanced Visualization
+
+### DeckGL Scatter
+
+```{.panel mode="editor" src="../assets/examples/deckgl-demo.py" code-visibility="collapsed" code-position="last" auto-run="true"}
+```
+
+## Real-time
+
+### Streaming Chart
+
+```{.panel mode="editor" src="../assets/examples/streaming-demo.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Tools
 
 ### Mini Calculator
 
-```{.panel mode="editor" src="../assets/examples/mini-calculator.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/mini-calculator.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Unit Converter
 
-```{.panel mode="editor" src="../assets/examples/unit-converter.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/unit-converter.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ### Markdown Preview
 
-```{.panel mode="editor" src="../assets/examples/markdown-preview.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/markdown-preview.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Layouts
 
 ### Layout Showcase
 
-```{.panel mode="editor" src="../assets/examples/tabs-layout.py" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/tabs-layout.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
 ## Testing
@@ -97,5 +111,5 @@ Run pure Python — no `.servable()` needed. The last expression is rendered aut
 
 This example deliberately raises an exception to verify that errors are displayed in the output section.
 
-```{.panel mode="editor" src="../assets/examples/exception-test.py" label="Python" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" src="../assets/examples/exception-test.py" label="Python" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```

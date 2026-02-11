@@ -2,6 +2,8 @@
 
 > **Early-stage development** — APIs may change. If you find a version that works, pin it.
 
+> **Only works in Fire Fox** - Issue reported [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737)
+
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
 [![pypi-version](https://img.shields.io/pypi/v/panel-live.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/panel-live)

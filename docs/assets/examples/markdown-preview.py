@@ -4,7 +4,7 @@ pn.extension(sizing_mode="stretch_width")
 
 SAMPLE = """# Hello Markdown
 
-This is a **live preview** editor.
+This is a **live preview** editor. Start typing to see changes instantly.
 
 - Item one
 - Item two
@@ -23,5 +23,5 @@ editor = pn.widgets.TextAreaInput(name="Markdown Source", value=SAMPLE, height=3
 
 pn.Row(
     pn.Card(editor, title="Editor", width=450),
-    pn.Card(pn.bind(lambda md: pn.pane.Markdown(md), editor), title="Preview"),
+    pn.Card(pn.bind(lambda md: pn.pane.Markdown(md if md else editor.value), editor.param.value_input), title="Preview"),
 ).servable()

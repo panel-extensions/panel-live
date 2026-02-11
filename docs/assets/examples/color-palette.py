@@ -2,8 +2,12 @@ import panel as pn
 
 pn.extension(sizing_mode="stretch_width")
 
-picker = pn.widgets.ColorPicker(name="Base Color", value="#3b82f6")
-steps = pn.widgets.RadioButtonGroup(name="Shades", options=["5", "7", "9"], value="7")
+picker = pn.widgets.ColorPicker(name="Base Color", value="#0072b5")
+steps = pn.widgets.RadioButtonGroup(
+    name="Shades", options=["5", "7", "9"], value="7",
+    button_style="outline", button_type="primary",
+    margin=(23, 5, 10, 5)
+)
 
 def hex_to_rgb(h):
     h = h.lstrip("#")
@@ -30,7 +34,6 @@ def generate_palette(color, n):
     )
 
 pn.Column(
-    "# Color Palette Generator",
-    pn.Row(picker, steps),
+    pn.Row(steps, picker),
     pn.bind(generate_palette, picker, steps),
 ).servable()

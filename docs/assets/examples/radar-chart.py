@@ -10,17 +10,27 @@ efficiency = pn.widgets.IntSlider(name="Efficiency", start=0, end=100, value=75)
 
 def radar_chart(sp, re, co, sa, ef):
     return pn.pane.ECharts({
-        "radar": {"indicator": [
-            {"name": "Speed", "max": 100}, {"name": "Reliability", "max": 100},
-            {"name": "Comfort", "max": 100}, {"name": "Safety", "max": 100},
-            {"name": "Efficiency", "max": 100},
-        ]},
-        "series": [{"type": "radar", "data": [{"value": [sp, re, co, sa, ef], "name": "Score",
-            "areaStyle": {"opacity": 0.3}}]}],
-    }, height=400)
+        "radar": {
+            "indicator": [
+                {"name": "Speed", "max": 100},
+                {"name": "Reliability", "max": 100},
+                {"name": "Comfort", "max": 100},
+                {"name": "Safety", "max": 100},
+                {"name": "Efficiency", "max": 100},
+            ],
+            "radius": "70%",
+        },
+        "series": [{
+            "type": "radar",
+            "data": [{"value": [sp, re, co, sa, ef], "name": "Score",
+                       "areaStyle": {"opacity": 0.3}}],
+            "symbol": "circle",
+            "symbolSize": 6,
+        }],
+    }, height=450)
 
 pn.Column(
     "# Radar Chart",
-    pn.Row(speed, reliability, comfort, safety, efficiency),
     pn.bind(radar_chart, speed, reliability, comfort, safety, efficiency),
+    pn.Row(speed, reliability, comfort, safety, efficiency),
 ).servable()
