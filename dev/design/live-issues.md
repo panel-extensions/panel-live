@@ -9,7 +9,7 @@ Outstanding issues for the Panel Live feature. See also `live-dream.md` for visi
 - **P2 - Important**: Needed for a polished, competitive product.
 - **P3 - Nice-to-have**: Future enhancements and stretch goals.
 
-**Current state:** 34 issues total. 21 resolved, 4 partially resolved, 5 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
+**Current state:** 36 issues total. 21 resolved, 4 partially resolved, 7 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
 
 ---
 
@@ -361,6 +361,28 @@ Features needed for a competitive product.
 
 ---
 
+### P2 - Prescript / Setup Code
+
+**Problem:** No mechanism exists to run setup code before the user's Python code executes. Common needs include calling `pn.extension(design="material")`, importing shared modules, or setting default parameter values — but currently each code block must repeat this boilerplate.
+
+**Why it matters:** Documentation pages often want a consistent design or shared imports across all examples. Repeating `pn.extension(...)` or `import panel_material_ui as pmui` in every code block is noisy, error-prone, and obscures the actual example. A prescript mechanism also enables site-wide configuration (e.g., "all examples on this site use Material design") without modifying individual examples.
+
+**Suggested approach:**
+
+1. **HTML-level:** Support a `<panel-prescript>` child element (or `prescript` attribute) on `<panel-live>` that contains Python code to execute before the user's code. The prescript code runs once per Pyodide session, before the first user code execution.
+2. **MkDocs-level:** Add a `prescript` option to the custom fence configuration in `zensical.toml` / `mkdocs.yml`, so all `` ```panel `` blocks on the site automatically run the prescript. Per-block override via fence attributes.
+3. **Use cases:**
+   - `pn.extension(design="material")` — apply Material design to all examples
+   - Shared imports (`import panel_material_ui as pmui`)
+   - Default parameter overrides (`pmui.Paper.param.margin.default = 10`)
+   - Common data setup (e.g., loading a shared DataFrame)
+
+**Acceptance criteria:** Prescript code runs before user code in all modes. Configurable at both the element level and the MkDocs site level. Prescript errors are reported clearly (not silently swallowed).
+
+**Related to:** MkDocs Extension (resolved), Document MkDocs Integration (P2).
+
+---
+
 ### ~~P1 - Loading Progress (All Modes)~~ [RESOLVED]
 
 **Resolution:** All 3 modes now use identical loading UI: a `.pl-status` bar with `.pl-spinner` CSS animation and stage text. Loading stages progress through: "Loading Bokeh & Panel JS..." → "Loading Pyodide..." → "Initializing Pyodide..." → "Loading micropip..." → "Installing Bokeh + Panel wheels..." → "Initializing Panel..." → "Running app...". The same `initPyodide()` + `_initAndRun()` code path is used for all modes, ensuring consistent behavior. Note: animation may still stutter when the main thread is blocked during Pyodide initialization (web worker support will fully resolve this).
@@ -622,6 +644,26 @@ Features needed for a competitive product.
 **Acceptance criteria:** A user with an existing MkDocs site can follow the guide to add live Panel code blocks in under 10 minutes. Guide published in the panel-live docs.
 
 **Related to:** Documentation (P1), MkDocs Extension (resolved).
+
+---
+
+### P2 - Quarto Extension
+
+**Problem:** No Quarto extension exists. Quarto is increasingly popular for scientific publishing, technical documentation, and literate programming. Users who author in Quarto have no way to embed live `<panel-live>` apps.
+
+**Why it matters:** Quarto is becoming the default authoring tool for many data scientists and researchers. Shinylive already has a well-regarded Quarto extension (`quarto-ext/shinylive`) that serves as prior art. Supporting Quarto broadens panel-live's reach beyond Sphinx and MkDocs users.
+
+**Suggested approach:**
+
+1. Create a Quarto extension (`panel-live` filter) that transforms a `{panel-live}` code block into `<panel-live>` HTML, similar to how `fences.py` works for MkDocs
+2. Support attributes via Quarto's cell option syntax (e.g., `#| mode: editor`, `#| height: 500px`)
+3. Automatically inject `panel-live.js` and `panel-live.css` via the extension's resource handling
+4. Reference [shinylive Quarto extension](https://github.com/quarto-ext/shinylive) for patterns and conventions
+5. Document installation (`quarto add panel-extensions/panel-live`) and usage
+
+**Acceptance criteria:** Working Quarto extension that embeds interactive `<panel-live>` apps in Quarto HTML documents. Multiple instances per page. Published as an installable Quarto extension.
+
+**Related to:** Sphinx Extension (P2), MkDocs Extension (resolved).
 
 ---
 
@@ -901,8 +943,10 @@ API Design [RESOLVED] ──┬──> Multi-file Support [RESOLVED]
 
 Folder/File Structure ───┬──> Build System ──┬──> Distribution ──┬──> Sphinx Extension
                          │                   ├──> Automated Testing  ├──> MkDocs Extension
-                         │                   └──> Pixi Commands      └──> Links
-                         └──> GitHub Actions
+                         │                   └──> Pixi Commands      ├──> Quarto Extension
+                         └──> GitHub Actions                         └──> Links
+
+MkDocs Extension [RESOLVED] ──> Prescript / Setup Code
 
 Web Worker Support ──────┬──> Keep Page Responsive
                          └──> Browser Crash (partial fix)
@@ -939,13 +983,13 @@ Release v0.1.0 ──────────> (blocks: Sphinx Extension, Browse
 Web Worker Support, ~~Folder/File Structure~~ [DONE], ~~Separate CSS~~ [DONE], Build System, CodeMirror 6 Upgrade, Fix Browser Crash (especially Chrome/Edge), ~~Interactive API Explorer~~ [DONE]
 
 **Phase 3 - Developer Experience:**
-Handle Python Errors (remaining: structured tracebacks, collapsible panel, copy button), Copy Code, Editor Theme (remaining: additional themes, high-contrast), Python string concatenation cleanup
+Handle Python Errors (remaining: structured tracebacks, collapsible panel, copy button), Copy Code, Prescript / Setup Code, Editor Theme (remaining: additional themes, high-contrast), Python string concatenation cleanup
 
 **Phase 4 - Polish & Release:**
 Automated Testing [PARTIAL], Distribution [PARTIAL], Documentation [PARTIAL], Examples Gallery (remaining: 3+ more examples, defaults, gallery page), ~~Pixi Commands~~ [DONE], ~~GitHub Actions CI/CD~~ [DONE], postMessage Security (for future worker support), Memory Leak investigation, Error Boundaries, Known Limitations, Revise README
 
 **Phase 5 - Release & Ecosystem:**
-Release v0.1.0 (meta-issue, depends on Phase 4 items), Sphinx Extension, ~~MkDocs Extension~~ [DONE], Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support, Diataxis Documentation Framework
+Release v0.1.0 (meta-issue, depends on Phase 4 items), Sphinx Extension, Quarto Extension, ~~MkDocs Extension~~ [DONE], Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support, Diataxis Documentation Framework
 
 **Phase 6 - Future:**
 React wrapper, Desktop version, Filesystem, Media access, Notebook experience, Claude.ai Artifact Sandbox

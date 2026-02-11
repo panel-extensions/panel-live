@@ -8,8 +8,8 @@ edit_uri = "edit/main/docs/"
 nav = [
   {"Home" = "index.md"},
   {"Examples" = "examples.md"},
-  {"Playground" = "playground.html"},
-  {"API Explorer" = "api-explorer.html"},
+  {"Playground" = "playground.md"},
+  {"API Explorer" = "api-explorer.md"},
   {"How-to Guides" = [
     {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
     {"Auto-Run Configuration" = "how-to/auto-run.md"},
@@ -26,7 +26,6 @@ extra_css = ["assets/css/panel-live.css"]
 custom_dir = "docs/overrides"
 logo = "assets/logo.svg"
 features = [
-  "announce.dismiss",
   "content.action.edit",
   "content.action.view",
   "content.code.annotate",

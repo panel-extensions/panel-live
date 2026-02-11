@@ -179,7 +179,7 @@ panel-live[data-resolved-theme="dark"] {
 .pl-editor-area {
   width: 100%;
   min-height: 180px;
-  max-height: 500px;
+  max-height: 700px;
   border: none;
   resize: vertical;
   font-family: var(--pl-font-mono, "JetBrains Mono", "Fira Code", "Cascadia Code", monospace);
@@ -345,7 +345,7 @@ panel-live[fullscreen] .pl-container.pl-resizable {
 .pl-container .CodeMirror {
   height: auto;
   min-height: 180px;
-  max-height: 500px;
+  max-height: 700px;
   font-family: var(--pl-font-mono, "JetBrains Mono", "Fira Code", "Cascadia Code", "Consolas", monospace);
   font-size: var(--pl-editor-font-size, 14px);
   line-height: var(--pl-editor-line-height, 1.6);

@@ -12,7 +12,7 @@ def make_plot(n, s):
     x = np.random.randn(n)
     y = x * 0.5 + np.random.randn(n) * s
     colors = ["#3b82f6" if v > 0 else "#ef4444" for v in y]
-    p = figure(title=f"{n} points (spread={s:.1f})", height=350, tools="pan,wheel_zoom,reset")
+    p = figure(title=f"{n} points (spread={s:.1f})", height=350, sizing_mode="stretch_width", tools="pan,wheel_zoom,reset")
     p.scatter(x, y, size=6, color=colors, alpha=0.7)
     return p
 

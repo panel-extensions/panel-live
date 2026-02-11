@@ -15,19 +15,20 @@ df = pd.DataFrame({
 })
 
 category = pn.widgets.Select(name="Category", options=["All"] + sorted(df["Category"].unique().tolist()), value="All")
+theme = pn.widgets.RadioButtonGroup(
+    name="theme", value="modern", options=["midnight", "modern", "simple", "default"],
+    button_style="outline", button_type="primary",
+    margin=(23, 5, 10, 5),
+)
+table = pn.widgets.Tabulator(df, page_size=10, sizing_mode="stretch_width", theme=theme, max_height=500)
 
-def filtered_table(cat):
-    filtered = df if cat == "All" else df[df["Category"] == cat]
-    return pn.widgets.Tabulator(
-        filtered,
-        page_size=10,
-        sizing_mode="stretch_width",
-        theme="midnight",
-        max_height=500,
-    )
+def update_table(event):
+    table.value = df if event.new == "All" else df[df["Category"] == event.new]
+
+category.param.watch(update_table, "value")
 
 pn.Column(
     "# Product Inventory",
-    category,
-    pn.bind(filtered_table, category),
+    pn.Row(category, theme),
+    table,
 ).servable()
