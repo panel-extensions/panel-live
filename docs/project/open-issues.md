@@ -86,6 +86,14 @@ No formal release yet. Depends on: browser crash fix, documentation, distributio
 
 ---
 
+## P1 — Display Print Statements
+
+`print()` output is not displayed to the user. Users expect print output to be visible.
+
+**Acceptance:** `print()` statements produce visible output in the output panel.
+
+---
+
 ## P2 — Tracking Prevention Blocks CDN Resources
 
 Browser tracking prevention blocks `cdnjs.cloudflare.com` (CodeMirror CSS). Upgrading to CodeMirror 6 or bundling would resolve this.
@@ -185,6 +193,14 @@ Document how to use panel-live in the Claude.ai web page. Covers embedding `<pan
 
 ---
 
+## P2 — Migrate HoloViz Projects to panel-live
+
+Getting HoloViz ecosystem projects to adopt panel-live for their documentation could be transformative for Panel and the wider HoloViz ecosystem. Start with panel-reactflow as an experiment.
+
+**Acceptance:** At least one HoloViz project (e.g. panel-reactflow) uses panel-live in its documentation.
+
+---
+
 ## P3 — URL Sharing with Compression `PARTIAL`
 
 Basic URL sharing works (base64 encoding, no gzip yet). Share button exists in playground mode. **Remaining:** gzip compression, URL length preview, better compression for large snippets.
@@ -224,5 +240,13 @@ No browser media device access from Python code.
 ## P3 — Notebook-like Experience
 
 Only single-cell execution. No multi-cell notebook workflow.
+
+---
+
+## P3 — Private Package Feeds (Azure Artifacts, JFrog)
+
+No support for installing packages from private feeds such as Azure Artifacts or JFrog Artifactory. Pyodide's `micropip.install()` only fetches from public PyPI by default. Supporting private feeds would require authenticated URL configuration and possibly custom index URLs.
+
+**Acceptance:** Users can configure a private package index URL (with authentication) so that `micropip.install()` can fetch wheels from private feeds.
 
 ---
