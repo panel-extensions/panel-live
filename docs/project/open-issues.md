@@ -28,7 +28,9 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge. Firefox is mo
 
 Errors display inline with themed styling and a "Copy error" button. `sys.stderr` is captured. **Remaining:** structured traceback formatting with syntax highlighting, collapsible error panel, async/callback error capture.
 
-**Acceptance:** All Python errors visible with file, line number, and error message.
+Tracebacks currently expose Pyodide and Panel internals (`_pyodide/_base.py`, `panel/io/mime_render.py`) instead of showing only the user's code. For example, a simple `raise Exception(...)` produces a traceback rooted in `eval_code_async` and `exec_with_return` — none of which is relevant to the user. The traceback should be filtered to show only frames from the user's code (e.g. `<exec>` or `<ast>`) with the actual exception message.
+
+**Acceptance:** All Python errors visible with file, line number, and error message. Tracebacks hide Pyodide/Panel internal frames and show only the user's code context.
 
 ---
 
@@ -148,6 +150,14 @@ No Sphinx extension. Required for Panel's own Sphinx-based documentation.
 ## P2 — Document MkDocs Integration for Third-Party Users
 
 The MkDocs fence extension works but lacks user-facing documentation for third-party adoption.
+
+---
+
+## P2 — Document Browser Sandbox Security Model
+
+panel-live runs all Python code client-side via Pyodide in the browser's sandbox. This means user code cannot access the server, filesystem, or other users' data — it is inherently safe and secure. This is a key advantage over server-side execution but is not documented anywhere. A clear explanation would build trust with documentation authors and site operators considering adoption.
+
+**Acceptance:** A documentation page (or section) explains that panel-live executes code in the browser sandbox, what that means for security, and why it is safe to embed user-editable code in public-facing sites.
 
 ---
 
