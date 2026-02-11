@@ -389,6 +389,9 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 .pl-btn.share-btn {
   position: relative;
 }
+.pl-btn.copy-btn {
+  position: relative;
+}
 .pl-toast {
   position: absolute;
   bottom: calc(100% + 6px);
@@ -473,4 +476,42 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 }
 .pl-editor-stacked.code-last > textarea.pl-editor-area {
   order: 4;
+}
+
+/* ---- Error panel ---- */
+.pl-error-panel {
+  padding: 16px;
+  border-radius: 4px;
+  background: var(--pl-error-bg, #ffebee);
+  color: var(--pl-error-color, #b71c1c);
+  font-size: 13px;
+  margin: 0;
+}
+.pl-error-header {
+  font-weight: 600;
+  font-family: var(--pl-font-mono, monospace);
+  white-space: pre-wrap;
+}
+.pl-error-body {
+  margin-top: 8px;
+}
+.pl-error-body pre {
+  white-space: pre-wrap;
+  margin: 8px 0 0;
+  font-size: 12px;
+  opacity: 0.85;
+}
+.pl-error-copy-btn {
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 2px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.7;
+}
+.pl-error-copy-btn:hover {
+  opacity: 1;
 }

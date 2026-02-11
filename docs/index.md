@@ -3,11 +3,13 @@
 **Run interactive Panel apps directly in the browser — no server required.**
 
 Embed live, editable Python visualizations in any web page using the `<panel-live>` web component.
-Code executes client-side via Pyodide — no backend, no deployment, no infrastructure.
+Code executes client-side via [Pyodide](https://pyodide.org/en/stable/) — no backend, no deployment, no infrastructure.
 
-## Try it — App Mode
+## Try it
 
-The default mode renders your Panel app directly — no editor, no chrome, just the output.
+### App Mode
+
+The default mode renders your Panel app directly — no editor, just the output.
 
 ```panel
 import panel as pn
@@ -22,7 +24,38 @@ pn.Column(
 ).servable()
 ```
 
-## Try it — Editor Mode
+### Works with any Python
+
+Not just Panel — run **any** Python code directly in the browser. Here's a matplotlib visualization with no Panel imports at all:
+
+```{.panel mode="editor" label="Python" code-visibility="collapsed" code-position="last"}
+import matplotlib
+matplotlib.use("agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 2 * np.pi, 200)
+fig, ax = plt.subplots(figsize=(8, 3))
+for n in range(1, 5):
+    ax.plot(x, np.sin(n * x) / n, label=f"sin({n}x)/{n}")
+ax.set_title("Harmonic Series")
+ax.legend(loc="upper right")
+ax.grid(True, alpha=0.3)
+fig
+```
+
+Click the *Code* button to edit the code and rerun it live in your browser!
+
+Try changing the code to:
+
+```python
+ax.set_title("Very Harmonic Series")
+ax.legend(loc="upper left")
+```
+
+Perfect for library developers and educators who want to make it easy to explore, learn, and have fun.
+
+### Editor Mode
 
 Edit the code below and press **Run** to see your changes.
 
@@ -64,7 +97,7 @@ pn.Column(
 ).servable()
 ```
 
-## Try it — Playground Mode
+### Playground Mode
 
 A side-by-side editor and live preview. Edit the code on the left and press **Run**.
 
@@ -90,6 +123,14 @@ pn.Column(
 ).servable()
 ```
 
+### Playground
+
+Explore the full-screen [Playground](playground.html) — a curated collection of interactive examples you can edit and run instantly.
+
+### API Editor
+
+Explore and configure every `<panel-live>` attribute interactively with the [API Explorer](api-explorer.html).
+
 ## Features
 
 - **3 modes:** app (output only), editor (code + output), playground (side-by-side)
@@ -100,10 +141,16 @@ pn.Column(
 - **MkDocs integration** via fenced code blocks and `pymdownx.superfences`
 - **No server needed** — runs entirely in the browser via Pyodide
 
+## Known Limitations
+
+Because panel-live runs entirely in the browser via Pyodide (WASM), some features that require a live server are not available:
+
+- **No `.plot()` calls** — matplotlib's `plt.show()`, plotly's `fig.show()`, and similar display methods do not work. Instead, return the figure object as the last expression (e.g. `fig`) and panel-live will render it.
+- **No `.show()` calls** — Bokeh's `show()`, Panel's `.show()`, and similar server-dependent methods are not supported. Use `.servable()` instead.
+
 ## Get Started
 
-- [Demo](demo.md) — all 3 modes explained in detail
-- [Examples](examples.md) — more interactive examples
+- [Examples](examples.md) — interactive examples across all categories
 - [API Explorer](api-explorer.html) — configure every attribute interactively
 - [Playground](playground.html) — full-screen editing environment
 

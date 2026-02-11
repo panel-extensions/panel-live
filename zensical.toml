@@ -8,13 +8,22 @@ edit_uri = "edit/main/docs/"
 nav = [
   {"Home" = "index.md"},
   {"Examples" = "examples.md"},
-  {"Reference" = "reference/panel_live.md"},
+  {"Playground" = "playground.html"},
+  {"API Explorer" = "api-explorer.html"},
+  {"How-to Guides" = [
+    {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
+    {"Auto-Run Configuration" = "how-to/auto-run.md"},
+  ]},
+  {"Reference" = [
+    {"Python API" = "reference/python-api.md"},
+  ]},
 ]
 extra_javascript = ["assets/js/panel-live.js"]
 extra_css = ["assets/css/panel-live.css"]
 
 # Theme configuration
 [project.theme]
+custom_dir = "docs/overrides"
 logo = "assets/logo.svg"
 features = [
   "announce.dismiss",

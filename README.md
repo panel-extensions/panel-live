@@ -1,4 +1,6 @@
-# panel-live [POC - NOT YET WORKING!]
+# panel-live
+
+> **Early-stage development** — APIs may change. If you find a version that works, pin it.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)

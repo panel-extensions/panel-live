@@ -9,7 +9,7 @@ Outstanding issues for the Panel Live feature. See also `live-dream.md` for visi
 - **P2 - Important**: Needed for a polished, competitive product.
 - **P3 - Nice-to-have**: Future enhancements and stretch goals.
 
-**Current state:** 30 issues total. 21 resolved, 4 partially resolved, 5 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
+**Current state:** 34 issues total. 21 resolved, 4 partially resolved, 5 open. The web component (`lib/panel-live.js`) implements the `<panel-live>` custom element with 3 modes (app, editor, playground), declarative + imperative API, CSS custom properties theming (`--pl-*` variables with light/dark presets), CodeMirror 5 editor, multi-file support (`<panel-file>`), explicit requirements (`<panel-requirements>`), and an interactive API explorer. CSS is in a separate `panel-live.css` file. Pyodide runs inline on the main thread (no iframe mode, no web worker yet).
 
 ---
 
@@ -346,13 +346,18 @@ Features needed for a competitive product.
 
 ### P1 - Copy Code Button
 
-**Problem:** No way to easily copy code from the editor or app view. Combined with the mouse selection bug, code is effectively locked.
+**Problem:** No way to easily copy code from the editor or app view. Additionally, there's no way to copy the `<panel-live>` embedding HTML for reuse in other pages or for reporting issues.
 
-**Why it matters:** Users want to copy examples to their own projects. This is a primary use case for documentation embeddings.
+**Why it matters:** Users want to copy examples to their own projects. This is a primary use case for documentation embeddings. Being able to copy the embedding code (not just the Python) makes it trivial to share or report issues with a fully reproducible snippet.
 
-**Suggested approach:** Add a copy-to-clipboard button (top-right corner of code block, like GitHub code blocks). Show brief "Copied!" confirmation.
+**Suggested approach:**
 
-**Acceptance criteria:** Copy button visible on hover/focus in both editor and app (visible code) modes. Works across browsers.
+1. **Copy Python code:** Add a copy-to-clipboard button (top-right corner of code block, like GitHub code blocks). Show brief "Copied!" confirmation. Visible in editor and app (visible code) modes.
+2. **Copy embedding code:** Add a second action (e.g., "Copy Embed" button or a dropdown with options) that copies the `<panel-live>` HTML markup. Two formats:
+   - **Minimal:** Just the `<panel-live>` tag with its content and any dependency imports — suitable for pasting into an existing page that already loads `panel-live.js`/`.css`
+   - **Full standalone HTML:** A complete, self-contained HTML file including `<script>`/`<link>` tags for panel-live assets, COOP/COEP `<meta>` tags, and the `<panel-live>` element — can be saved as `.html` and opened directly
+
+**Acceptance criteria:** Copy Python button visible on hover/focus in editor and app (visible code) modes. Copy embed action available in editor and playground modes. Both formats produce valid, runnable output. Works across browsers.
 
 ---
 
@@ -503,6 +508,25 @@ Features needed for a competitive product.
 
 ---
 
+### P2 - Follow Diataxis Documentation Framework
+
+**Problem:** The docs site has content but lacks a clear organizational structure. Pages mix tutorials, reference, and explanation without a guiding framework. As the project matures, this will make the docs harder to navigate and maintain.
+
+**Why it matters:** The [Diataxis framework](https://diataxis.fr/) provides a proven structure for technical documentation, dividing content into four categories based on user needs: tutorials (learning-oriented), how-to guides (task-oriented), reference (information-oriented), and explanation (understanding-oriented). Following this structure ensures users can find what they need quickly.
+
+**Suggested approach:**
+
+1. **Immediate focus:** `index.md` (landing page), live examples/playgrounds, how-to guides, and auto-generated Python API reference
+2. **Short-term:** Add a single tutorial (e.g., "Embed a live Panel app in your MkDocs site in 5 minutes")
+3. **Medium-term:** Add a JavaScript API reference guide to replace `dev/design/api-design.md` once the API stabilizes
+4. **Long-term:** Consolidate material from `dev/` folder into concise explanation pages as the project matures and the rate of change slows
+
+**Acceptance criteria:** Docs site navigation clearly maps to Diataxis categories. Each page has a clear purpose (tutorial, how-to, reference, or explanation). Landing page, examples, how-to guides, and Python reference are in place.
+
+**Related to:** Documentation (P1), Examples Gallery (P2).
+
+---
+
 ### P1 - Examples Gallery [PARTIALLY RESOLVED]
 
 **Problem:** Need a comprehensive, curated collection of examples covering common use cases.
@@ -527,6 +551,26 @@ Features needed for a competitive product.
 
 ---
 
+### P2 - Landing Page Should Showcase Generic Python Support
+
+**Problem:** The `docs/index.md` landing page only shows Panel examples, giving the impression that `<panel-live>` is limited to Panel apps. In reality, the component runs **any Python code** — including plain PyData objects (DataFrames, Matplotlib plots, etc.) that Pyodide supports.
+
+**Why it matters:** Many potential users are not (yet) Panel users. Showing a non-Panel example early on the landing page — ideally the first "app mode" demo — immediately communicates the broader value proposition: "run any Python in the browser." This lowers the barrier to adoption and positions panel-live as a general-purpose tool, not just a Panel showcase.
+
+**Suggested approach:**
+
+1. Add an app-mode example near the top of `docs/index.md` (before or right after the current Panel slider demo) that uses a well-known PyData library **without importing Panel**. Good candidates:
+   - A Matplotlib or hvPlot figure (recognizable to nearly all Python users)
+   - A pandas DataFrame rendered as HTML
+   - A NumPy computation with formatted output
+2. Add a brief sentence or heading making the point explicit, e.g. "Works with any Python code — not just Panel."
+
+**Acceptance criteria:** The landing page includes at least one non-Panel Python example in app mode. The page copy explicitly communicates that panel-live supports arbitrary Python code.
+
+**Related to:** Documentation (P1), Examples Gallery (P2).
+
+---
+
 ### P2 - Sphinx Extension
 
 **Problem:** No Sphinx extension exists. The current `nbsite` pyodide directive is limited (one instance per page, no template support, code not editable).
@@ -539,8 +583,10 @@ Features needed for a competitive product.
 2. Support code from directive body or external file reference
 3. Support options: `layout`, `theme`, `requirements`, `height`
 4. Load panel-live JS/CSS from CDN or bundled with docs
+5. Automated tests: a pytest fixture that builds a minimal Sphinx project with a `.. panel-live::` directive and verifies the output HTML contains a `<panel-live>` element
+6. User documentation: installation, `conf.py` configuration, directive syntax reference, attributes, and a troubleshooting section
 
-**Acceptance criteria:** Working Sphinx extension that can embed interactive Panel apps in documentation pages. Multiple instances per page.
+**Acceptance criteria:** Working Sphinx extension that can embed interactive Panel apps in documentation pages. Multiple instances per page. Tests verify directive produces valid `<panel-live>` HTML. Documentation published in panel-live docs.
 
 **Blocked by:** Build, Distribute.
 
@@ -588,6 +634,45 @@ Features needed for a competitive product.
 **Acceptance criteria:** Panel website navigation includes playground link. Panel GitHub README mentions the feature with link.
 
 **Blocked by:** Documentation, Distribute.
+
+---
+
+### P2 - Revise README for Broader Audience
+
+**Problem:** The README positions panel-live primarily as a Panel tool ("Run interactive Panel apps"). In reality, it runs any Python code — DataFrames, Matplotlib plots, NumPy computations — via Pyodide. Additionally, the README duplicates content that belongs in the docs site (detailed MkDocs configuration, development setup), making it harder to maintain.
+
+**Why it matters:** The project has seconds to capture a visitor's interest on GitHub. A Panel-only pitch excludes the vast majority of Python users. Duplicated content drifts out of sync and adds maintenance burden.
+
+**Suggested approach:**
+
+1. **Broaden the tagline:** "Run interactive Python apps directly in the browser" (drop "Panel" from the headline; mention Panel as the primary framework below)
+2. **Lead with a general example:** Show a non-Panel example first (e.g., a pandas DataFrame or Matplotlib plot), then Panel examples
+3. **Trim duplicated content:** Replace detailed MkDocs config and development setup sections with brief summaries + links to the docs site
+4. **Keep it scannable:** Hero line -> 3 code examples (app/editor/playground) -> features bullet list -> links to docs/demos/playground -> install one-liner -> development link
+
+**Acceptance criteria:** README communicates "any Python" value prop within the first 2 paragraphs. No content that duplicates the docs site verbatim. Development section links to docs rather than duplicating pixi/uv instructions.
+
+**Related to:** Landing Page Should Showcase Generic Python Support (P2), Links from Panel Website and README (P2).
+
+---
+
+### P2 - Document Known Limitations
+
+**Problem:** Panel-live has known limitations (main-thread execution blocks UI, browser crashes on some hardware, no offline support, CodeMirror 5 is legacy, etc.) but these are scattered across individual issues in `live-issues.md`. Users have no single place to check what works and what doesn't.
+
+**Why it matters:** Setting correct expectations prevents frustration and support burden. Users evaluating the tool need to quickly understand what's production-ready vs. experimental. This is also a prerequisite for a credible v0.1.0 release.
+
+**Suggested content:**
+
+1. **Runtime:** Pyodide runs on the main thread; page may freeze during load (5-15s); web worker support planned
+2. **Browser compatibility:** Chrome/Edge may crash on machines with <8GB RAM; Firefox is more stable; COOP/COEP headers required for SharedArrayBuffer
+3. **Package support:** Only packages available in Pyodide/micropip work; C extensions must have Emscripten builds
+4. **Editor:** CodeMirror 5 (maintenance mode); CDN may be blocked by tracking prevention
+5. **Performance:** First load ~10-15s on broadband; subsequent runs ~1-2s; no service worker caching yet
+
+**Acceptance criteria:** A "Known Limitations" section in the docs (or standalone page) covering runtime, browser, package, editor, and performance limitations. Linked from the README.
+
+**Related to:** Browser Crash (P0), Web Worker Support (P0), Documentation (P1), Release v0.1.0 (P1).
 
 ---
 
@@ -684,6 +769,35 @@ Features needed for a competitive product.
 
 ---
 
+### P1 - Release v0.1.0
+
+**Problem:** No formal release of panel-live has been made. Users can only use `latest` from CDN or install from git.
+
+**Why it matters:** A versioned release signals stability, enables version pinning (the README already advises this), and is required for PyPI/conda-forge distribution.
+
+**Prerequisites (must be resolved before release):**
+
+- [ ] ~~P2 - MkDocs Extension~~ [DONE]
+- [ ] P2 - Sphinx Extension — at minimum a working directive
+- [ ] P0 - Browser Crash — stable in Chrome, Edge, and Firefox (no crashes on reference hardware)
+- [ ] P1 - Documentation [PARTIAL] — at minimum: getting started guide + API reference
+- [ ] P1 - Distribution [PARTIAL] — versioned CDN URLs + published PyPI package
+- [ ] P1 - Automated Testing [PARTIAL] — reasonable test coverage for release confidence
+- [ ] P2 - Known Limitations — documented so users know what to expect
+- [ ] Update GitHub repo description and topics at https://github.com/panel-extensions/panel-live
+
+**Not blocking v0.1.0** (important but can follow):
+
+- P0 - Web Worker Support (significant effort; v0.1 can ship with main-thread execution and a known limitation note)
+- P1 - Build System (current unminified JS works; optimization can follow)
+- P2 - npm package (CDN + PyPI is sufficient for v0.1)
+
+**Acceptance criteria:** Tagged v0.1.0 release on GitHub. PyPI package published. Versioned CDN URLs live. Release notes document features and known limitations.
+
+**Related to:** Distribution (P1), Documentation (P1), Automated Testing (P1), Browser Crash (P0), Known Limitations (P2).
+
+---
+
 ## Category 6: Technical Debt
 
 ### P1 - Python Code as String Concatenation
@@ -762,6 +876,22 @@ These are stretch goals for after MVP.
 
 ---
 
+### P3 - Test panel-live in Claude.ai Artifact Sandbox
+
+**Problem:** Claude.ai can generate HTML artifacts for users. It's unknown whether `<panel-live>` renders correctly inside Claude's artifact sandbox (which has restrictions on external scripts, CDN access, and iframe behavior).
+
+**Why it matters:** If panel-live works in Claude artifacts, it becomes a powerful way for Claude to generate interactive Python visualizations on the fly — a unique differentiator. If it doesn't, we need to understand what restrictions prevent it.
+
+**Suggested approach:**
+
+1. Manually test: ask Claude to generate an artifact with `<panel-live>` CDN tags + inline code
+2. Document what works and what doesn't (CDN blocked? sandbox restrictions? CSP issues?)
+3. If blocked: investigate workarounds (inline bundle, data URIs, etc.)
+
+**Acceptance criteria:** Documented test results. If feasible: a prompt template or guide for using panel-live in Claude artifacts.
+
+---
+
 ## Dependency Graph
 
 ```text
@@ -793,6 +923,11 @@ Loading Progress [RESOLVED]
 Dark Theme [RESOLVED]
 
 Distribution ────────────┬──> Documentation ──> Links
+
+Known Limitations ───────> Release v0.1.0
+README Revision ─────────> Release v0.1.0
+Release v0.1.0 ──────────> (blocks: Sphinx Extension, Browser Crash, Documentation,
+                            Distribution, Automated Testing, Known Limitations)
 ```
 
 ## Suggested Execution Order
@@ -807,10 +942,10 @@ Web Worker Support, ~~Folder/File Structure~~ [DONE], ~~Separate CSS~~ [DONE], B
 Handle Python Errors (remaining: structured tracebacks, collapsible panel, copy button), Copy Code, Editor Theme (remaining: additional themes, high-contrast), Python string concatenation cleanup
 
 **Phase 4 - Polish & Release:**
-Automated Testing [PARTIAL], Distribution [PARTIAL], Documentation [PARTIAL], Examples Gallery (remaining: 3+ more examples, defaults, gallery page), ~~Pixi Commands~~ [DONE], ~~GitHub Actions CI/CD~~ [DONE], postMessage Security (for future worker support), Memory Leak investigation, Error Boundaries
+Automated Testing [PARTIAL], Distribution [PARTIAL], Documentation [PARTIAL], Examples Gallery (remaining: 3+ more examples, defaults, gallery page), ~~Pixi Commands~~ [DONE], ~~GitHub Actions CI/CD~~ [DONE], postMessage Security (for future worker support), Memory Leak investigation, Error Boundaries, Known Limitations, Revise README
 
-**Phase 5 - Ecosystem & Deferred Features:**
-Sphinx Extension, ~~MkDocs Extension~~ [DONE], Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support
+**Phase 5 - Release & Ecosystem:**
+Release v0.1.0 (meta-issue, depends on Phase 4 items), Sphinx Extension, ~~MkDocs Extension~~ [DONE], Links, ~~Multi-file Support~~ [DONE], ~~Requirements Specification~~ [DONE], Version Info / Switching, URL Sharing improvements, Zero-Install Deployment, Offline Support, Diataxis Documentation Framework
 
 **Phase 6 - Future:**
-React wrapper, Desktop version, Filesystem, Media access, Notebook experience
+React wrapper, Desktop version, Filesystem, Media access, Notebook experience, Claude.ai Artifact Sandbox

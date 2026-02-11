@@ -1,4 +1,4 @@
-# panel-live
+# Python API Reference
 
 ::: panel_live
     options:
