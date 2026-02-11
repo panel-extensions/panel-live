@@ -67,10 +67,23 @@ depends-on = ["_install-ui"]
 [feature.docs.dependencies]
 zensical = "*"
 mkdocstrings-python = "*"
+panel = ">=1.5.0"
+pip = "*"
+hatchling = "*"
+hatch-vcs = "*"
+setuptools = ">=61"
+setuptools-scm = "*"
 
 [feature.docs.tasks]
-serve = "zensical serve"
-build = "zensical build"
+_postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
+
+[feature.docs.tasks.serve]
+cmd = "zensical serve"
+depends-on = ["_postinstall"]
+
+[feature.docs.tasks.build]
+cmd = "zensical build"
+depends-on = ["_postinstall"]
 
 [environments]
 default = ["test"]
