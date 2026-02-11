@@ -15,6 +15,8 @@ Turn any web page into an interactive Python playground with the `<panel-live>` 
 
 ## Quick Start
 
+> **Not Possible Yet!** - The panel-live css and js assets have not yet been deployed.
+
 ### HTML (any web page)
 
 Include the CSS and JS from the CDN:
