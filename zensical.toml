@@ -8,8 +8,10 @@ edit_uri = "edit/main/docs/"
 nav = [
   {"Home" = "index.md"},
   {"Examples" = "examples.md"},
-  {"Reference" = "reference/panel_live.md"}
+  {"Reference" = "reference/panel_live.md"},
 ]
+extra_javascript = ["assets/js/panel-live.js"]
+extra_css = ["assets/css/panel-live.css"]
 
 # Theme configuration
 [project.theme]
@@ -75,6 +77,9 @@ url_download = true
 [project.markdown_extensions.admonition]
 
 [project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.formatter" }
+]
 
 # Plugins
 [project.plugins]
