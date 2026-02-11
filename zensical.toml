@@ -11,11 +11,45 @@ nav = [
   {"Playground" = "playground.md"},
   {"API Explorer" = "api-explorer.md"},
   {"How-to Guides" = [
-    {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
-    {"Auto-Run Configuration" = "how-to/auto-run.md"},
+    {"Getting Started" = [
+      {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
+    ]},
+    {"HTML Attributes" = [
+      {"Display Modes" = "how-to/mode.md"},
+      {"Theming" = "how-to/theme.md"},
+      {"Layout Direction" = "how-to/layout.md"},
+      {"Code Editor Options" = "how-to/code-editor-options.md"},
+      {"Height" = "how-to/height.md"},
+      {"Auto-Run" = "how-to/auto-run.md"},
+      {"Labels" = "how-to/label.md"},
+      {"External Source" = "how-to/src.md"},
+      {"Fullscreen" = "how-to/fullscreen.md"},
+      {"Examples Source" = "how-to/examples-src.md"},
+    ]},
+    {"Child Elements" = [
+      {"Multi-File Apps" = "how-to/multi-file-apps.md"},
+    ]},
+    {"JavaScript API" = [
+      {"Programmatic Usage" = "how-to/javascript-api.md"},
+    ]},
+    {"Styling" = [
+      {"CSS Custom Properties" = "how-to/css-custom-properties.md"},
+      {"Events" = "how-to/events.md"},
+    ]},
   ]},
   {"Reference" = [
     {"Python API" = "reference/python-api.md"},
+    {"HTML API" = "reference/html-api.md"},
+    {"JavaScript API" = "reference/javascript-api.md"},
+    {"CSS Custom Properties" = "reference/css-custom-properties.md"},
+    {"Events" = "reference/events.md"},
+  ]},
+  {"Explanation" = [
+    {"Design Decisions" = "explanation/design.md"},
+  ]},
+  {"Project" = [
+    {"Open Issues" = "project/open-issues.md"},
+    {"Closed Issues" = "project/closed-issues.md"},
   ]},
 ]
 extra_javascript = ["assets/js/panel-live.js"]

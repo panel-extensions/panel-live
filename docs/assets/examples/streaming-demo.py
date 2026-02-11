@@ -35,7 +35,7 @@ def stream():
     tabulator.stream(data, rollover=rollover.value, follow=follow.value)
     value = {k: [v] for k, v in tabulator.value.iloc[-1].to_dict().items()}
     value["index"] = [tabulator.value.index[-1]]
-    cds.stream(value)
+    cds.stream(value, rollover=rollover.value)
 
 cb = pn.state.add_periodic_callback(stream, period=500)
 
