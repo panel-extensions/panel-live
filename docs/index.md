@@ -1,9 +1,8 @@
 # panel-live
 
-**Run interactive Panel apps directly in the browser — no server required.**
+**Write, edit, and run Python interactively in the browser — no server required.**
 
-Embed live, editable Python visualizations in any web page using the `<panel-live>` web component.
-Code executes client-side via [Pyodide](https://pyodide.org/en/stable/) — no backend, no deployment, no infrastructure.
+Turn any web page into an interactive Python playground with the `<panel-live>` web component. Plots, widgets, dashboards, and tools are fully interactive — users can view, explore, edit code, and re-run, all directly in the browser via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure.
 
 ## Try it
 
@@ -61,10 +60,15 @@ Edit the code below and press **Run** to see your changes.
 
 ```{.panel mode="editor"}
 import panel as pn
+
 pn.extension(sizing_mode="stretch_width")
 
-picker = pn.widgets.ColorPicker(name="Base Color", value="#3b82f6")
-steps = pn.widgets.RadioButtonGroup(name="Shades", options=["5", "7", "9"], value="7")
+picker = pn.widgets.ColorPicker(name="Base Color", value="#0072b5")
+steps = pn.widgets.RadioButtonGroup(
+    name="Shades", options=["5", "7", "9"], value="7",
+    button_style="outline", button_type="primary",
+    margin=(23, 5, 10, 5)
+)
 
 def hex_to_rgb(h):
     h = h.lstrip("#")
@@ -91,8 +95,7 @@ def generate_palette(color, n):
     )
 
 pn.Column(
-    "# Color Palette Generator",
-    pn.Row(picker, steps),
+    pn.Row(steps, picker),
     pn.bind(generate_palette, picker, steps),
 ).servable()
 ```
@@ -146,13 +149,16 @@ Explore and configure every `<panel-live>` attribute interactively with the [API
 Because panel-live runs entirely in the browser via Pyodide (WASM), some features that require a live server are not available:
 
 - **No `.plot()` calls** — matplotlib's `plt.show()`, plotly's `fig.show()`, and similar display methods do not work. Instead, return the figure object as the last expression (e.g. `fig`) and panel-live will render it.
-- **No `.show()` calls** — Bokeh's `show()`, Panel's `.show()`, and similar server-dependent methods are not supported. Use `.servable()` instead.
+- **No `.show()` calls** — Bokeh's `show()`, Panel's `.show()`, and similar server-dependent methods are not supported.
 
 ## Get Started
 
 - [Examples](examples.md) — interactive examples across all categories
 - [API Explorer](api-explorer.html) — configure every attribute interactively
 - [Playground](playground.html) — full-screen editing environment
+- [How-to Guides](how-to/mode.md) — per-attribute guides with live examples
+- [Reference](reference/html-api.md) — complete HTML, JavaScript, CSS, and Events API
+- [Design Decisions](explanation/design.md) — why panel-live is built the way it is
 
 ```bash
 pip install panel-live

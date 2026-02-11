@@ -2,16 +2,16 @@
 
 > **Early-stage development** — APIs may change. If you find a version that works, pin it.
 
-> **Only works in Fire Fox** - Issue reported [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737)
+> **Only works in FireFox** - Issue reported [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
 [![pypi-version](https://img.shields.io/pypi/v/panel-live.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/panel-live)
 [![python-version](https://img.shields.io/pypi/pyversions/panel-live?logoColor=white&logo=python&style=flat-square)](https://pypi.org/project/panel-live)
 
-**Run interactive Panel apps directly in the browser — no server required.**
+**Write, edit, and run Python interactively in the browser — no server required.**
 
-Embed live, editable Python visualizations in any web page using the `<panel-live>` web component. Code executes client-side via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure. Drop two lines of HTML into your page and your Panel app just works.
+Turn any web page into an interactive Python playground with the `<panel-live>` web component. Plots, widgets, dashboards, and tools are fully interactive — users can view, explore, edit code, and re-run, all directly in the browser via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure.
 
 ## Quick Start
 
@@ -106,7 +106,7 @@ custom_fences = [
 
 ## Live Demos
 
-- [Demo](https://panel-extensions.github.io/panel-live/demo/) — all 3 modes in action
+- [Examples](https://panel-extensions.github.io/panel-live/examples/) — many cool examples
 - [API Explorer](https://panel-extensions.github.io/panel-live/api-explorer.html) — interactive configuration
 - [Playground](https://panel-extensions.github.io/panel-live/playground.html) — full-screen editing
 

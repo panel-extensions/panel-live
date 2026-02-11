@@ -1,0 +1,60 @@
+# Display Modes
+
+Control how `panel-live` presents your code and output using the `mode` attribute.
+
+## App mode (default)
+
+Renders the output only — no editor, no controls. Use for embedded demos.
+
+```{.panel mode="app" auto-run="true"}
+import panel as pn
+pn.panel("This is **app mode** — output only, no editor visible.").servable()
+```
+
+## Editor mode
+
+Shows code and output stacked vertically with a Run button. Users can edit and re-run.
+
+```{.panel mode="editor" auto-run="true"}
+import panel as pn
+pn.panel("This is **editor mode** — edit the code and press Run.").servable()
+```
+
+## Playground mode
+
+Side-by-side editor and live preview. Best for exploration and experimentation.
+
+```{.panel mode="playground" auto-run="true"}
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=42)
+pn.Column(slider, pn.bind(lambda v: f"**Value:** {v}", slider)).servable()
+```
+
+## Fence syntax
+
+````markdown
+```panel
+# app mode (default)
+```
+````
+
+````markdown
+```{.panel mode="editor"}
+# editor mode
+```
+````
+
+````markdown
+```{.panel mode="playground"}
+# playground mode
+```
+````
+
+## When to use each
+
+| Scenario | Recommended Mode |
+|----------|-----------------|
+| Embedded demos in docs | `app` |
+| Tutorials with editable examples | `editor` |
+| Interactive exploration / playground | `playground` |
+| Showcase pages | `app` or `editor` with `code-visibility="collapsed"` |
