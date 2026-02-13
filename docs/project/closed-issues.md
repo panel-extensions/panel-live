@@ -145,3 +145,21 @@ Resolved and rejected issues from the panel-live project.
 ## ~~P2 — Revise README for Broader Audience~~
 
 **Resolved.** README leads with "Write, edit, and run Python interactively in the browser" and "Turn any web page into an interactive Python playground". No Panel-centric framing.
+
+---
+
+## ~~P1 — Fix events/ Page Navigation~~
+
+**Resolved.** Events page moved from under "Styling" to its own "Events" section in `zensical.toml` navigation. The page now appears correctly in the sidebar.
+
+---
+
+## ~~P2 — Rename "Competitors" to "Alternatives"~~
+
+**Resolved.** All references to "competitors" in `docs/explanation/design.md` replaced with "alternatives" — section heading, comparison table intro, and differentiators list.
+
+---
+
+## ~~P2 — Enable "org" Mode in MkDocs~~
+
+**Resolved.** `mode="org"` in the fence syntax delegates to `pymdownx.superfences.fence_code_format()` to render a standard syntax-highlighted code block. No `<panel-live>` element is inserted. Documented in how-to/mode.md and reference/html-api.md. Tests in `tests/test_fences.py`.

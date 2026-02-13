@@ -16,6 +16,7 @@ or with attributes:
 """
 
 from pymdownx.superfences import default_validator
+from pymdownx.superfences import fence_code_format
 
 _KNOWN_ATTRS = frozenset(
     {
@@ -88,6 +89,10 @@ def formatter(source, language, css_class, options, md, **kwargs):
     Builds the ``<panel-live>`` tag with attributes from *options*
     and the fenced source code as escaped inner text.
 
+    If ``mode="org"`` is set, delegates to the standard
+    ``pymdownx.superfences.fence_code_format`` to render a plain
+    syntax-highlighted code block instead of a ``<panel-live>`` element.
+
     Parameters
     ----------
     source : str
@@ -106,13 +111,18 @@ def formatter(source, language, css_class, options, md, **kwargs):
     Returns
     -------
     str
-        An HTML string containing a ``<panel-live>`` element.
+        An HTML string containing a ``<panel-live>`` element, or a
+        standard ``<pre><code>`` block when ``mode="org"``.
     """
     attrs = dict(_DEFAULTS)
     for key in _KNOWN_ATTRS:
         value = options.get(key, "")
         if value:
             attrs[key] = value
+
+    if attrs.get("mode") == "org":
+        kw = {"classes": kwargs.get("classes", []), "id_value": kwargs.get("id_value", ""), "attrs": kwargs.get("attrs", {})}
+        return fence_code_format(source, "python", css_class, options, md, **kw)
 
     attr_str = "".join(f' {k}="{_escape(v)}"' for k, v in attrs.items())
     if source.strip():

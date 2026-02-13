@@ -4,7 +4,7 @@ This page explains *why* `panel-live` is designed the way it is. For *how* to us
 
 ## Custom element (`<panel-live>`)
 
-Three of four competitors (gradio-lite, stlite, PyScript) use custom HTML elements. Attributes are the natural way to configure HTML, and child elements compose naturally. A custom element also means zero framework dependencies — it works in any HTML page, any static site generator, any CMS.
+Three of four alternatives (gradio-lite, stlite, PyScript) use custom HTML elements. Attributes are the natural way to configure HTML, and child elements compose naturally. A custom element also means zero framework dependencies — it works in any HTML page, any static site generator, any CMS.
 
 ## Light DOM (no Shadow DOM)
 
@@ -47,7 +47,7 @@ cdn.holoviz.org/panel-live/{version}/panel-live.min.js
 cdn.holoviz.org/panel-live/latest/panel-live.min.js
 ```
 
-## Competitor comparison
+## Comparison with alternatives
 
 | Feature | panel-live | gradio-lite | stlite | PyScript | shinylive |
 |---------|-----------|-------------|--------|----------|-----------|
@@ -65,9 +65,9 @@ cdn.holoviz.org/panel-live/latest/panel-live.min.js
 
 ### Differentiators
 
-1. **Three display modes in one element** — no other competitor offers app, editor, and playground from a single tag.
-2. **Full CSS custom property system** — no competitor exposes comprehensive `--pl-*` theming.
+1. **Three display modes in one element** — no other alternative offers app, editor, and playground from a single tag.
+2. **Full CSS custom property system** — no alternative exposes comprehensive `--pl-*` theming.
 3. **`<panel-example>` child elements** — built-in example selector for playground mode.
-4. **`PanelLiveController`** — richer runtime interaction than any competitor's JS API.
+4. **`PanelLiveController`** — richer runtime interaction than any alternative's JS API.
 5. **`theme="auto"`** — automatic light/dark detection via `prefers-color-scheme`.
 6. **Panel/HoloViz ecosystem** — hvPlot, HoloViews, Param, panel-material-ui provide a richer widget/visualization toolkit.

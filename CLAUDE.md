@@ -90,3 +90,8 @@ Known attributes: `mode`, `theme`, `height`, `layout`, `auto-run`, `label`, `cod
 ## Local development server
 
 `serve.py` provides an HTTP server with Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers, required for Pyodide's SharedArrayBuffer support. Use `pixi run serve` or `python serve.py [port]`.
+
+## Please also read
+
+@docs/explanation/design.md
+@docs/project/open-issues.md
