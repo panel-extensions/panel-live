@@ -15,8 +15,20 @@ or with attributes:
     ```
 """
 
+import re
+
 from pymdownx.superfences import default_validator
 from pymdownx.superfences import fence_code_format
+
+_CHILD_RE = re.compile(
+    r"(<panel-(?:requirements|file|example)\b[^>]*>.*?</panel-(?:requirements|file|example)>)",
+    re.DOTALL,
+)
+
+_REQ_RE = re.compile(
+    r"<panel-requirements\b[^>]*>(.*?)</panel-requirements>",
+    re.DOTALL,
+)
 
 _KNOWN_ATTRS = frozenset(
     {
@@ -124,7 +136,16 @@ def formatter(source, language, css_class, options, md, **kwargs):
         kw = {"classes": kwargs.get("classes", []), "id_value": kwargs.get("id_value", ""), "attrs": kwargs.get("attrs", {})}
         return fence_code_format(source, "python", css_class, options, md, **kw)
 
+    # Extract <panel-requirements> content and promote to data attribute
+    # so it survives HTML sanitisation in static-site generators.
+    req_match = _REQ_RE.search(source)
+    if req_match:
+        attrs["data-requirements"] = req_match.group(1).strip()
+
+    # Strip all child elements from source, leaving only code
+    code = _CHILD_RE.sub("", source)
+
     attr_str = "".join(f' {k}="{_escape(v)}"' for k, v in attrs.items())
-    if source.strip():
-        return f"<panel-live{attr_str}>\n{_escape(source)}\n</panel-live>"
+    if code.strip():
+        return f"<panel-live{attr_str}>\n{_escape(code)}\n</panel-live>"
     return f"<panel-live{attr_str}></panel-live>"

@@ -1,33 +1,42 @@
-import random
 import panel as pn
+import pydeck as pdk
+pn.extension('deckgl')
 
-pn.extension("deckgl", sizing_mode="stretch_width")
+MAPBOX_KEY = ""
 
-n_points = pn.widgets.IntSlider(name="Points", start=50, end=500, step=50, value=200)
+if MAPBOX_KEY:
+    map_style = "mapbox://styles/mapbox/dark-v9"
+else:
+    map_style = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 
-def make_spec(n):
-    random.seed(42)
-    data = [
-        {"position": [-122.4 + random.gauss(0, 0.02), 37.78 + random.gauss(0, 0.02)],
-         "color": [random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)]}
-        for _ in range(n)
+json_spec = {
+    "initialViewState": {
+        "bearing": -27.36,
+        "latitude": 52.2323,
+        "longitude": -1.415,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "pitch": 40.5,
+        "zoom": 6
+    },
+    "layers": [{
+        "@@type": "HexagonLayer",
+        "autoHighlight": True,
+        "coverage": 1,
+        "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
+        "elevationRange": [0, 3000],
+        "elevationScale": 50,
+        "extruded": True,
+        "getPosition": "@@=[lng, lat]",
+        "id": "8a553b25-ef3a-489c-bbe2-e102d18a3211",
+        "pickable": True
+    }],
+    "mapStyle": map_style,
+    "views": [
+        {"@@type": "MapView", "controller": True}
     ]
-    return {
-        "initialViewState": {"longitude": -122.4, "latitude": 37.78, "zoom": 11, "pitch": 0},
-        "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-        "layers": [{
-            "@@type": "ScatterplotLayer",
-            "data": data,
-            "getPosition": "@@=position",
-            "getColor": "@@=color",
-            "getRadius": 80,
-            "radiusMinPixels": 4,
-            "pickable": True,
-        }],
-    }
+}
 
-pn.Column(
-    "# DeckGL Scatter",
-    n_points,
-    pn.pane.DeckGL(pn.bind(make_spec, n_points), height=500, sizing_mode="stretch_width"),
-).servable()
+deck_gl = pn.pane.DeckGL(json_spec, mapbox_api_key=MAPBOX_KEY, sizing_mode='stretch_width', height=600)
+
+deck_gl

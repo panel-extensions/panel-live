@@ -125,3 +125,8 @@ Known attributes: `mode`, `theme`, `height`, `layout`, `auto-run`, `label`, `cod
 
 @docs/explanation/design.md
 @docs/project/open-issues.md
+
+## Definition of Done
+
+Please fix pytest, vitest and pre-commit issues before claiming something is ready or done.
+Please update the docs and dev folders accordingly before claiming something is ready or done.

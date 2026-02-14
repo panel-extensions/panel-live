@@ -10,10 +10,10 @@ nav = [
   {"Examples" = "examples.md"},
   {"Playground" = "playground.md"},
   {"API Explorer" = "api-explorer.md"},
+  {"Tutorials" = [
+    {"Getting Started" = "tutorials/getting-started.md"},
+  ]},
   {"How-to Guides" = [
-    {"Getting Started" = [
-      {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
-    ]},
     {"HTML Attributes" = [
       {"Display Modes" = "how-to/mode.md"},
       {"Theming" = "how-to/theme.md"},
@@ -38,6 +38,15 @@ nav = [
     {"Events" = [
       {"Events" = "how-to/events.md"},
     ]},
+    {"Deployment" = [
+      {"Self-Hosting" = "how-to/self-hosting.md"},
+      {"Auth Proxy Setup" = "how-to/auth-proxy-setup.md"},
+    ]},
+    {"Integration" = [
+      {"Claude Artifacts" = "how-to/claude-artifacts.md"},
+      {"Iframe Embedding" = "how-to/iframe-embedding.md"},
+      {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
+    ]},
   ]},
   {"Reference" = [
     {"Python API" = "reference/python-api.md"},
@@ -47,11 +56,20 @@ nav = [
     {"Events" = "reference/events.md"},
   ]},
   {"Explanation" = [
+    {"Browser Compatibility" = "reference/browser-compatibility.md"},
     {"Design Decisions" = "explanation/design.md"},
+    {"Known Limitations" = "reference/known-limitations.md"},
+    {"Security Model" = "explanation/security.md"},
   ]},
   {"Project" = [
     {"Open Issues" = "project/open-issues.md"},
     {"Closed Issues" = "project/closed-issues.md"},
+    {"Not Working" = [
+      "project/not-working/index.md",
+{"DuckDB" = "project/not-working/duckdb.md"},
+      {"GeoViews" = "project/not-working/geoviews.md"},
+      {"Polars" = "project/not-working/polars.md"},
+    ]},
   ]},
 ]
 extra_javascript = ["assets/js/panel-live.js"]

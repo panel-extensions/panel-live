@@ -58,6 +58,23 @@ The original monolithic `panel-live.js` was decomposed into 13 focused ES module
 
 esbuild bundles these into `dist/panel-live.js` (main IIFE) + `dist/panel-live-worker.js` (worker IIFE) + `dist/panel-live.css` with source maps. The `.py` text loader pattern allows Python bootstrap scripts to live as `.py` files in `lib/python/` while being imported as strings in JavaScript — keeping Python code readable and lintable.
 
+## postMessage validation
+
+Worker↔main thread communication uses `postMessage` for all messages. Although Web Workers use `MessagePort` (not cross-origin `postMessage`), which means `event.origin` is not available, structural validation is still valuable as defense-in-depth.
+
+Both sides validate incoming messages:
+
+- **`worker-bridge.js`** (`_validateWorkerMessage`) — whitelists valid message types (`ready`, `status`, `render`, `no-output`, `stdout`, `stderr`, `patch`, `idle`, `error`, `done`) and checks type-specific required fields (e.g., `render` must have `runId`, `targetId`, `docs_json`).
+- **`panel-live-worker.js`** (`_validateMainMessage`) — whitelists valid message types (`init`, `run`, `install`, `write-file`, `rendered`, `patch`, `reset`) and checks type-specific required fields (e.g., `run` must have `code`, `targetId`, `runId`).
+
+Invalid messages are rejected with a `console.warn` and not processed. This prevents malformed messages from causing unexpected behavior if panel-live is embedded in iframes or other contexts where message integrity matters.
+
+## CSP nonce support
+
+Sites with strict Content Security Policy headers block inline styles and dynamically created `<script>` or `<link>` elements unless they carry a nonce. `PanelLive.configure({ styleNonce: "abc123" })` passes the nonce to all dynamically injected `<script>` and `<link>` elements via the `nonce` attribute.
+
+The nonce is stored in `_config.styleNonce` (default: empty string) and applied in `loadScript()` and `loadCSS()` when truthy. This enables panel-live on sites that require `script-src 'nonce-...'` or `style-src 'nonce-...'` CSP directives.
+
 ## Version coupling
 
 Bokeh JS version **must** match the Bokeh Python wheel version. Panel JS version **must** match the Panel Python wheel version. This is why versions are managed together in `PanelLive.configure()` — a single configuration point prevents version mismatches that produce cryptic runtime errors.

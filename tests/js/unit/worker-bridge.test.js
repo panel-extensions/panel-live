@@ -108,6 +108,7 @@ describe('getWorkerBridge', () => {
     expect(mockWorkerInstance._posted.length).toBe(1);
     expect(mockWorkerInstance._posted[0].type).toBe('init');
     expect(mockWorkerInstance._posted[0].config.pyodideUrl).toBe('https://cdn.example.com/pyodide.js');
+    expect(mockWorkerInstance._posted[0].config.packageAliases).toBeDefined();
 
     mockWorkerInstance._simulateMessage({ type: 'ready' });
     await initPromise;
@@ -198,6 +199,28 @@ describe('getWorkerBridge', () => {
     bridge.install('numpy\npandas\n# comment\n');
     const msg = mockWorkerInstance._posted.find(m => m.type === 'install');
     expect(msg.packages).toEqual(['numpy', 'pandas']);
+  });
+
+  it('install() splits space-separated packages', async () => {
+    const initP = bridge.init(vi.fn());
+    mockWorkerInstance._simulateMessage({ type: 'ready' });
+    await initP;
+
+    bridge.install('fastparquet requests');
+    const msg = mockWorkerInstance._posted.find(m => m.type === 'install');
+    expect(msg.packages).toEqual(['fastparquet', 'requests']);
+  });
+
+  it('install() resolves package aliases', async () => {
+    const initP = bridge.init(vi.fn());
+    mockWorkerInstance._simulateMessage({ type: 'ready' });
+    await initP;
+
+    mockConfig.packageAliases = { 'duckdb': 'https://example.com/duckdb.whl' };
+    bridge.install(['duckdb', 'pandas']);
+    const msg = mockWorkerInstance._posted.find(m => m.type === 'install');
+    expect(msg.packages).toEqual(['https://example.com/duckdb.whl', 'pandas']);
+    delete mockConfig.packageAliases;
   });
 
   it('writeFile() posts write-file message', async () => {
@@ -494,6 +517,96 @@ describe('getWorkerBridge', () => {
       expect(bridge._refCount).toBe(0);
       expect(bridge._terminationTimer).toBeNull();
       bridge = getWorkerBridge();
+    });
+  });
+
+  // --- Message validation ---
+
+  describe('_validateWorkerMessage', () => {
+    it('accepts valid ready message', () => {
+      expect(bridge._validateWorkerMessage({ type: 'ready' })).toBe(true);
+    });
+
+    it('accepts valid status message', () => {
+      expect(bridge._validateWorkerMessage({ type: 'status', msg: 'Loading...' })).toBe(true);
+    });
+
+    it('accepts valid render message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'render', runId: 'run-1', targetId: 'el-1', docs_json: '{}',
+      })).toBe(true);
+    });
+
+    it('accepts valid no-output message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'no-output', runId: 'run-1', targetId: 'el-1',
+      })).toBe(true);
+    });
+
+    it('accepts valid error message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'error', runId: 'run-1', message: 'ValueError',
+      })).toBe(true);
+    });
+
+    it('accepts valid stdout message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'stdout', runId: 'run-1', text: 'output',
+      })).toBe(true);
+    });
+
+    it('accepts valid patch message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'patch', targetId: 'el-1', patch: { events: [] },
+      })).toBe(true);
+    });
+
+    it('accepts valid idle message', () => {
+      expect(bridge._validateWorkerMessage({ type: 'idle', targetId: 'el-1' })).toBe(true);
+    });
+
+    it('accepts valid done message', () => {
+      expect(bridge._validateWorkerMessage({ type: 'done' })).toBe(true);
+    });
+
+    it('rejects null message', () => {
+      expect(bridge._validateWorkerMessage(null)).toBe(false);
+    });
+
+    it('rejects non-object message', () => {
+      expect(bridge._validateWorkerMessage('hello')).toBe(false);
+    });
+
+    it('rejects unknown type', () => {
+      expect(bridge._validateWorkerMessage({ type: 'unknown' })).toBe(false);
+    });
+
+    it('rejects render missing runId', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'render', targetId: 'el-1', docs_json: '{}',
+      })).toBe(false);
+    });
+
+    it('rejects render missing docs_json', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'render', runId: 'run-1', targetId: 'el-1',
+      })).toBe(false);
+    });
+
+    it('rejects error missing message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'error', runId: 'run-1',
+      })).toBe(false);
+    });
+
+    it('rejects status missing msg', () => {
+      expect(bridge._validateWorkerMessage({ type: 'status' })).toBe(false);
+    });
+
+    it('rejects patch missing targetId', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'patch', patch: { events: [] },
+      })).toBe(false);
     });
   });
 });

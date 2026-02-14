@@ -1,6 +1,6 @@
-(()=>{var y=`import io
-import sys
+(()=>{var h=`import io
 import json
+import sys
 
 from bokeh.document import Document
 from bokeh.io.doc import set_curdoc
@@ -8,6 +8,7 @@ from bokeh.model import Model
 from bokeh.settings import settings as bk_settings
 from panel.io.document import MockSessionContext
 from panel.io.state import state
+
 
 # Streaming stdout/stderr writer that calls JS callbacks for real-time output
 class StreamingWriter:
@@ -31,12 +32,14 @@ class StreamingWriter:
     def getvalue(self):
         return self._buffer.getvalue()
 
+
 # Determine execution branch
 code = __panel_user_code__  # noqa: F821
 target_id = __panel_target_id__  # noqa: F821
 has_servable = ".servable(" in code
 has_servable_target = False
 import re
+
 if has_servable:
     has_servable_target = bool(re.search(r"\\.servable\\s*\\(\\s*target\\s*=", code))
 
@@ -64,12 +67,14 @@ sys.stderr = stderr_writer
 try:
     if is_expression:
         from panel.io.mime_render import exec_with_return
+
         __exec_result__ = exec_with_return(code, __ns__, stderr=stderr_writer)
         if __exec_result__ is None and stderr_writer.getvalue():
             raise RuntimeError(stderr_writer.getvalue())
         # Wrap expression result into the document for unified serialization
         if __exec_result__ is not None:
             import panel as pn
+
             pn.panel(__exec_result__).server_doc(doc=doc)
     else:
         exec(code, __ns__)
@@ -100,9 +105,9 @@ __active_docs__[target_id] = doc
 # Store branch info for render script
 __exec_branch__ = branch
 __has_output__ = not is_expression or __exec_result__ is not None  # noqa: F821
-`;var h=`import json
+`;var b=`import json
+
 from panel.io.pyodide import _doc_json
-from panel.io.state import state
 
 doc = __active_docs__[__panel_target_id__]  # noqa: F821
 
@@ -111,40 +116,42 @@ if not __has_output__:  # noqa: F821
 else:
     docs_json, render_items, root_ids = _doc_json(doc)
     doc._session_context = None
-    __render_result__ = json.dumps({
-        "docs_json": docs_json,
-        "render_items": render_items,
-        "root_ids": root_ids,
-    })
-`;var e=null,c=null,f=new Set(["panel","bokeh","pyodide-http"]),m=Promise.resolve();function n(s){return m=m.then(s,s),m}self.onmessage=async s=>{let t=s.data;try{switch(t.type){case"init":await P(t.config);break;case"run":await n(()=>S(t));break;case"install":await n(()=>R(t.packages));break;case"write-file":await n(()=>q(t.name,t.content));break;case"rendered":await n(()=>I(t));break;case"patch":await n(()=>j(t));break;case"reset":await n(()=>M(t));break;default:console.warn("[panel-live-worker] Unknown message type:",t.type)}}catch(r){console.error("[panel-live-worker] Error handling message:",t.type,r),t.runId&&self.postMessage({type:"error",runId:t.runId,message:r.message||String(r),traceback:String(r)})}};async function P(s){return c||(c=(async()=>{self.postMessage({type:"status",msg:"Loading Pyodide..."}),importScripts(s.pyodideUrl),self.postMessage({type:"status",msg:"Initializing Pyodide..."}),e=await self.loadPyodide(),self.postMessage({type:"status",msg:"Loading micropip..."}),await e.loadPackage("micropip"),self.postMessage({type:"status",msg:"Installing Bokeh + Panel wheels..."}),await e.pyimport("micropip").install([s.bokehWhl,s.panelWhl]),self.postMessage({type:"status",msg:"Initializing Panel..."}),await e.runPythonAsync(`
+    __render_result__ = json.dumps(
+        {
+            "docs_json": docs_json,
+            "render_items": render_items,
+            "root_ids": root_ids,
+        }
+    )
+`;var s=null,c=null,w={},g=new Set(["panel","bokeh","pyodide-http"]),f=Promise.resolve();function n(e){return f=f.then(e,e),f}function P(e){if(!e||typeof e!="object"||!["init","run","install","write-file","rendered","patch","reset"].includes(e.type))return!1;switch(e.type){case"init":return e.config!=null&&typeof e.config=="object";case"run":return typeof e.code=="string"&&typeof e.targetId=="string"&&typeof e.runId=="string";case"install":return Array.isArray(e.packages);case"write-file":return typeof e.name=="string"&&typeof e.content=="string";case"rendered":return typeof e.targetId=="string"&&typeof e.runId=="string";case"patch":return typeof e.targetId=="string"&&e.patch!=null;case"reset":return typeof e.targetId=="string";default:return!0}}self.onmessage=async e=>{let t=e.data;if(!P(t)){console.warn("[panel-live-worker] Invalid message rejected:",t);return}try{switch(t.type){case"init":await S(t.config);break;case"run":await n(()=>M(t));break;case"install":await n(()=>F(t.packages));break;case"write-file":await n(()=>N(t.name,t.content));break;case"rendered":await n(()=>R(t));break;case"patch":await n(()=>A(t));break;case"reset":await n(()=>q(t));break;default:console.warn("[panel-live-worker] Unknown message type:",t.type)}}catch(r){console.error("[panel-live-worker] Error handling message:",t.type,r),t.runId&&self.postMessage({type:"error",runId:t.runId,message:r.message||String(r),traceback:String(r)})}};async function S(e){return c||(c=(async()=>{w=e.packageAliases||{},self.postMessage({type:"status",msg:"Loading Pyodide..."}),importScripts(e.pyodideUrl),self.postMessage({type:"status",msg:"Initializing Pyodide..."}),s=await self.loadPyodide(),self.postMessage({type:"status",msg:"Loading micropip..."}),await s.loadPackage("micropip"),self.postMessage({type:"status",msg:"Installing Bokeh + Panel wheels..."}),await s.pyimport("micropip").install([e.bokehWhl,e.panelWhl]),self.postMessage({type:"status",msg:"Initializing Panel..."}),await s.runPythonAsync(`
 import panel as pn
 print("Panel", pn.__version__, "ready (worker)")
-`),e.globals.set("__stream_stdout__",r=>{self._currentRunId&&self.postMessage({type:"stdout",text:r,runId:self._currentRunId})}),e.globals.set("__stream_stderr__",r=>{self._currentRunId&&self.postMessage({type:"stderr",text:r,runId:self._currentRunId})}),await e.runPythonAsync("__active_docs__ = {}"),self.postMessage({type:"ready"})})(),c)}async function S(s){let{code:t,targetId:r,runId:_}=s;self._currentRunId=_;try{self.postMessage({type:"status",msg:"Detecting requirements..."}),e.globals.set("__user_code__",t);let a=await e.runPythonAsync(`
+`),s.globals.set("__stream_stdout__",r=>{self._currentRunId&&self.postMessage({type:"stdout",text:r,runId:self._currentRunId})}),s.globals.set("__stream_stderr__",r=>{self._currentRunId&&self.postMessage({type:"stderr",text:r,runId:self._currentRunId})}),await s.runPythonAsync("__active_docs__ = {}"),self.postMessage({type:"ready"})})(),c)}function k(e){return e.map(t=>w[t]||t)}async function M(e){let{code:t,targetId:r,runId:_}=e;self._currentRunId=_;try{self.postMessage({type:"status",msg:"Detecting requirements..."}),s.globals.set("__user_code__",t);let o=await s.runPythonAsync(`
 from panel.io.mime_render import find_requirements
 import json
 json.dumps(find_requirements(__user_code__))
-`),o=JSON.parse(a).filter(l=>!f.has(l.toLowerCase()));o.length>0&&(self.postMessage({type:"status",msg:"Installing: "+o.join(", ")+"..."}),await e.pyimport("micropip").install(o),o.forEach(u=>f.add(u.toLowerCase()))),await e.runPythonAsync(`
+`),a=JSON.parse(o).filter(l=>!g.has(l.toLowerCase()));if(a.length>0){let l=k(a);self.postMessage({type:"status",msg:"Installing: "+a.join(", ")+"..."}),await s.pyimport("micropip").install(l),a.forEach(u=>g.add(u.toLowerCase()))}await s.runPythonAsync(`
 from bokeh.io.doc import set_curdoc
 from bokeh.document import Document
 set_curdoc(Document())
-`),self.postMessage({type:"status",msg:"Running code..."}),e.globals.set("__panel_user_code__",t),e.globals.set("__panel_target_id__",r),await e.runPythonAsync(y);let d="",p="";try{d=e.globals.get("__captured_stdout__")||"",p=e.globals.get("__captured_stderr__")||""}catch{}let b=e.globals.get("__ext_resources__"),w=JSON.parse(b||'{"js":[],"css":[]}');await e.runPythonAsync(h);let g=e.globals.get("__render_result__");if(g==="__NO_OUTPUT__")self.postMessage({type:"no-output",runId:_,targetId:r,stdout:d,stderr:p});else{let{docs_json:l,render_items:u,root_ids:k}=JSON.parse(g);self.postMessage({type:"render",runId:_,targetId:r,docs_json:l,render_items:u,root_ids:k,ext_resources:w,stdout:d,stderr:p})}self.postMessage({type:"done",runId:_})}catch(a){let i="",o="";try{i=e.globals.get("__captured_stdout__")||"",o=e.globals.get("__captured_stderr__")||""}catch{}self.postMessage({type:"error",runId:_,targetId:r,message:a.message||String(a),traceback:String(a),stdout:i,stderr:o})}finally{self._currentRunId=null}}async function I(s){let{targetId:t,runId:r}=s;try{let _=(a,i,o)=>{self.postMessage({type:"patch",targetId:t,patch:a,buffers:i})};e.globals.set("__sendPatch__",_),e.globals.set("__panel_target_id__",t),await e.runPythonAsync(`
+`),self.postMessage({type:"status",msg:"Running code..."}),s.globals.set("__panel_user_code__",t),s.globals.set("__panel_target_id__",r),await s.runPythonAsync(h);let d="",p="";try{d=s.globals.get("__captured_stdout__")||"",p=s.globals.get("__captured_stderr__")||""}catch{}let v=s.globals.get("__ext_resources__"),x=JSON.parse(v||'{"js":[],"css":[]}');await s.runPythonAsync(b);let m=s.globals.get("__render_result__");if(m==="__NO_OUTPUT__")self.postMessage({type:"no-output",runId:_,targetId:r,stdout:d,stderr:p});else{let{docs_json:l,render_items:y,root_ids:u}=JSON.parse(m);self.postMessage({type:"render",runId:_,targetId:r,docs_json:l,render_items:y,root_ids:u,ext_resources:x,stdout:d,stderr:p})}self.postMessage({type:"done",runId:_})}catch(o){let i="",a="";try{i=s.globals.get("__captured_stdout__")||"",a=s.globals.get("__captured_stderr__")||""}catch{}self.postMessage({type:"error",runId:_,targetId:r,message:o.message||String(o),traceback:String(o),stdout:i,stderr:a})}finally{self._currentRunId=null}}async function R(e){let{targetId:t,runId:r}=e;try{let _=(o,i,a)=>{self.postMessage({type:"patch",targetId:t,patch:o,buffers:i})};s.globals.set("__sendPatch__",_),s.globals.set("__panel_target_id__",t),await s.runPythonAsync(`
 from panel.io.pyodide import _link_docs_worker
 doc = __active_docs__.get(__panel_target_id__)
 if doc:
     _link_docs_worker(doc, __sendPatch__, setter='js')
-`)}catch(_){console.error("[panel-live-worker] Error in handleRendered:",_)}}async function j(s){let{targetId:t,patch:r}=s;try{e.globals.set("__patch__",r),e.globals.set("__panel_target_id__",t),await e.runPythonAsync(`
+`)}catch(_){console.error("[panel-live-worker] Error in handleRendered:",_)}}async function A(e){let{targetId:t,patch:r}=e;try{s.globals.set("__patch__",r),s.globals.set("__panel_target_id__",t),await s.runPythonAsync(`
 from panel.io.pyodide import _convert_json_patch
 doc = __active_docs__.get(__panel_target_id__)
 if doc:
     doc.apply_json_patch(_convert_json_patch(__patch__), setter='js')
-`)}catch(_){console.error("[panel-live-worker] Error applying patch:",_)}self.postMessage({type:"idle",targetId:t})}async function M(s){let{targetId:t}=s;try{e.globals.set("__panel_target_id__",t),await e.runPythonAsync(`
+`)}catch(_){console.error("[panel-live-worker] Error applying patch:",_)}self.postMessage({type:"idle",targetId:t})}async function q(e){let{targetId:t}=e;try{s.globals.set("__panel_target_id__",t),await s.runPythonAsync(`
 doc = __active_docs__.get(__panel_target_id__)
 if doc:
     # Remove all callbacks to prevent stale refs
     doc.callbacks._change_callbacks.clear()
     doc.callbacks._event_callbacks.clear()
     del __active_docs__[__panel_target_id__]
-`)}catch(r){console.error("[panel-live-worker] Error in reset:",r)}}async function R(s){if(!s||s.length===0)return;self.postMessage({type:"status",msg:"Installing: "+s.join(", ")+"..."}),await e.pyimport("micropip").install(s),s.forEach(r=>{let _=r.split(/[=<>!~\[@ ]/)[0].trim().toLowerCase();_&&f.add(_)})}async function q(s,t){e.globals.set("__file_name__",s),e.globals.set("__file_content__",t),await e.runPythonAsync(`
+`)}catch(r){console.error("[panel-live-worker] Error in reset:",r)}}async function F(e){if(!e||e.length===0)return;let t=k(e);self.postMessage({type:"status",msg:"Installing: "+e.join(", ")+"..."}),await s.pyimport("micropip").install(t),e.forEach(_=>{let o=_.split(/[=<>!~\[@ ]/)[0].trim().toLowerCase();o&&g.add(o)})}async function N(e,t){s.globals.set("__file_name__",e),s.globals.set("__file_content__",t),await s.runPythonAsync(`
 import pathlib
 pathlib.Path(__file_name__).write_text(__file_content__)
 `)}})();
