@@ -174,14 +174,17 @@ jobs:
         run: pixi --version
 
       - name: Configure Coverage
+        shell: bash
         run: |
           echo "[run]" > .uicoveragerc
           echo "concurrency = greenlet" >> .uicoveragerc
 
       - name: Test UI
+        shell: bash
         run: |
-          FAIL="--screenshot only-on-failure --full-page-screenshot --output ui_screenshots --tracing retain-on-failure"
-          pixi run -e ${{ matrix.environment }} test-ui --cov-config=.uicoveragerc $FAIL
+          pixi run -e ${{ matrix.environment }} test-ui --cov-config=.uicoveragerc \
+            --screenshot only-on-failure --full-page-screenshot \
+            --output ui_screenshots --tracing retain-on-failure
 
       - name: Upload UI Screenshots
         uses: actions/upload-artifact@v4
