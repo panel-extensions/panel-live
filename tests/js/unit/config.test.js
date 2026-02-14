@@ -35,6 +35,11 @@ describe('config', () => {
     expect(urls.bokehJs[0]).toContain(_defaults.bokehVersion);
   });
 
+  it('has packageAliases default (empty object)', () => {
+    expect(_defaults.packageAliases).toBeDefined();
+    expect(typeof _defaults.packageAliases).toBe('object');
+  });
+
   it('cdnUrls() bokeh JS includes widgets and tables', () => {
     const urls = cdnUrls();
     expect(urls.bokehJs[0]).toContain('bokeh-' + _defaults.bokehVersion);

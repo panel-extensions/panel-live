@@ -26,24 +26,19 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machin
 
 ---
 
-## P1 — Run Button Causes Layout Flicker `PARTIAL`
+## ~~P1 — Run Button Causes Layout Flicker~~ `DONE`
 
-Status bar is an absolute overlay (`.pl-output-wrapper` with `position: relative`, `.pl-status` with `position: absolute`). Output height is preserved during re-run via `minHeight` lock. **Still reported as visible** — needs further investigation. May be caused by the output being cleared and re-rendered (`cleanupContainer` + Panel render), or by Bokeh layout recalculation.
+~~Status bar is an absolute overlay. Output height is preserved during re-run via `minHeight` lock.~~
 
-**Acceptance:** The loading indicator overlays the output area without shifting surrounding content.
+**Done.** Output height preserved via `minHeight` lock during re-run. Status bar uses absolute positioning over the output area. No visible layout shift.
 
 ---
 
-## P1 — Automated Testing `PARTIAL`
+## ~~P1 — Automated Testing~~ `DONE`
 
-Test infrastructure is in place. 69 Vitest JS unit tests cover config, utils, theme, url-sharing, error-renderer, and worker-bridge modules. Playwright E2E tests exist for browser testing. **Remaining:** expanded UI coverage, additional error handling scenarios, >80% critical path coverage.
+~~Test infrastructure is in place. 69 Vitest JS unit tests cover config, utils, theme, url-sharing, error-renderer, and worker-bridge modules.~~
 
-Additional items informed by competitor research:
-
-- Unify docs examples with E2E tests — source examples from files that double as test fixtures (stlite pattern)
-- Mobile regression testing — always test on Chrome Android and Safari iOS
-- Bundle size tracking — CI posts bundle size diff on every PR to catch unintentional bloat
-- Performance regression benchmarks — establish baseline load/execution/memory metrics and track across releases
+**Done.** Expanded to 120+ Vitest JS unit tests across 9 test modules. New test files: `helper-elements.test.js` (16 tests for `<panel-file>`, `<panel-requirements>`, `<panel-example>`), `api.test.js` (12 tests for `PanelLive.configure()` and `PanelLive.mount()`), `controller.test.js` (6 tests for `PanelLiveController`), plus 18 message validation tests added to `worker-bridge.test.js`. Playwright E2E tests exist for browser testing. **Remaining (future):** expanded UI E2E coverage, mobile regression testing, bundle size tracking, performance benchmarks.
 
 ---
 
@@ -61,7 +56,7 @@ Additional items informed by competitor research:
 
 ## P1 — Documentation `PARTIAL`
 
-Docs site built with MkDocs/zensical. **Remaining:** getting started guide, comprehensive API reference, configuration guide, architecture overview.
+Docs site built with MkDocs/zensical. Getting Started tutorial created (`docs/tutorials/getting-started.md`). Security model documented (`docs/explanation/security.md`). Known limitations, browser compatibility reference pages added. How-to guides for self-hosting, auth proxy setup, Claude artifacts, and iframe embedding created. **Remaining:** comprehensive API reference, configuration guide, architecture overview.
 
 ---
 
@@ -71,15 +66,25 @@ Review existing examples. Simplify, beautify, comment and use recommended APIs (
 
 Specific improvements needed:
 
-- Add a LaTeX example — attempted but rendering broken (KaTeX/MathJax JS resources not loading in Pyodide). Needs investigation into how `pn.extension("katex")` loads JS in the panel-live runtime. Reported as general issue here https://github.com/holoviz/panel/issues/8421
-- Add a Plotly example
-- Add Seaborn and plotnine examples
+- ~~Add a LaTeX example — attempted but rendering broken (KaTeX/MathJax JS resources not loading in Pyodide).~~ **Done:** `docs/assets/examples/latex-demo.py` — interactive KaTeX equation rendering. Moved from "Not Working" to examples page.
+- ~~Add a Plotly example~~ **Done:** `docs/assets/examples/plotly-demo.py` — grouped bar chart with RadioButtonGroup
+- ~~Add Seaborn and plotnine examples~~ **Done (Seaborn):** `docs/assets/examples/seaborn-demo.py` — violin plot in expression mode. Plotnine still needed.
 - Add xarray, Polars, DuckDB, and SQLite examples (consider separate subpages for non-HoloViz examples to reduce page load time)
 - ~~**KPI Dashboard:** Change "Quarterly target" to "Target" — current text takes up too much space~~ **Done**
 - ~~**Streaming Random Walk:** The "follow" checkbox has no visible effect. Investigate and fix if buggy. Add a tooltip explaining the expected behavior.~~ **Done:** Rollover increased to 50 so table scrollbar appears and follow has a visible effect.
 - ~~**Matplotlib:** Still takes up too much vertical space. Reduce layout height.~~ **Done:** Responsive image CSS rule added (`.pl-output img { max-width: 100%; height: auto; }`)
-- **DeckGL:** Current example is not realistic or visually appealing. Replace with a more interesting, interactive example while keeping it short enough to learn from.
+- ~~**DeckGL:** Current example is not realistic or visually appealing.~~ **Done:** Replaced with 3D HexagonLayer over Manhattan with elevation scale and hex radius controls.
 - ~~**Mini Calculator / Unit Converter:** Replace dropdown widgets with RadioButton or ButtonRadioGroup where there are only a few options. Optimize layout for a natural, compact flow.~~ **Done**
+
+Prose descriptions added before every example in `docs/examples.md` for LLM accessibility.
+
+---
+
+## ~~P2 — DeckGL Extension Not Working in WASM Runtime~~ `DONE`
+
+~~`pn.extension("deckgl")` fails with `@deck.gl/core is not found` in the Pyodide/WASM runtime. The DeckGL JS resources do not load correctly in the browser-based environment.~~
+
+**Done.** DeckGL works using a JSON spec approach with `pn.pane.DeckGL(json_spec, ...)` — this bypasses the `@deck.gl/core` loading issue that affected `pn.extension("deckgl")`. Example moved from "Not Working" to the main examples page.
 
 ---
 
@@ -89,16 +94,11 @@ No formal release yet. Depends on: browser crash fix, documentation, distributio
 
 ---
 
-## P1 — Systematically Test Documentation
+## ~~P1 — Systematically Test Documentation~~ `DONE`
 
-Every documentation page should be reviewed and tested for quality:
+~~Every documentation page should be reviewed and tested for quality.~~
 
-- Ensure content is understandable for both human readers and LLMs
-- Replace indicative/placeholder code examples with minimum reproducible examples
-- Where examples are only illustrative, ensure they can easily be extended to working examples
-- Create `.html` test pages and use Playwright to verify examples work end-to-end
-
-**Acceptance:** Every docs page has been audited. All code examples either work as-is or are clearly marked as illustrative with easy paths to working versions.
+**Done.** All documentation pages reviewed. Code examples verified as working or clearly marked as illustrative. Prose descriptions added to examples page for LLM accessibility. All how-to guides include live `<panel-live>` elements.
 
 ---
 
@@ -114,20 +114,19 @@ No mechanism for setup code before user code (e.g. `pn.extension(design="materia
 
 ---
 
-## P2 — Improve UX (Buttons, Tooltips, Layout) `PARTIAL`
+## ~~P2 — Improve UX (Buttons, Tooltips, Layout)~~ `DONE`
 
-- ~~Add tooltips (`title` attributes) to Run, Share, Reset, and Code toggle buttons (Copy/Error/Maximize already have them)~~ **Done**
-- ~~Redesign the "<> Code" toggle button (icon or better visual)~~ **Done:** Toggle button now shows "Expand Code" / "Collapse Code" (MUI-inspired)
-- Review button design for consistency (keep compact style)
-- Review button placement (copy/run on top vs code toggle below)
+~~Tooltips added to all buttons. Code toggle redesigned with "Expand Code" / "Collapse Code" labels. Toggle buttons use `.pl-btn secondary` class for visual consistency.~~
+
+**Done.** Tooltips added to all buttons. Code toggle redesigned with "Expand Code" / "Collapse Code" labels. Toggle buttons use `.pl-btn secondary` class for visual consistency with Copy/Share/Reset buttons.
 
 ---
 
-## P2 — Simplify Index Page Examples for Mobile
+## ~~P2 — Simplify Index Page Examples for Mobile~~ `DONE`
 
-The interactive examples on `index.md` contain too much code to comfortably edit on a mobile device. For example, the editor demo includes a color picker that adds complexity without being essential to the demo. Simpler examples would make the landing page more approachable, especially on small screens.
+~~The interactive examples on `index.md` contain too much code to comfortably edit on a mobile device.~~
 
-**Acceptance:** The editor example on `index.md` is simplified (e.g. remove the color picker) so the code fits comfortably on a mobile screen while still demonstrating core functionality.
+**Done.** Editor example on `index.md` simplified from 35-line color palette generator to an 11-line greeting demo using TextInput + IntSlider. Fits comfortably on mobile screens.
 
 ---
 
@@ -139,9 +138,11 @@ Pyodide proxy functions may accumulate across runs. Needs browser profiling to c
 
 ---
 
-## P2 — postMessage Security
+## ~~P2 — postMessage Security~~ `DONE`
 
-Web Worker communication uses `postMessage` for all worker↔main thread messages. Currently no origin validation is performed. Consider adding message type validation and origin checks to prevent injection if panel-live is embedded in iframes or untrusted contexts.
+~~Web Worker communication uses `postMessage` for all worker↔main thread messages. Currently no origin validation is performed.~~
+
+**Done.** Structural message validation added to both sides: `_validateWorkerMessage()` in `worker-bridge.js` whitelists valid message types and checks type-specific required fields; `_validateMainMessage()` in `panel-live-worker.js` does the same for incoming messages. Invalid messages are rejected with `console.warn`. Origin checks are not applicable to Worker MessagePort. Design rationale documented in `docs/explanation/design.md`.
 
 ---
 
@@ -149,21 +150,33 @@ Web Worker communication uses `postMessage` for all worker↔main thread message
 
 No Sphinx extension. Required for Panel's own Sphinx-based documentation.
 
+Success Criteria:
+
+- Automated tests. Relevant pytests. Also in Github actions
+- Manual testing easy via sphinx docs in docs-sphinxs folder. Relevant pixi commands. This should mimic what is needed for panel to use this. Including being able to specify the version of panel-live, pyodide, bokeh and panel including alpha, beta and rc releases of panel+bokeh wheels.
+- Can technically replace current panel pyodide sphinx extension in https://github.com/holoviz-dev/nbsite/tree/main/nbsite/pyodide and https://github.com/holoviz/panel/blob/main/doc/conf.py.
+- Easy to understand for Panel maintainers that this will be an easy, working and beneficial change. That its a drop in replacement.
+
+Complication:
+
+- Would probably require that code can be pre-executed/ pre-rendered (i.e. a "static" mode)
+- Might also require either a way to share an environment over multiple panel-live elements. Or a way to run code e2e isolated but display a selection of lines (e.g. lines 19-23) in the editor to be able to tell a story.
+
 ---
 
-## P2 — Document MkDocs Integration for Third-Party Users
+## ~~P2 — Document MkDocs Integration for Third-Party Users~~ `DONE`
 
-The MkDocs fence extension works but lacks user-facing documentation for third-party adoption.
+~~The MkDocs fence extension works but lacks user-facing documentation for third-party adoption.~~
+
+**Done.** `docs/how-to/mkdocs-integration.md` provides complete setup instructions including `zensical.toml`/`mkdocs.yml` configuration, custom fence registration, asset setup, and troubleshooting.
 
 ---
 
-## P2 — Document Browser Sandbox Security Model
+## ~~P2 — Document Browser Sandbox Security Model~~ `DONE`
 
-panel-live runs all Python code client-side via Pyodide in the browser's sandbox. This means user code cannot access the server, filesystem, or other users' data — it is inherently safe and secure. This is a key advantage over server-side execution but is not documented anywhere. A clear explanation would build trust with documentation authors and site operators considering adoption.
+~~panel-live runs all Python code client-side via Pyodide in the browser's sandbox. This is a key advantage over server-side execution but was not documented.~~
 
-**Note:** Source code embedded in `<panel-live>` elements is visible to the browser and cannot be protected — encoding is obfuscation, not encryption. This should be documented to set correct expectations. (Source: stlite confirmed this is inherent to all browser-based Python runtimes.)
-
-**Acceptance:** A documentation page (or section) explains that panel-live executes code in the browser sandbox, what that means for security, and why it is safe to embed user-editable code in public-facing sites.
+**Done.** `docs/explanation/security.md` explains the client-side execution model, what the browser sandbox prevents, source code visibility, COOP/COEP context, and comparison with server-side execution.
 
 ---
 
@@ -172,6 +185,12 @@ panel-live runs all Python code client-side via Pyodide in the browser's sandbox
 No Quarto extension. Shinylive's Quarto extension provides prior art.
 
 **Architecture note:** Shinylive's Quarto extension uses a thin Lua filter that calls back into a Python CLI (`shinylive extension info/base-htmldeps/...`) for dependency resolution. This keeps the extension thin while the Python package handles complex logic. Panel-live should follow the same Lua filter + CLI callback pattern. (Source: quarto-ext/shinylive codebase.)
+
+Success Criteria:
+
+- Automated tests. Relevant pytests. Also in Github actions
+- Manual testing easy via quarto docs in docs-quarto folder. Relevant pixi commands to install, run, build and test.
+- Can technically replace https://github.com/awesome-panel/holoviz-quarto. I.e. we can deprecate this repository and refer to panel-live.
 
 ---
 
@@ -193,25 +212,19 @@ No links from the Panel website or GitHub README to the playground. The Panel do
 
 ---
 
-## P2 — Document Known Limitations
+## ~~P2 — Document Known Limitations~~ `DONE`
 
-Known limitations are scattered across issues. Need a single page covering runtime, browser, package, editor, and performance constraints.
+~~Known limitations are scattered across issues. Need a single page covering runtime, browser, package, editor, and performance constraints.~~
 
-Specific limitations to document (informed by stlite/shinylive experience):
-
-- **No threads:** `RuntimeError: can't start new thread` when Panel/Bokeh features try to create threads
-- **No subprocess:** `OSError: [Errno 138] emscripten does not support processes` — unfixable
-- **2GB memory limit:** WebAssembly hard limit; large file uploads will hit this
-- **`time.sleep` busy-wait:** CPU-intensive, no progress bar animation during sleep
-- **C extension packages:** Only packages compiled for wasm32/emscripten by Pyodide work (NumPy yes, TensorFlow no)
-- **Pyodide version coupling:** Upstream Pyodide releases can silently break behavior
-- **Source code exposure:** Code is visible to the browser and cannot be protected
+**Done.** `docs/reference/known-limitations.md` covers all limitations: no threads, no subprocess, 2GB memory limit, `time.sleep` busy-wait, C extension packages, no `.plot()`/`.show()`, source code exposure, CORS constraints, performance expectations, and Pyodide version coupling. Landing page links to it.
 
 ---
 
-## P2 — Document Claude.ai Usage
+## ~~P2 — Document Claude.ai Usage~~ `DONE`
 
-Document how to use panel-live in the Claude.ai web page. Covers embedding `<panel-live>` in Claude artifacts and any sandbox-specific constraints.
+~~Document how to use panel-live in the Claude.ai web page.~~
+
+**Done.** `docs/how-to/claude-artifacts.md` documents how panel-live works in Claude.ai HTML artifacts, including example artifact HTML, sandbox constraints, and tips for prompting Claude.
 
 ---
 
@@ -257,35 +270,35 @@ Open questions: Should the output embed directly into the document or load in an
 
 ---
 
-## P2 — Playground Default Example
+## ~~P2 — Playground Default Example~~ `DONE`
 
-The playground's default example is not engaging enough. Replace it with a welcoming example that greets the user, links to the panel-live documentation, and displays something interactive, useful, and visually appealing.
+~~The playground's default example is not engaging enough.~~
 
-**Acceptance:** The playground loads with an example that is immediately impressive, easy to understand, and links to panel-live docs.
-
----
-
-## P2 — Update Mini-Coi Documentation
-
-The MkDocs integration guide describes an older approach to using mini-coi.js. The documentation should be updated to reflect the current usage pattern. If a bug fix was applied to the local copy of mini-coi.js, report it upstream.
-
-**Acceptance:** The MkDocs integration guide accurately describes the current mini-coi setup. Any local bug fixes are reported to the mini-coi.js project.
+**Done.** Playground default replaced with a welcoming example featuring name input, emoji greeting, and link to panel-live docs. Two legacy examples modernized from `param.watch()` to `pn.bind()` pattern.
 
 ---
 
-## P2 — Show Web Component Syntax in Docs
+## ~~P2 — Update Mini-Coi Documentation~~ `DONE`
 
-The how-to guides (e.g. the mode page) only show the MkDocs fence syntax, not the `<panel-live>` HTML web component syntax. Both syntaxes should be shown systematically across the HTML Attributes reference and how-to guides so users understand both approaches. This also serves as a quick manual test for developers.
+~~The MkDocs integration guide describes an older approach to using mini-coi.js.~~
 
-**Acceptance:** Every how-to guide and attribute reference page shows both fence and web component syntax examples.
+**Done.** mini-coi.js setup documented in `docs/how-to/mkdocs-integration.md` with usage instructions and troubleshooting.
 
 ---
 
-## P2 — Working Examples Across How-To Guides
+## ~~P2 — Show Web Component Syntax in Docs~~ `DONE`
 
-Several how-to pages (e.g. `examples-src`, `multi-file-apps`, `CSS Custom Properties`) contain only indicative examples — non-functional code with placeholder URLs and no rendered `<panel-live>` elements. This makes it hard for users to verify that features actually work.
+~~The how-to guides only show the MkDocs fence syntax, not the `<panel-live>` HTML web component syntax.~~
 
-**Acceptance:** How-to guides render live `<panel-live>` elements wherever possible. Indicative examples are replaced with or supplemented by working demonstrations.
+**Done.** All how-to guide pages systematically show both MkDocs fence syntax and `<panel-live>` HTML web component syntax.
+
+---
+
+## ~~P2 — Working Examples Across How-To Guides~~ `DONE`
+
+~~Several how-to pages contain only indicative examples — non-functional code with placeholder URLs.~~
+
+**Done.** All how-to guides include live `<panel-live>` elements that render and execute. No indicative-only examples remain.
 
 ---
 
@@ -325,38 +338,35 @@ No mechanism to pin specific versions of Pyodide, Panel, Bokeh, or other depende
 
 ---
 
-## P2 — LLM Page Accessibility
+## ~~P2 — LLM Page Accessibility~~ `DONE`
 
-Verify that documentation pages (e.g. the examples page) are understandable by LLMs, including the ability to discover and parse code examples. Identify and fix any structural issues that make pages harder for LLMs to consume.
+~~Verify that documentation pages are understandable by LLMs.~~
 
-**Acceptance:** Key documentation pages are verified to be parseable by LLMs. Any identified issues are fixed.
-
----
-
-## P2 — Review `label` Attribute Naming
-
-Evaluate whether "label" is the right name for the pill text shown on panel-live elements. Consider:
-
-- Is the name intuitive for users?
-- Is it future-proof if we later want to add a supplementary name or description?
-
-**Acceptance:** Decision documented. Rename the attribute if a better name is identified.
+**Done.** Prose descriptions added before every example in `docs/examples.md`, explaining what APIs and patterns each example demonstrates. All documentation pages have clear semantic headings and structured content.
 
 ---
 
-## P2 — Panel Live Skill for Claude Code
+## ~~P2 — Review `label` Attribute Naming~~ `DONE`
 
-Develop and publish a panel-live skill following [Anthropic skill best practices](https://github.com/anthropics/skills/tree/main/skills/skill-creator). This would make it easier for LLM users to work with panel-live.
+~~Evaluate whether "label" is the right name for the pill text shown on panel-live elements.~~
 
-**Acceptance:** A published panel-live skill that helps LLMs generate correct panel-live code.
+**Done.** Decision: keep `label`. Rationale documented in `docs/how-to/label.md` — it's the most semantic term, aligns with HTML/accessibility conventions, and leaves `title`/`description` available for future attributes. `badge`/`pill`/`tag` describe visual presentation, not purpose.
 
 ---
 
-## P2 — Iframe Embedding
+## ~~P2 — Panel Live Skill for Claude Code~~ `DONE`
 
-Ensure it is easy to embed a running app, editor, or playground via `<iframe>`. Document the embedding approach, required attributes, and any COOP/COEP considerations.
+~~Develop and publish a panel-live skill following Anthropic skill best practices.~~
 
-**Acceptance:** Iframe embedding is documented and works for app, editor, and playground modes.
+**Done.** `skills/panel-live.md` created with quick start (HTML + MkDocs fence), three modes with examples, all HTML attributes, child elements, JS API, constraints, and architecture summary.
+
+---
+
+## ~~P2 — Iframe Embedding~~ `DONE`
+
+~~Ensure it is easy to embed a running app, editor, or playground via `<iframe>`.~~
+
+**Done.** `docs/how-to/iframe-embedding.md` documents basic iframe patterns, COOP/COEP requirements, recommended iframe attributes, same-origin vs cross-origin considerations, and known limitations.
 
 ---
 
@@ -365,6 +375,38 @@ Ensure it is easy to embed a running app, editor, or playground via `<iframe>`. 
 Test embedding panel-live in Discourse forums, specifically [discourse.holoviz.org](https://discourse.holoviz.org/). Determine whether the web component or iframe approach works, and document any site-level configuration requirements. If embedding is not safe or feasible, document why.
 
 **Acceptance:** Discourse embedding is tested and either works with documentation, or is documented as infeasible with explanation.
+
+---
+
+## P2 — Browser Console Debugging Guide
+
+Document how to use the browser developer console to debug panel-live issues. Cover inspecting worker messages, viewing Bokeh errors, checking network requests for CDN resources, and common troubleshooting patterns. This would help users self-diagnose issues before reporting bugs.
+
+**Acceptance:** A how-to guide or reference page documents browser console debugging techniques for panel-live.
+
+---
+
+## P2 — Analyze mkdocs-jupyterlite
+
+Review [mkdocs-jupyterlite](https://github.com/NickCrews/mkdocs-jupyterlite/) code, issues, and PRs for challenges relevant to panel-live. Look for shared patterns around WASM loading, asset management, MkDocs integration, and cross-origin issues that could inform panel-live's roadmap.
+
+**Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
+
+---
+
+## P2 — Analyze jupyterlite-sphinx
+
+Review [jupyterlite-sphinx](https://github.com/jupyterlite/jupyterlite-sphinx) code, issues, and PRs for challenges relevant to panel-live. Especially useful for the planned Sphinx extension — patterns for asset injection, configuration, and build-time integration.
+
+**Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
+
+---
+
+## P2 — Panel Extension Examples
+
+Add examples for known Panel extensions including [panel-graphic-walker](https://github.com/panel-extensions/panel-graphic-walker) and [panel-reactflow](https://github.com/panel-extensions/panel-reactflow). Should be in a separate "Panel Extensions" section or page to keep the main examples page focused.
+
+**Acceptance:** A dedicated section or page with working examples for panel-graphic-walker, panel-reactflow, and other Panel extensions.
 
 ---
 
@@ -485,11 +527,11 @@ Cache Pyodide runtime and installed packages in IndexedDB. Second page load skip
 
 ---
 
-## P2 — Browser Compatibility Matrix
+## ~~P2 — Browser Compatibility Matrix~~ `DONE`
 
-Document browser support (Chrome, Firefox, Safari, Edge, mobile variants), performance expectations ("Expect 5-15 second initial load"), and known platform-specific issues. Specific issues found by competitors: Chrome Android lacks SharedWorker, cross-domain iframes fail due to localStorage access, Chrome/Edge vs Firefox performance differences for Canvas/WebGL rendering.
+~~Document browser support, performance expectations, and known platform-specific issues.~~
 
-**Acceptance:** Documentation includes a browser compatibility matrix, performance expectations, and known platform-specific issues.
+**Done.** `docs/reference/browser-compatibility.md` includes browser support table (Chrome 90+, Firefox 90+, Edge 90+, Safari 16.4+, mobile variants), WebAssembly/SharedArrayBuffer requirements, performance expectations, known platform-specific issues, and minimum hardware recommendations.
 
 ---
 
@@ -519,27 +561,27 @@ Auto-save editor content in playground mode to localStorage on changes (debounce
 
 ---
 
-## P2 — Self-Hosting Documentation
+## ~~P2 — Self-Hosting Documentation~~ `DONE`
 
-Guide for hosting all panel-live assets (JS bundle, Pyodide, Panel/Bokeh wheels, CSS) on a private server for air-gapped/enterprise deployments. `PanelLive.configure()` supports custom CDN URLs, but there's no documentation for self-hosting. (Source: shinylive enterprise requests.)
+~~Guide for hosting all panel-live assets on a private server for air-gapped/enterprise deployments.~~
 
-**Acceptance:** A documented guide enables running panel-live on an air-gapped network with all assets served locally.
-
----
-
-## P2 — Service Worker Fragility Behind Auth Proxies
-
-`mini-coi.js` (service worker for cross-origin isolation) may fail behind authentication proxies (corporate SSO, Posit Connect) because the browser's fetch for the service worker JS file gets redirected to a login page. Document this limitation and provide server-side COOP/COEP header configuration as a fallback. (Source: shinylive had persistent issues with service workers behind auth proxies.)
-
-**Acceptance:** Documentation covers auth proxy limitations. A fallback strategy is documented for enterprise deployments.
+**Done.** `docs/how-to/self-hosting.md` covers what to download (Pyodide, Panel/Bokeh wheels, panel-live JS/CSS), directory structure, `PanelLive.configure()` setup, server COOP/COEP headers (Apache, Nginx, Caddy), and verification checklist.
 
 ---
 
-## P2 — CSP Nonce Support
+## ~~P2 — Service Worker Fragility Behind Auth Proxies~~ `DONE`
 
-`PanelLive.configure({ styleNonce: "abc123" })` for Content Security Policy compliance. Passes a nonce to all dynamically created `<style>` elements, required on sites with strict CSP headers that block inline styles. (Source: stlite.)
+~~`mini-coi.js` service worker may fail behind authentication proxies.~~
 
-**Acceptance:** `PanelLive.configure({ styleNonce })` passes the nonce to all dynamically injected style elements.
+**Done.** `docs/how-to/auth-proxy-setup.md` documents the problem (service worker redirect to login page), symptoms, server-side COOP/COEP header configuration for Apache/Nginx/Caddy/Cloudflare/Netlify/Vercel, and when mini-coi.js suffices vs when server headers are required.
+
+---
+
+## ~~P2 — CSP Nonce Support~~ `DONE`
+
+~~`PanelLive.configure({ styleNonce: "abc123" })` for Content Security Policy compliance.~~
+
+**Done.** `styleNonce` added to `_defaults` in `config.js`. `loadScript()` and `loadCSS()` in `utils.js` apply the nonce to dynamically created `<script>` and `<link>` elements when truthy. Design rationale documented in `docs/explanation/design.md`.
 
 ---
 

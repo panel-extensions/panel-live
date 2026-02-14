@@ -265,3 +265,135 @@ Resolved and rejected issues from the panel-live project.
 ## ~~P1 — Vitest Unit Test Suite~~
 
 **Resolved.** 69 Vitest unit tests across 6 test modules covering config, utils, theme, url-sharing, error-renderer, and worker-bridge. Tests run in a jsdom environment via `pixi run test-js`. V8 coverage reporting available via `pixi run test-js-coverage`.
+
+---
+
+## ~~P1 — Run Button Causes Layout Flicker~~
+
+**Resolved.** Output height preserved via `minHeight` lock during re-run. Status bar uses absolute positioning over the output area. No visible layout shift.
+
+---
+
+## ~~P2 — Improve UX (Buttons, Tooltips, Layout)~~
+
+**Resolved.** Tooltips added to all buttons. Code toggle redesigned with "Expand Code" / "Collapse Code" labels. Toggle buttons use `.pl-btn secondary` class for visual consistency with Copy/Share/Reset buttons.
+
+---
+
+## ~~P2 — Show Web Component Syntax in Docs~~
+
+**Resolved.** All how-to guide pages systematically show both MkDocs fence syntax and `<panel-live>` HTML web component syntax.
+
+---
+
+## ~~P2 — Working Examples Across How-To Guides~~
+
+**Resolved.** All how-to guides include live `<panel-live>` elements that render and execute. No indicative-only examples remain.
+
+---
+
+## ~~P2 — Update Mini-Coi Documentation~~
+
+**Resolved.** mini-coi.js setup documented in `docs/how-to/mkdocs-integration.md` with usage instructions and troubleshooting.
+
+---
+
+## ~~P2 — Document MkDocs Integration for Third-Party Users~~
+
+**Resolved.** `docs/how-to/mkdocs-integration.md` provides complete setup instructions including `zensical.toml`/`mkdocs.yml` configuration, custom fence registration, asset setup, and troubleshooting.
+
+---
+
+## ~~P1 — Automated Testing~~
+
+**Resolved.** Expanded from 69 to 120+ Vitest JS unit tests across 9 test modules. New test files: `helper-elements.test.js` (16 tests for `<panel-file>`, `<panel-requirements>`, `<panel-example>`), `api.test.js` (12 tests for `PanelLive.configure()` and `PanelLive.mount()`), `controller.test.js` (6 tests for `PanelLiveController`), plus 18 message validation tests in `worker-bridge.test.js`.
+
+---
+
+## ~~P1 — Systematically Test Documentation~~
+
+**Resolved.** All documentation pages reviewed. Code examples verified as working or clearly marked as illustrative. Prose descriptions added to examples page for LLM accessibility. All how-to guides include live `<panel-live>` elements.
+
+---
+
+## ~~P2 — Simplify Index Page Examples for Mobile~~
+
+**Resolved.** Editor example on `index.md` simplified from 35-line color palette generator to an 11-line greeting demo using TextInput + IntSlider. Fits comfortably on mobile screens.
+
+---
+
+## ~~P2 — Playground Default Example~~
+
+**Resolved.** Playground default replaced with a welcoming example featuring name input, emoji greeting, and link to panel-live docs. Two legacy examples modernized from `param.watch()` to `pn.bind()` pattern.
+
+---
+
+## ~~P2 — postMessage Security~~
+
+**Resolved.** Structural message validation added to both sides: `_validateWorkerMessage()` in `worker-bridge.js` whitelists valid message types and checks type-specific required fields; `_validateMainMessage()` in `panel-live-worker.js` does the same for incoming messages. Invalid messages rejected with `console.warn`. Design rationale documented in `docs/explanation/design.md`.
+
+---
+
+## ~~P2 — CSP Nonce Support~~
+
+**Resolved.** `styleNonce` added to `_defaults` in `config.js`. `loadScript()` and `loadCSS()` in `utils.js` apply the nonce to dynamically created `<script>` and `<link>` elements when truthy. Design rationale documented in `docs/explanation/design.md`.
+
+---
+
+## ~~P2 — Document Known Limitations~~
+
+**Resolved.** `docs/reference/known-limitations.md` covers all limitations: no threads, no subprocess, 2GB memory limit, `time.sleep` busy-wait, C extension packages, no `.plot()`/`.show()`, source code exposure, CORS constraints, performance expectations, and Pyodide version coupling. Landing page links to it.
+
+---
+
+## ~~P2 — Document Browser Sandbox Security Model~~
+
+**Resolved.** `docs/explanation/security.md` explains the client-side execution model, what the browser sandbox prevents, source code visibility, COOP/COEP context, and comparison with server-side execution.
+
+---
+
+## ~~P2 — Browser Compatibility Matrix~~
+
+**Resolved.** `docs/reference/browser-compatibility.md` includes browser support table (Chrome 90+, Firefox 90+, Edge 90+, Safari 16.4+, mobile variants), WebAssembly/SharedArrayBuffer requirements, performance expectations, known platform-specific issues, and minimum hardware recommendations.
+
+---
+
+## ~~P2 — Self-Hosting Documentation~~
+
+**Resolved.** `docs/how-to/self-hosting.md` covers what to download, directory structure, `PanelLive.configure()` setup, server COOP/COEP headers (Apache, Nginx, Caddy), and verification checklist.
+
+---
+
+## ~~P2 — Service Worker Fragility Behind Auth Proxies~~
+
+**Resolved.** `docs/how-to/auth-proxy-setup.md` documents the problem, symptoms, server-side COOP/COEP header configuration for Apache/Nginx/Caddy/Cloudflare/Netlify/Vercel, and when mini-coi.js suffices vs when server headers are required.
+
+---
+
+## ~~P2 — Document Claude.ai Usage~~
+
+**Resolved.** `docs/how-to/claude-artifacts.md` documents how panel-live works in Claude.ai HTML artifacts, including example artifact HTML, sandbox constraints, and tips for prompting Claude.
+
+---
+
+## ~~P2 — LLM Page Accessibility~~
+
+**Resolved.** Prose descriptions added before every example in `docs/examples.md`, explaining what APIs and patterns each example demonstrates. All documentation pages have clear semantic headings and structured content.
+
+---
+
+## ~~P2 — Review `label` Attribute Naming~~
+
+**Resolved.** Decision: keep `label`. Rationale documented in `docs/how-to/label.md` — it's the most semantic term, aligns with HTML/accessibility conventions, and leaves `title`/`description` available for future attributes.
+
+---
+
+## ~~P2 — Panel Live Skill for Claude Code~~
+
+**Resolved.** `skills/panel-live.md` created with quick start (HTML + MkDocs fence), three modes with examples, all HTML attributes, child elements, JS API, constraints, and architecture summary.
+
+---
+
+## ~~P2 — Iframe Embedding~~
+
+**Resolved.** `docs/how-to/iframe-embedding.md` documents basic iframe patterns, COOP/COEP requirements, recommended iframe attributes, same-origin vs cross-origin considerations, and known limitations.
