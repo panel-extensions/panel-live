@@ -306,7 +306,7 @@ Resolved and rejected issues from the panel-live project.
 
 ## ~~P1 — Automated Testing~~
 
-**Resolved.** Expanded from 69 to 120+ Vitest JS unit tests across 9 test modules. New test files: `helper-elements.test.js` (16 tests for `<panel-file>`, `<panel-requirements>`, `<panel-example>`), `api.test.js` (12 tests for `PanelLive.configure()` and `PanelLive.mount()`), `controller.test.js` (6 tests for `PanelLiveController`), plus 18 message validation tests in `worker-bridge.test.js`.
+**Resolved.** Expanded from 69 to 123 Vitest JS unit tests across 9 test modules. New test files: `helper-elements.test.js` (16 tests for `<panel-file>`, `<panel-requirements>`, `<panel-example>`), `api.test.js` (12 tests for `PanelLive.configure()` and `PanelLive.mount()`), `controller.test.js` (6 tests for `PanelLiveController`), plus 18 message validation tests in `worker-bridge.test.js`.
 
 ---
 
@@ -397,3 +397,33 @@ Resolved and rejected issues from the panel-live project.
 ## ~~P2 — Iframe Embedding~~
 
 **Resolved.** `docs/how-to/iframe-embedding.md` documents basic iframe patterns, COOP/COEP requirements, recommended iframe attributes, same-origin vs cross-origin considerations, and known limitations.
+
+---
+
+## ~~P2 — DeckGL Extension Not Working in WASM Runtime~~
+
+**Resolved.** DeckGL works using a JSON spec approach with `pn.pane.DeckGL(json_spec, ...)` — this bypasses the `@deck.gl/core` loading issue that affected `pn.extension("deckgl")`. Example moved from "Not Working" to the main examples page.
+
+---
+
+## ~~P2 — Requirements Whitespace Splitting~~
+
+**Resolved.** `worker-bridge.js` `install()` now splits by any whitespace (not just newlines). Fixes `<panel-requirements>fastparquet requests</panel-requirements>` producing a single invalid package name.
+
+---
+
+## ~~P2 — Package Aliases (`packageAliases`)~~
+
+**Resolved.** `packageAliases` config maps package names to wheel URLs. Resolved in both `worker-bridge.js` (explicit install) and `panel-live-worker.js` (auto-detected requirements). Passed from main thread to worker during init. Empty defaults — infrastructure for future use (e.g. DuckDB once a compatible wheel exists).
+
+---
+
+## ~~P2 — Playground URL on Subpages~~
+
+**Resolved.** `_updatePlaygroundLink()` derives site root from `<script src="...panel-live.js">` tag. Previously resolved relative to current page, producing wrong URLs from subpages like `/examples/`.
+
+---
+
+## ~~P2 — CSS Button Height and Toggle Visibility~~
+
+**Resolved.** `.pl-btn` uses `display: inline-flex; align-items: center` instead of `line-height: 1`. Playground link stays visible when code is expanded (only Copy is hidden via `.copy-btn.pl-toggle-btn` selector).

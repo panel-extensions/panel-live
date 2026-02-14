@@ -129,6 +129,7 @@ PanelLive.configure({
   bokehVersion: '3.8.2',
   pyodideVersion: 'v0.28.2',
   styleNonce: 'abc123',  // CSP nonce for dynamic styles
+  packageAliases: { 'duckdb': 'https://example.com/duckdb.whl' },  // map package names to wheel URLs
 });
 ```
 

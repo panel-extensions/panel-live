@@ -82,7 +82,7 @@ Declares a Python source file within a multi-file `<panel-live>` app.
 
 ### `<panel-requirements>`
 
-Declares pip package requirements. One package per line, pip specifier format. Comments and blank lines are stripped.
+Declares pip package requirements. One package per line or space-separated. Pip specifier format. Comments (`#`) and blank lines are stripped.
 
 ```html
 <panel-requirements>

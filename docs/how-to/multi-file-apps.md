@@ -43,7 +43,7 @@ Use the `src` attribute to load file content from external URLs:
 
 ## Declaring requirements
 
-Use `<panel-requirements>` to declare pip packages. One package per line, pip specifier format. Comments and blank lines are stripped.
+Use `<panel-requirements>` to declare pip packages. One package per line or space-separated. Pip specifier format. Comments (`#`) and blank lines are stripped.
 
 ```html
 <panel-live mode="editor">

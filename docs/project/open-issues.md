@@ -6,14 +6,6 @@ Outstanding issues and planned improvements for panel-live.
 
 ---
 
-## ~~P0 — Web Worker Support~~ `DONE`
-
-~~Pyodide runs on the main thread, blocking the page during load (5-15 seconds) and execution. Every competitor uses web workers.~~
-
-**Done.** Pyodide now runs in a Dedicated Worker. See closed-issues.md for details.
-
----
-
 ## P0 — Browser Crash (STATUS_ACCESS_VIOLATION)
 
 The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machines. Firefox is more stable. `serve.py` adds COOP/COEP headers for SharedArrayBuffer, but crashes still occur.
@@ -23,22 +15,6 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machin
 **Likely causes:** Main thread memory pressure (~300-500MB), missing COOP/COEP headers behind proxies, version incompatibilities. Moving Pyodide to a Dedicated Worker (now done) isolates the ~300-500MB from the main thread, which may mitigate this.
 
 **Acceptance:** No crashes on 8GB RAM machines with up to 3 concurrent apps.
-
----
-
-## ~~P1 — Run Button Causes Layout Flicker~~ `DONE`
-
-~~Status bar is an absolute overlay. Output height is preserved during re-run via `minHeight` lock.~~
-
-**Done.** Output height preserved via `minHeight` lock during re-run. Status bar uses absolute positioning over the output area. No visible layout shift.
-
----
-
-## ~~P1 — Automated Testing~~ `DONE`
-
-~~Test infrastructure is in place. 69 Vitest JS unit tests cover config, utils, theme, url-sharing, error-renderer, and worker-bridge modules.~~
-
-**Done.** Expanded to 120+ Vitest JS unit tests across 9 test modules. New test files: `helper-elements.test.js` (16 tests for `<panel-file>`, `<panel-requirements>`, `<panel-example>`), `api.test.js` (12 tests for `PanelLive.configure()` and `PanelLive.mount()`), `controller.test.js` (6 tests for `PanelLiveController`), plus 18 message validation tests added to `worker-bridge.test.js`. Playwright E2E tests exist for browser testing. **Remaining (future):** expanded UI E2E coverage, mobile regression testing, bundle size tracking, performance benchmarks.
 
 ---
 
@@ -69,7 +45,7 @@ Specific improvements needed:
 - ~~Add a LaTeX example — attempted but rendering broken (KaTeX/MathJax JS resources not loading in Pyodide).~~ **Done:** `docs/assets/examples/latex-demo.py` — interactive KaTeX equation rendering. Moved from "Not Working" to examples page.
 - ~~Add a Plotly example~~ **Done:** `docs/assets/examples/plotly-demo.py` — grouped bar chart with RadioButtonGroup
 - ~~Add Seaborn and plotnine examples~~ **Done (Seaborn):** `docs/assets/examples/seaborn-demo.py` — violin plot in expression mode. Plotnine still needed.
-- Add xarray, Polars, DuckDB, and SQLite examples (consider separate subpages for non-HoloViz examples to reduce page load time)
+- ~~Add xarray, Polars, DuckDB, and SQLite examples (consider separate subpages for non-HoloViz examples to reduce page load time)~~ **Done (xarray, Polars):** examples added. **DuckDB:** blocked upstream — no compatible wheel for Pyodide v0.28+ (emscripten 4.x). `packageAliases` infrastructure ready for when a wheel is available. See `docs/project/not-working/duckdb.md`.
 - ~~**KPI Dashboard:** Change "Quarterly target" to "Target" — current text takes up too much space~~ **Done**
 - ~~**Streaming Random Walk:** The "follow" checkbox has no visible effect. Investigate and fix if buggy. Add a tooltip explaining the expected behavior.~~ **Done:** Rollover increased to 50 so table scrollbar appears and follow has a visible effect.
 - ~~**Matplotlib:** Still takes up too much vertical space. Reduce layout height.~~ **Done:** Responsive image CSS rule added (`.pl-output img { max-width: 100%; height: auto; }`)
@@ -80,25 +56,9 @@ Prose descriptions added before every example in `docs/examples.md` for LLM acce
 
 ---
 
-## ~~P2 — DeckGL Extension Not Working in WASM Runtime~~ `DONE`
-
-~~`pn.extension("deckgl")` fails with `@deck.gl/core is not found` in the Pyodide/WASM runtime. The DeckGL JS resources do not load correctly in the browser-based environment.~~
-
-**Done.** DeckGL works using a JSON spec approach with `pn.pane.DeckGL(json_spec, ...)` — this bypasses the `@deck.gl/core` loading issue that affected `pn.extension("deckgl")`. Example moved from "Not Working" to the main examples page.
-
----
-
 ## P1 — Release v0.1.0
 
 No formal release yet. Depends on: browser crash fix, documentation, distribution, testing, known limitations. (Sphinx extension is P2, not a blocker.)
-
----
-
-## ~~P1 — Systematically Test Documentation~~ `DONE`
-
-~~Every documentation page should be reviewed and tested for quality.~~
-
-**Done.** All documentation pages reviewed. Code examples verified as working or clearly marked as illustrative. Prose descriptions added to examples page for LLM accessibility. All how-to guides include live `<panel-live>` elements.
 
 ---
 
@@ -114,35 +74,11 @@ No mechanism for setup code before user code (e.g. `pn.extension(design="materia
 
 ---
 
-## ~~P2 — Improve UX (Buttons, Tooltips, Layout)~~ `DONE`
-
-~~Tooltips added to all buttons. Code toggle redesigned with "Expand Code" / "Collapse Code" labels. Toggle buttons use `.pl-btn secondary` class for visual consistency.~~
-
-**Done.** Tooltips added to all buttons. Code toggle redesigned with "Expand Code" / "Collapse Code" labels. Toggle buttons use `.pl-btn secondary` class for visual consistency with Copy/Share/Reset buttons.
-
----
-
-## ~~P2 — Simplify Index Page Examples for Mobile~~ `DONE`
-
-~~The interactive examples on `index.md` contain too much code to comfortably edit on a mobile device.~~
-
-**Done.** Editor example on `index.md` simplified from 35-line color palette generator to an 11-line greeting demo using TextInput + IntSlider. Fits comfortably on mobile screens.
-
----
-
 ## P2 — Memory Leak on Re-run (Hypothesis)
 
 Pyodide proxy functions may accumulate across runs. Needs browser profiling to confirm or close.
 
 **Update:** Worker ref counting (`registerElement()`/`cleanupElement()`) is now implemented — when all `<panel-live>` elements disconnect, the worker terminates after a 5s grace period, freeing ~300-500MB. Proxy function cleanup on re-run still needs profiling. (Source: gradio-lite confirmed sessions accumulate without explicit cleanup.)
-
----
-
-## ~~P2 — postMessage Security~~ `DONE`
-
-~~Web Worker communication uses `postMessage` for all worker↔main thread messages. Currently no origin validation is performed.~~
-
-**Done.** Structural message validation added to both sides: `_validateWorkerMessage()` in `worker-bridge.js` whitelists valid message types and checks type-specific required fields; `_validateMainMessage()` in `panel-live-worker.js` does the same for incoming messages. Invalid messages are rejected with `console.warn`. Origin checks are not applicable to Worker MessagePort. Design rationale documented in `docs/explanation/design.md`.
 
 ---
 
@@ -161,22 +97,6 @@ Complication:
 
 - Would probably require that code can be pre-executed/ pre-rendered (i.e. a "static" mode)
 - Might also require either a way to share an environment over multiple panel-live elements. Or a way to run code e2e isolated but display a selection of lines (e.g. lines 19-23) in the editor to be able to tell a story.
-
----
-
-## ~~P2 — Document MkDocs Integration for Third-Party Users~~ `DONE`
-
-~~The MkDocs fence extension works but lacks user-facing documentation for third-party adoption.~~
-
-**Done.** `docs/how-to/mkdocs-integration.md` provides complete setup instructions including `zensical.toml`/`mkdocs.yml` configuration, custom fence registration, asset setup, and troubleshooting.
-
----
-
-## ~~P2 — Document Browser Sandbox Security Model~~ `DONE`
-
-~~panel-live runs all Python code client-side via Pyodide in the browser's sandbox. This is a key advantage over server-side execution but was not documented.~~
-
-**Done.** `docs/explanation/security.md` explains the client-side execution model, what the browser sandbox prevents, source code visibility, COOP/COEP context, and comparison with server-side execution.
 
 ---
 
@@ -209,22 +129,6 @@ URL sharing via base64-encoded hash is working (playground mode). **Remaining:**
 ## P2 — Links from Panel Website and README
 
 No links from the Panel website or GitHub README to the playground. The Panel docs at `panel.holoviz.org/how_to/wasm/` should link to panel-live and recommend it as the easiest and most powerful option for running Panel in the browser.
-
----
-
-## ~~P2 — Document Known Limitations~~ `DONE`
-
-~~Known limitations are scattered across issues. Need a single page covering runtime, browser, package, editor, and performance constraints.~~
-
-**Done.** `docs/reference/known-limitations.md` covers all limitations: no threads, no subprocess, 2GB memory limit, `time.sleep` busy-wait, C extension packages, no `.plot()`/`.show()`, source code exposure, CORS constraints, performance expectations, and Pyodide version coupling. Landing page links to it.
-
----
-
-## ~~P2 — Document Claude.ai Usage~~ `DONE`
-
-~~Document how to use panel-live in the Claude.ai web page.~~
-
-**Done.** `docs/how-to/claude-artifacts.md` documents how panel-live works in Claude.ai HTML artifacts, including example artifact HTML, sandbox constraints, and tips for prompting Claude.
 
 ---
 
@@ -270,38 +174,6 @@ Open questions: Should the output embed directly into the document or load in an
 
 ---
 
-## ~~P2 — Playground Default Example~~ `DONE`
-
-~~The playground's default example is not engaging enough.~~
-
-**Done.** Playground default replaced with a welcoming example featuring name input, emoji greeting, and link to panel-live docs. Two legacy examples modernized from `param.watch()` to `pn.bind()` pattern.
-
----
-
-## ~~P2 — Update Mini-Coi Documentation~~ `DONE`
-
-~~The MkDocs integration guide describes an older approach to using mini-coi.js.~~
-
-**Done.** mini-coi.js setup documented in `docs/how-to/mkdocs-integration.md` with usage instructions and troubleshooting.
-
----
-
-## ~~P2 — Show Web Component Syntax in Docs~~ `DONE`
-
-~~The how-to guides only show the MkDocs fence syntax, not the `<panel-live>` HTML web component syntax.~~
-
-**Done.** All how-to guide pages systematically show both MkDocs fence syntax and `<panel-live>` HTML web component syntax.
-
----
-
-## ~~P2 — Working Examples Across How-To Guides~~ `DONE`
-
-~~Several how-to pages contain only indicative examples — non-functional code with placeholder URLs.~~
-
-**Done.** All how-to guides include live `<panel-live>` elements that render and execute. No indicative-only examples remain.
-
----
-
 ## P2 — Sharing Strategy
 
 No cohesive strategy for sharing panel-live apps. Need to address:
@@ -335,38 +207,6 @@ No mechanism to pin specific versions of Pyodide, Panel, Bokeh, or other depende
 `panel_live.fences` implies MkDocs/pymdownx.superfences specificity but doesn't generalize to Sphinx, Quarto, or other documentation systems. The module namespace should be planned to accommodate multiple documentation frameworks and updated accordingly.
 
 **Acceptance:** A namespace plan covering MkDocs, Sphinx, and Quarto extensions. Module renamed if necessary, with documentation updated.
-
----
-
-## ~~P2 — LLM Page Accessibility~~ `DONE`
-
-~~Verify that documentation pages are understandable by LLMs.~~
-
-**Done.** Prose descriptions added before every example in `docs/examples.md`, explaining what APIs and patterns each example demonstrates. All documentation pages have clear semantic headings and structured content.
-
----
-
-## ~~P2 — Review `label` Attribute Naming~~ `DONE`
-
-~~Evaluate whether "label" is the right name for the pill text shown on panel-live elements.~~
-
-**Done.** Decision: keep `label`. Rationale documented in `docs/how-to/label.md` — it's the most semantic term, aligns with HTML/accessibility conventions, and leaves `title`/`description` available for future attributes. `badge`/`pill`/`tag` describe visual presentation, not purpose.
-
----
-
-## ~~P2 — Panel Live Skill for Claude Code~~ `DONE`
-
-~~Develop and publish a panel-live skill following Anthropic skill best practices.~~
-
-**Done.** `skills/panel-live.md` created with quick start (HTML + MkDocs fence), three modes with examples, all HTML attributes, child elements, JS API, constraints, and architecture summary.
-
----
-
-## ~~P2 — Iframe Embedding~~ `DONE`
-
-~~Ensure it is easy to embed a running app, editor, or playground via `<iframe>`.~~
-
-**Done.** `docs/how-to/iframe-embedding.md` documents basic iframe patterns, COOP/COEP requirements, recommended iframe attributes, same-origin vs cross-origin considerations, and known limitations.
 
 ---
 
@@ -407,6 +247,61 @@ Review [jupyterlite-sphinx](https://github.com/jupyterlite/jupyterlite-sphinx) c
 Add examples for known Panel extensions including [panel-graphic-walker](https://github.com/panel-extensions/panel-graphic-walker) and [panel-reactflow](https://github.com/panel-extensions/panel-reactflow). Should be in a separate "Panel Extensions" section or page to keep the main examples page focused.
 
 **Acceptance:** A dedicated section or page with working examples for panel-graphic-walker, panel-reactflow, and other Panel extensions.
+
+---
+
+## P2 — SharedWorker Mode for Multi-Instance Pages
+
+Share a single Pyodide runtime across multiple `<panel-live>` elements on the same page via `<panel-live shared-worker>` or `PanelLive.configure({ sharedWorker: true })`. Reduces memory from ~300MB per instance to ~300MB total on documentation pages with many examples.
+
+**Key lessons from competitors:**
+- SharedWorker is **not available on Chrome Android** — automatic fallback to DedicatedWorker is required (stlite had a full mobile regression without this).
+- Playwright's WebKit does not support SharedWorker properly — real Safari testing via BrowserStack is needed.
+- DedicatedWorker must remain the default.
+
+**Acceptance:** SharedWorker mode shares a single Pyodide worker across all elements on the page. Automatic fallback on browsers without SharedWorker support.
+
+---
+
+## P2 — IndexedDB Caching for Pyodide and Packages
+
+Cache Pyodide runtime and installed packages in IndexedDB. Second page load skips network download. Package installation accounts for ~70% of boot-up time according to stlite user reports. Note: stlite found that the bottleneck is loading packages into memory, not network transfer — but caching still eliminates the download phase entirely.
+
+**Acceptance:** Pyodide runtime and installed packages are cached in IndexedDB. Cache is versioned and invalidated on version changes.
+
+---
+
+## P2 — Single HTML File Export
+
+"Export HTML" action in playground mode that downloads a self-contained `.html` file with the current code, requirements, and configuration embedded. The file loads panel-live from CDN — no hosting needed. (Source: stlite's sharing editor.)
+
+**Acceptance:** Playground mode has an "Export HTML" action that downloads a self-contained `.html` file. The file works when opened in any browser (with internet for CDN resources).
+
+**Relates to:** P2 Sharing Strategy
+
+---
+
+## P2 — AST-Based Import Detection
+
+Python utility using the `ast` module to analyze source files and extract import statements, mapping module names to package keys (handling mismatches like `cv2` -> `opencv-python`). Enables the export CLI and selective bundling. Uses Pyodide's `pyodide-lock.json` for resolving module names to package keys. (Source: shinylive's `_deps.py`.)
+
+**Acceptance:** A Python utility can analyze Panel code and produce a list of required packages with their Pyodide availability status.
+
+---
+
+## P2 — Editor State Persistence (localStorage)
+
+Auto-save editor content in playground mode to localStorage on changes (debounced). On playground load, offer to restore the last session if saved content exists and differs from the default. Prevents losing work when navigating away. (Source: shinylive feature request.)
+
+**Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session.
+
+---
+
+## P1 — Export CLI for Static Deployment
+
+`panel-live export myapp/ site/` CLI that bundles Panel code with panel-live assets into a deployable static directory. Uses AST-based import detection for selective package inclusion — only required `.whl` files are copied, not the full Pyodide distribution. Produces a fully self-contained directory deployable to any static host (GitHub Pages, Netlify, S3). (Source: shinylive's `shinylive export` is their most distinctive feature.)
+
+**Acceptance:** `panel-live export` produces a static directory that works when served by any HTTP server. Only required packages are included.
 
 ---
 
@@ -495,93 +390,6 @@ Add an AI chat interface to the editor or playground for LLM-assisted code editi
 The playground may eventually expand into a more fully featured editor environment (like Shinylive or CodeSandbox) with a JS console, Python terminal, multi-file support, and CSS/JS editing. For now, review the playground API, documentation, and implementation to ensure it can be extended in the future without breaking changes.
 
 **Acceptance:** API review completed and documented. No blocking architectural issues identified for future expansion.
-
----
-
-## P1 — Export CLI for Static Deployment
-
-`panel-live export myapp/ site/` CLI that bundles Panel code with panel-live assets into a deployable static directory. Uses AST-based import detection for selective package inclusion — only required `.whl` files are copied, not the full Pyodide distribution. Produces a fully self-contained directory deployable to any static host (GitHub Pages, Netlify, S3). (Source: shinylive's `shinylive export` is their most distinctive feature.)
-
-**Acceptance:** `panel-live export` produces a static directory that works when served by any HTTP server. Only required packages are included.
-
----
-
-## P2 — SharedWorker Mode for Multi-Instance Pages
-
-Share a single Pyodide runtime across multiple `<panel-live>` elements on the same page via `<panel-live shared-worker>` or `PanelLive.configure({ sharedWorker: true })`. Reduces memory from ~300MB per instance to ~300MB total on documentation pages with many examples.
-
-**Key lessons from competitors:**
-- SharedWorker is **not available on Chrome Android** — automatic fallback to DedicatedWorker is required (stlite had a full mobile regression without this).
-- Playwright's WebKit does not support SharedWorker properly — real Safari testing via BrowserStack is needed.
-- DedicatedWorker must remain the default.
-
-**Acceptance:** SharedWorker mode shares a single Pyodide worker across all elements on the page. Automatic fallback on browsers without SharedWorker support.
-
----
-
-## P2 — IndexedDB Caching for Pyodide and Packages
-
-Cache Pyodide runtime and installed packages in IndexedDB. Second page load skips network download. Package installation accounts for ~70% of boot-up time according to stlite user reports. Note: stlite found that the bottleneck is loading packages into memory, not network transfer — but caching still eliminates the download phase entirely.
-
-**Acceptance:** Pyodide runtime and installed packages are cached in IndexedDB. Cache is versioned and invalidated on version changes.
-
----
-
-## ~~P2 — Browser Compatibility Matrix~~ `DONE`
-
-~~Document browser support, performance expectations, and known platform-specific issues.~~
-
-**Done.** `docs/reference/browser-compatibility.md` includes browser support table (Chrome 90+, Firefox 90+, Edge 90+, Safari 16.4+, mobile variants), WebAssembly/SharedArrayBuffer requirements, performance expectations, known platform-specific issues, and minimum hardware recommendations.
-
----
-
-## P2 — Single HTML File Export
-
-"Export HTML" action in playground mode that downloads a self-contained `.html` file with the current code, requirements, and configuration embedded. The file loads panel-live from CDN — no hosting needed. (Source: stlite's sharing editor.)
-
-**Acceptance:** Playground mode has an "Export HTML" action that downloads a self-contained `.html` file. The file works when opened in any browser (with internet for CDN resources).
-
-**Relates to:** P2 Sharing Strategy
-
----
-
-## P2 — AST-Based Import Detection
-
-Python utility using the `ast` module to analyze source files and extract import statements, mapping module names to package keys (handling mismatches like `cv2` -> `opencv-python`). Enables the export CLI and selective bundling. Uses Pyodide's `pyodide-lock.json` for resolving module names to package keys. (Source: shinylive's `_deps.py`.)
-
-**Acceptance:** A Python utility can analyze Panel code and produce a list of required packages with their Pyodide availability status.
-
----
-
-## P2 — Editor State Persistence (localStorage)
-
-Auto-save editor content in playground mode to localStorage on changes (debounced). On playground load, offer to restore the last session if saved content exists and differs from the default. Prevents losing work when navigating away. (Source: shinylive feature request.)
-
-**Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session.
-
----
-
-## ~~P2 — Self-Hosting Documentation~~ `DONE`
-
-~~Guide for hosting all panel-live assets on a private server for air-gapped/enterprise deployments.~~
-
-**Done.** `docs/how-to/self-hosting.md` covers what to download (Pyodide, Panel/Bokeh wheels, panel-live JS/CSS), directory structure, `PanelLive.configure()` setup, server COOP/COEP headers (Apache, Nginx, Caddy), and verification checklist.
-
----
-
-## ~~P2 — Service Worker Fragility Behind Auth Proxies~~ `DONE`
-
-~~`mini-coi.js` service worker may fail behind authentication proxies.~~
-
-**Done.** `docs/how-to/auth-proxy-setup.md` documents the problem (service worker redirect to login page), symptoms, server-side COOP/COEP header configuration for Apache/Nginx/Caddy/Cloudflare/Netlify/Vercel, and when mini-coi.js suffices vs when server headers are required.
-
----
-
-## ~~P2 — CSP Nonce Support~~ `DONE`
-
-~~`PanelLive.configure({ styleNonce: "abc123" })` for Content Security Policy compliance.~~
-
-**Done.** `styleNonce` added to `_defaults` in `config.js`. `loadScript()` and `loadCSS()` in `utils.js` apply the nonce to dynamically created `<script>` and `<link>` elements when truthy. Design rationale documented in `docs/explanation/design.md`.
 
 ---
 
