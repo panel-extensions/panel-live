@@ -6,11 +6,11 @@ Outstanding issues and planned improvements for panel-live.
 
 ---
 
-## P0 — Web Worker Support
+## ~~P0 — Web Worker Support~~ `DONE`
 
-Pyodide runs on the main thread, blocking the page during load (5-15 seconds) and execution. Every competitor uses web workers. Panel already has a production-proven worker implementation (`pyodide_worker.js`) that can be adapted.
+~~Pyodide runs on the main thread, blocking the page during load (5-15 seconds) and execution. Every competitor uses web workers.~~
 
-**Acceptance:** Pyodide loads and runs in a web worker. Main thread stays responsive. Loading spinner animates smoothly.
+**Done.** Pyodide now runs in a Dedicated Worker. See closed-issues.md for details.
 
 ---
 
@@ -18,49 +18,44 @@ Pyodide runs on the main thread, blocking the page during load (5-15 seconds) an
 
 The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machines. Firefox is more stable. `serve.py` adds COOP/COEP headers for SharedArrayBuffer, but crashes still occur.
 
-**Update:** Testing on iOS tablet, iOS iPhone, and a second Windows laptop all work fine. The crash only reproduces on one specific Windows laptop in Edge/Chrome. The scope may be narrower than originally assumed. ~~Crash warnings in README.md and index.md should be softened to reflect that this affects some Edge/Chrome users, with Firefox as a known workaround.~~ **Done:** Banner in `docs/overrides/main.html` softened.
+**Update:** Scope appears narrow — only reproducible on one specific Windows laptop in Edge/Chrome. Testing on iOS tablet, iOS iPhone, and a second Windows laptop all work fine. ~~Crash warnings in README.md and index.md should be softened to reflect that this affects some Edge/Chrome users, with Firefox as a known workaround.~~ **Done:** Banner in `docs/overrides/main.html` softened, README.md updated.
 
-**Likely causes:** Main thread memory pressure (~300-500MB), missing COOP/COEP headers behind proxies, version incompatibilities.
+**Likely causes:** Main thread memory pressure (~300-500MB), missing COOP/COEP headers behind proxies, version incompatibilities. Moving Pyodide to a Dedicated Worker (now done) isolates the ~300-500MB from the main thread, which may mitigate this.
 
 **Acceptance:** No crashes on 8GB RAM machines with up to 3 concurrent apps.
 
 ---
 
-## P1 — Handle Python Errors Properly `PARTIAL`
+## P1 — Run Button Causes Layout Flicker `PARTIAL`
 
-Errors display inline with themed styling and a "Copy error" button. `sys.stderr` is captured. **Remaining:** structured traceback formatting with syntax highlighting, collapsible error panel, async/callback error capture.
+Status bar is an absolute overlay (`.pl-output-wrapper` with `position: relative`, `.pl-status` with `position: absolute`). Output height is preserved during re-run via `minHeight` lock. **Still reported as visible** — needs further investigation. May be caused by the output being cleared and re-rendered (`cleanupContainer` + Panel render), or by Bokeh layout recalculation.
 
-Tracebacks currently expose Pyodide and Panel internals (`_pyodide/_base.py`, `panel/io/mime_render.py`) instead of showing only the user's code. For example, a simple `raise Exception(...)` produces a traceback rooted in `eval_code_async` and `exec_with_return` — none of which is relevant to the user. The traceback should be filtered to show only frames from the user's code (e.g. `<exec>` or `<ast>`) with the actual exception message.
-
-**Acceptance:** All Python errors visible with file, line number, and error message. Tracebacks hide Pyodide/Panel internal frames and show only the user's code context.
-
----
-
-## P1 — Warn on Invalid Source URLs
-
-Fetching a missing `.py` file via `src` returns an HTML 404 page that Pyodide tries to parse as Python, producing a confusing `SyntaxError` on `<!doctype html>`. Need Content-Type validation or HTML detection in fetch calls.
-
-**Acceptance:** Fetching a non-Python response shows a clear error message in the output panel instead of a cryptic traceback.
-
----
-
-## P1 — Build System
-
-No build step. Raw JS served directly. Need minification, source maps, and dependency bundling.
-
-**Acceptance:** Build produces minified JS + CSS bundles with source maps, runs in CI.
+**Acceptance:** The loading indicator overlays the output area without shifting surrounding content.
 
 ---
 
 ## P1 — Automated Testing `PARTIAL`
 
-Test infrastructure is in place. **Remaining:** expanded UI coverage, JS unit tests, error handling scenarios, >80% critical path coverage.
+Test infrastructure is in place. 69 Vitest JS unit tests cover config, utils, theme, url-sharing, error-renderer, and worker-bridge modules. Playwright E2E tests exist for browser testing. **Remaining:** expanded UI coverage, additional error handling scenarios, >80% critical path coverage.
+
+Additional items informed by competitor research:
+
+- Unify docs examples with E2E tests — source examples from files that double as test fixtures (stlite pattern)
+- Mobile regression testing — always test on Chrome Android and Safari iOS
+- Bundle size tracking — CI posts bundle size diff on every PR to catch unintentional bloat
+- Performance regression benchmarks — establish baseline load/execution/memory metrics and track across releases
 
 ---
 
 ## P1 — Distribution `PARTIAL`
 
-CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. **Remaining:** CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag, npm package, minified builds, automated release workflow. Users should be able to load specific versioned assets (including `mini-coi.js` and other dependencies) instead of only `latest/`, to ensure reproducibility.
+esbuild bundling is done. CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. **Remaining:** CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag, npm package, minified builds, automated release workflow. Users should be able to load specific versioned assets (including `mini-coi.js` and other dependencies) instead of only `latest/`, to ensure reproducibility.
+
+Additional items informed by competitor research:
+
+- SRI hashes for CDN assets (Subresource Integrity) for security-conscious deployments
+- Bundle size tracking in CI with sticky PR comments showing size diffs
+- Changesets or equivalent for automated versioning and changelog generation
 
 ---
 
@@ -88,35 +83,9 @@ Specific improvements needed:
 
 ---
 
-## P1 — Python Code as String Concatenation
-
-All Python bootstrap code is built as concatenated strings in JavaScript. Fragile and error-prone.
-
-**Acceptance:** Python bootstrap code maintained in `.py` files, not JS strings.
-
----
-
 ## P1 — Release v0.1.0
 
 No formal release yet. Depends on: browser crash fix, documentation, distribution, testing, known limitations. (Sphinx extension is P2, not a blocker.)
-
----
-
-## P1 — Display Print Statements
-
-`print()` output is not displayed to the user. Users expect print output to be visible.
-
-**Acceptance:** `print()` statements produce visible output in the output panel.
-
----
-
-## P1 — Run Button Causes Layout Flicker `PARTIAL`
-
-Clicking the Run button causes the page to visibly flicker. A spinner and "running" message are inserted at the top of the output panel, pushing content down. When execution finishes, the message disappears and content jumps back up. This layout shift is jarring, especially on pages with multiple editors.
-
-**Update:** Status bar is now an absolute overlay (`.pl-output-wrapper` with `position: relative`, `.pl-status` with `position: absolute`). Output height is preserved during re-run via `minHeight` lock. **Remaining:** Verify fix across all modes and layouts.
-
-**Acceptance:** The loading indicator overlays the output area (e.g. as an overlay or inline replacement) without shifting surrounding content.
 
 ---
 
@@ -133,21 +102,9 @@ Every documentation page should be reviewed and tested for quality:
 
 ---
 
-## P2 — Tracking Prevention Blocks CDN Resources
-
-Browser tracking prevention blocks `cdnjs.cloudflare.com` (CodeMirror CSS). Upgrading to CodeMirror 6 or bundling would resolve this.
-
----
-
-## P2 — CodeMirror 5 is Legacy
-
-CodeMirror 5 is in maintenance mode. Upgrading to CM6 resolves tracking prevention and improves accessibility/mobile support.
-
----
-
 ## P2 — Choose and Configure Editor Theme `PARTIAL`
 
-Light/dark themes work. **Remaining:** additional built-in themes, high-contrast theme, configurable editor theme independent of UI theme.
+Light/dark switching works via CM6 Compartment with oneDark theme. **Remaining:** additional built-in themes, high-contrast theme, configurable editor theme independent of UI theme.
 
 ---
 
@@ -160,19 +117,9 @@ No mechanism for setup code before user code (e.g. `pn.extension(design="materia
 ## P2 — Improve UX (Buttons, Tooltips, Layout) `PARTIAL`
 
 - ~~Add tooltips (`title` attributes) to Run, Share, Reset, and Code toggle buttons (Copy/Error/Maximize already have them)~~ **Done**
-- Redesign the "<> Code" toggle button (icon or better visual)
+- ~~Redesign the "<> Code" toggle button (icon or better visual)~~ **Done:** Toggle button now shows "Expand Code" / "Collapse Code" (MUI-inspired)
 - Review button design for consistency (keep compact style)
 - Review button placement (copy/run on top vs code toggle below)
-
-**Inspiration from MUI docs editor:** MUI uses "Expand Code" / "Collapse Code" instead of "<> Code" — clearer for users. Their toggle button stays in place when clicked (ours shifts up/down). They also have a clean "Copy the source" tooltip, a "Reset demo" button, and a menu with "View source on GitHub" and copy-link actions. Analyze the MUI editor pattern and adopt the best ideas.
-
----
-
-## P2 — Auto Layout Based on Window Size
-
-The `layout` attribute supports `horizontal` and `vertical`, but there is no responsive `auto` option. The default should adapt based on window size — on mobile / narrow viewports the editor and playground should stack vertically, while on wider screens they sit side by side. Currently users on phones get a horizontal layout that is cramped and hard to use.
-
-**Acceptance:** A new `auto` layout option (ideally the default) switches between horizontal and vertical based on viewport width. Editor and playground modes are usable on mobile screens.
 
 ---
 
@@ -188,11 +135,13 @@ The interactive examples on `index.md` contain too much code to comfortably edit
 
 Pyodide proxy functions may accumulate across runs. Needs browser profiling to confirm or close.
 
+**Update:** Worker ref counting (`registerElement()`/`cleanupElement()`) is now implemented — when all `<panel-live>` elements disconnect, the worker terminates after a 5s grace period, freeing ~300-500MB. Proxy function cleanup on re-run still needs profiling. (Source: gradio-lite confirmed sessions accumulate without explicit cleanup.)
+
 ---
 
 ## P2 — postMessage Security
 
-No `postMessage` validation currently needed (no iframe/worker mode). Will become relevant when web worker support is added. **Blocked by:** P0 Web Worker Support.
+Web Worker communication uses `postMessage` for all worker↔main thread messages. Currently no origin validation is performed. Consider adding message type validation and origin checks to prevent injection if panel-live is embedded in iframes or untrusted contexts.
 
 ---
 
@@ -212,6 +161,8 @@ The MkDocs fence extension works but lacks user-facing documentation for third-p
 
 panel-live runs all Python code client-side via Pyodide in the browser's sandbox. This means user code cannot access the server, filesystem, or other users' data — it is inherently safe and secure. This is a key advantage over server-side execution but is not documented anywhere. A clear explanation would build trust with documentation authors and site operators considering adoption.
 
+**Note:** Source code embedded in `<panel-live>` elements is visible to the browser and cannot be protected — encoding is obfuscation, not encryption. This should be documented to set correct expectations. (Source: stlite confirmed this is inherent to all browser-based Python runtimes.)
+
 **Acceptance:** A documentation page (or section) explains that panel-live executes code in the browser sandbox, what that means for security, and why it is safe to embed user-editable code in public-facing sites.
 
 ---
@@ -219,6 +170,8 @@ panel-live runs all Python code client-side via Pyodide in the browser's sandbox
 ## P2 — Quarto Extension
 
 No Quarto extension. Shinylive's Quarto extension provides prior art.
+
+**Architecture note:** Shinylive's Quarto extension uses a thin Lua filter that calls back into a Python CLI (`shinylive extension info/base-htmldeps/...`) for dependency resolution. This keeps the extension thin while the Python package handles complex logic. Panel-live should follow the same Lua filter + CLI callback pattern. (Source: quarto-ext/shinylive codebase.)
 
 ---
 
@@ -244,11 +197,15 @@ No links from the Panel website or GitHub README to the playground. The Panel do
 
 Known limitations are scattered across issues. Need a single page covering runtime, browser, package, editor, and performance constraints.
 
----
+Specific limitations to document (informed by stlite/shinylive experience):
 
-## P2 — Error Boundaries Between Apps
-
-One crashing app may prevent subsequent apps from running on the same page.
+- **No threads:** `RuntimeError: can't start new thread` when Panel/Bokeh features try to create threads
+- **No subprocess:** `OSError: [Errno 138] emscripten does not support processes` — unfixable
+- **2GB memory limit:** WebAssembly hard limit; large file uploads will hit this
+- **`time.sleep` busy-wait:** CPU-intensive, no progress bar animation during sleep
+- **C extension packages:** Only packages compiled for wasm32/emscripten by Pyodide work (NumPy yes, TensorFlow no)
+- **Pyodide version coupling:** Upstream Pyodide releases can silently break behavior
+- **Source code exposure:** Code is visible to the browser and cannot be protected
 
 ---
 
@@ -262,7 +219,31 @@ Document how to use panel-live in the Claude.ai web page. Covers embedding `<pan
 
 Getting HoloViz ecosystem projects to adopt panel-live for their documentation could be transformative for Panel and the wider HoloViz ecosystem. Start with panel-reactflow as an experiment.
 
+**Update:** Hugging Face Spaces is another adoption vector. [gradio-lite is no longer maintained](https://discuss.huggingface.co/t/gradio-lite-mostly-dead-on-all-spaces/169640) — the repo is frozen with no updates. This creates a gap for browser-based Python WASM frameworks on HF Spaces that panel-live can fill. A panel-live HF Spaces template (see below) would make it trivial for HF users to adopt panel-live.
+
 **Acceptance:** At least one HoloViz project (e.g. panel-reactflow) uses panel-live in its documentation.
+
+---
+
+## P2 — Hugging Face Spaces Template
+
+Create a `panel-extensions/panel-live-template` Hugging Face Space with `sdk: static` that serves as a starter template for panel-live apps on HF Spaces. Model it on the existing [`gradio/gradio-lite-template`](https://huggingface.co/spaces/gradio/gradio-lite-template) pattern: a `README.md` with YAML frontmatter (`sdk: static`) and an `index.html` that loads panel-live from CDN.
+
+**Motivation:** [gradio-lite is no longer maintained](https://discuss.huggingface.co/t/gradio-lite-mostly-dead-on-all-spaces/169640) — the repo is frozen and no updates are being made. This leaves a gap in the HF Spaces ecosystem for browser-based Python WASM frameworks. Panel-live can fill this gap with a ready-to-use template.
+
+Include a sentiment analysis demo using [`transformers-js-py`](https://github.com/nicholasmckinney/transformers-js-py) to demonstrate in-browser ML inference — mirroring the gradio-lite template pattern. The goal is for panel-live to appear as a template option when users create new HF Spaces.
+
+**Acceptance:** A `panel-extensions/panel-live-template` HF Space exists with `sdk: static`, loads panel-live from CDN, includes a working interactive demo, and can be duplicated by HF users as a starting point.
+
+---
+
+## P2 — Contribute panel-live Example to transformers.js.py
+
+Submit a PR to [`whitphx/transformers.js.py`](https://github.com/whitphx/transformers.js.py) adding a panel-live HTML example to the Panel section of the README. The existing Panel section uses the `panel convert` workflow — add a panel-live `<panel-live>` web component example alongside it (not replacing the existing example).
+
+The example should show the HTML pattern: load panel-live JS/CSS from CDN, use a `<panel-live>` element with a `<panel-requirements>` child containing `transformers_js_py`, and include Panel code that runs a transformer pipeline. Link to a live HF Space demo once the panel-live HF Spaces template exists.
+
+**Acceptance:** A PR is submitted to `whitphx/transformers.js.py` adding a working panel-live HTML example to the Panel section of the README.
 
 ---
 
@@ -276,27 +257,11 @@ Open questions: Should the output embed directly into the document or load in an
 
 ---
 
-## P2 — VS Code Keyboard Shortcuts
-
-The editor and playground lack standard keyboard shortcuts. Adding VS Code-style keybindings (e.g. Ctrl+D for duplicate line, Ctrl+/ for toggle comment, Ctrl+Shift+K for delete line) would significantly improve the editing experience.
-
-**Acceptance:** Common VS Code keyboard shortcuts work in the CodeMirror editor.
-
----
-
 ## P2 — Playground Default Example
 
 The playground's default example is not engaging enough. Replace it with a welcoming example that greets the user, links to the panel-live documentation, and displays something interactive, useful, and visually appealing.
 
 **Acceptance:** The playground loads with an example that is immediately impressive, easy to understand, and links to panel-live docs.
-
----
-
-## P2 — Support GitHub URLs in `src` Attribute
-
-A GitHub blob URL like `https://github.com/panel-extensions/panel-live/blob/main/docs/assets/examples/bokeh-scatter.py` returns an HTML page, not raw Python. The `src` attribute should detect GitHub URLs and automatically convert them to the corresponding `raw.githubusercontent.com` URL.
-
-**Acceptance:** GitHub blob URLs in the `src` attribute resolve to raw file content and execute correctly.
 
 ---
 
@@ -328,10 +293,13 @@ Several how-to pages (e.g. `examples-src`, `multi-file-apps`, `CSS Custom Proper
 
 No cohesive strategy for sharing panel-live apps. Need to address:
 
-- **Share via Gist:** Enable sharing via a link to a GitHub Gist, similar to [Shinylive](https://shiny.posit.co/py/get-started/shinylive.html).
-- **Create / Export:** Enable users to create and export self-contained panel-live apps.
+- **Share via Gist:** Enable sharing via `?gist=GIST_ID` URL parameter that fetches gist content from the GitHub API (shinylive pattern).
+- **Create / Export:** Enable users to create and export self-contained panel-live apps, including single HTML file export (stlite pattern).
+- **Load from URL:** Support `#url=<raw-url>` in the hash to load code from an external URL, with optional `&req=package` for requirements (stlite pattern).
+- **Separate view/edit URLs:** Same hash works on both app-only view and full editor.
 - **Official URLs:** Decide where official app/editor/playground links should live (Panel website vs panel-live website).
 - **Durability:** Plan for keeping shared links working as Pyodide, Panel, and Bokeh versions change.
+- **LZString compression:** Better fit than gzip for URL-safe compression; available in both Python and JS (shinylive pattern).
 
 **Acceptance:** A documented sharing strategy covering gist sharing, export, official URLs, and long-term link stability.
 
@@ -402,7 +370,9 @@ Test embedding panel-live in Discourse forums, specifically [discourse.holoviz.o
 
 ## P3 — URL Sharing with Compression `PARTIAL`
 
-Basic URL sharing works (base64 encoding, no gzip yet). Share button exists in playground mode. **Remaining:** gzip compression, URL length preview, better compression for large snippets.
+Basic URL sharing works (base64 encoding, no gzip yet). Share button exists in playground mode. **Remaining:** compression, URL length preview, better compression for large snippets.
+
+**Note:** LZString may be a better fit than gzip for URL-safe compression — it's designed specifically for this purpose. Stlite found that for typical single-file code snippets, simple base64url encoding is competitive with compression. Gzip may only help for large multi-file apps. Consider Protobuf for structured sharing state (multi-file + requirements). (Sources: stlite, shinylive.)
 
 ---
 
@@ -421,6 +391,8 @@ No React/Vue/Svelte wrapper components.
 ## P3 — Desktop Version (Electron/Tauri)
 
 No documented approach for wrapping in Electron or Tauri.
+
+**Note:** Tauri is preferred over Electron since Pyodide only runs in the renderer process, making Electron's Node.js main process irrelevant. Tauri is lighter and also supports mobile apps. Consider a snapshot/dump pattern: pre-download all Pyodide resources and wheels at build time, bundle into the app for offline capability and faster startup. (Source: stlite.)
 
 ---
 
@@ -452,7 +424,9 @@ No support for installing packages from private feeds such as Azure Artifacts or
 
 ## P3 — Language Server Integration
 
-Adding language server support to the editor would enable tooltips, tab-completion, and inline error messages — a significant developer experience improvement. This is a complex feature that depends on the CodeMirror upgrade (P2).
+Adding language server support to the editor would enable tooltips, tab-completion, and inline error messages — a significant developer experience improvement. CodeMirror 6 is now in place (previously P2 blocker resolved).
+
+**Note:** Two viable approaches from competitors: (1) Jedi running in the Pyodide worker — lighter weight, completion requests bridged via postMessage from editor to worker (stlite pattern). (2) Pyright running in a separate Web Worker via Pyodide — full type checking and diagnostics, but heavier (shinylive pattern, with known LSP completion edge cases). Jedi is the simpler starting point.
 
 **Acceptance:** The editor provides basic autocomplete and inline error highlighting.
 
@@ -474,18 +448,145 @@ Add an AI chat interface to the editor or playground for LLM-assisted code editi
 
 ---
 
-## P3 — Link to panel-live Docs from Editor / Playground
-
-Add a help link in the editor and playground UI that points to the panel-live documentation site, making it easy for users to find reference material.
-
-**Acceptance:** A visible link or help button in editor/playground modes opens the panel-live docs.
-
----
-
 ## P3 — Review Playground API Extensibility
 
 The playground may eventually expand into a more fully featured editor environment (like Shinylive or CodeSandbox) with a JS console, Python terminal, multi-file support, and CSS/JS editing. For now, review the playground API, documentation, and implementation to ensure it can be extended in the future without breaking changes.
 
 **Acceptance:** API review completed and documented. No blocking architectural issues identified for future expansion.
+
+---
+
+## P1 — Export CLI for Static Deployment
+
+`panel-live export myapp/ site/` CLI that bundles Panel code with panel-live assets into a deployable static directory. Uses AST-based import detection for selective package inclusion — only required `.whl` files are copied, not the full Pyodide distribution. Produces a fully self-contained directory deployable to any static host (GitHub Pages, Netlify, S3). (Source: shinylive's `shinylive export` is their most distinctive feature.)
+
+**Acceptance:** `panel-live export` produces a static directory that works when served by any HTTP server. Only required packages are included.
+
+---
+
+## P2 — SharedWorker Mode for Multi-Instance Pages
+
+Share a single Pyodide runtime across multiple `<panel-live>` elements on the same page via `<panel-live shared-worker>` or `PanelLive.configure({ sharedWorker: true })`. Reduces memory from ~300MB per instance to ~300MB total on documentation pages with many examples.
+
+**Key lessons from competitors:**
+- SharedWorker is **not available on Chrome Android** — automatic fallback to DedicatedWorker is required (stlite had a full mobile regression without this).
+- Playwright's WebKit does not support SharedWorker properly — real Safari testing via BrowserStack is needed.
+- DedicatedWorker must remain the default.
+
+**Acceptance:** SharedWorker mode shares a single Pyodide worker across all elements on the page. Automatic fallback on browsers without SharedWorker support.
+
+---
+
+## P2 — IndexedDB Caching for Pyodide and Packages
+
+Cache Pyodide runtime and installed packages in IndexedDB. Second page load skips network download. Package installation accounts for ~70% of boot-up time according to stlite user reports. Note: stlite found that the bottleneck is loading packages into memory, not network transfer — but caching still eliminates the download phase entirely.
+
+**Acceptance:** Pyodide runtime and installed packages are cached in IndexedDB. Cache is versioned and invalidated on version changes.
+
+---
+
+## P2 — Browser Compatibility Matrix
+
+Document browser support (Chrome, Firefox, Safari, Edge, mobile variants), performance expectations ("Expect 5-15 second initial load"), and known platform-specific issues. Specific issues found by competitors: Chrome Android lacks SharedWorker, cross-domain iframes fail due to localStorage access, Chrome/Edge vs Firefox performance differences for Canvas/WebGL rendering.
+
+**Acceptance:** Documentation includes a browser compatibility matrix, performance expectations, and known platform-specific issues.
+
+---
+
+## P2 — Single HTML File Export
+
+"Export HTML" action in playground mode that downloads a self-contained `.html` file with the current code, requirements, and configuration embedded. The file loads panel-live from CDN — no hosting needed. (Source: stlite's sharing editor.)
+
+**Acceptance:** Playground mode has an "Export HTML" action that downloads a self-contained `.html` file. The file works when opened in any browser (with internet for CDN resources).
+
+**Relates to:** P2 Sharing Strategy
+
+---
+
+## P2 — AST-Based Import Detection
+
+Python utility using the `ast` module to analyze source files and extract import statements, mapping module names to package keys (handling mismatches like `cv2` -> `opencv-python`). Enables the export CLI and selective bundling. Uses Pyodide's `pyodide-lock.json` for resolving module names to package keys. (Source: shinylive's `_deps.py`.)
+
+**Acceptance:** A Python utility can analyze Panel code and produce a list of required packages with their Pyodide availability status.
+
+---
+
+## P2 — Editor State Persistence (localStorage)
+
+Auto-save editor content in playground mode to localStorage on changes (debounced). On playground load, offer to restore the last session if saved content exists and differs from the default. Prevents losing work when navigating away. (Source: shinylive feature request.)
+
+**Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session.
+
+---
+
+## P2 — Self-Hosting Documentation
+
+Guide for hosting all panel-live assets (JS bundle, Pyodide, Panel/Bokeh wheels, CSS) on a private server for air-gapped/enterprise deployments. `PanelLive.configure()` supports custom CDN URLs, but there's no documentation for self-hosting. (Source: shinylive enterprise requests.)
+
+**Acceptance:** A documented guide enables running panel-live on an air-gapped network with all assets served locally.
+
+---
+
+## P2 — Service Worker Fragility Behind Auth Proxies
+
+`mini-coi.js` (service worker for cross-origin isolation) may fail behind authentication proxies (corporate SSO, Posit Connect) because the browser's fetch for the service worker JS file gets redirected to a login page. Document this limitation and provide server-side COOP/COEP header configuration as a fallback. (Source: shinylive had persistent issues with service workers behind auth proxies.)
+
+**Acceptance:** Documentation covers auth proxy limitations. A fallback strategy is documented for enterprise deployments.
+
+---
+
+## P2 — CSP Nonce Support
+
+`PanelLive.configure({ styleNonce: "abc123" })` for Content Security Policy compliance. Passes a nonce to all dynamically created `<style>` elements, required on sites with strict CSP headers that block inline styles. (Source: stlite.)
+
+**Acceptance:** `PanelLive.configure({ styleNonce })` passes the nonce to all dynamically injected style elements.
+
+---
+
+## P3 — Lazy Initialization via IntersectionObserver
+
+Defer Pyodide initialization for off-screen `<panel-live>` elements using `IntersectionObserver`. Only initialize when the element scrolls into view. Would significantly improve page load for the examples gallery and documentation pages with many examples. (Source: gradio-lite selective rendering pattern.)
+
+**Acceptance:** Off-screen `<panel-live>` elements defer initialization until they become visible.
+
+---
+
+## P3 — Pre-Bundle Common HoloViz Packages
+
+Pre-bundle hvPlot, HoloViews, Param alongside Panel/Bokeh in the panel-live distribution to reduce runtime download times. Currently each package is fetched from PyPI via micropip at runtime. (Source: shinylive pre-bundles common packages in their distribution archive.)
+
+**Acceptance:** Common HoloViz packages load significantly faster due to pre-bundling, without unacceptable distribution size increase.
+
+---
+
+## P3 — Resizable Layout Panels
+
+Draggable dividers between code editor and output area. Users can resize panels by dragging the dividers in editor and playground modes. Support saving the user's preferred split ratio. (Source: shinylive's `ResizableGrid` component.)
+
+**Acceptance:** Users can drag to resize editor and output panels in editor and playground modes.
+
+---
+
+## P3 — Terminal / Console Panel
+
+Dedicated panel for stdout/stderr with proper formatting. Panel-live currently shows stdout/stderr inline. Even a read-only terminal panel would improve the debugging experience for longer-running apps. Could use xterm.js or a simpler approach. (Source: shinylive uses xterm.js.)
+
+**Acceptance:** Users can see formatted console output in a dedicated panel when running code.
+
+---
+
+## P3 — Expose URL Parameters to Running Apps
+
+Make query parameters accessible to running Panel code via a Python-side mechanism (e.g., writing URL parameters to a file in the virtual filesystem). Enables use cases like `?dataset=iris` to pre-configure which dataset an example loads. (Source: shinylive saves URL query parameters as a `.urlParams` file.)
+
+**Acceptance:** Panel apps running in panel-live can read URL query parameters passed to the host page.
+
+---
+
+## P3 — Auto-Run on Code Change (Debounced)
+
+Optional `auto-run="debounce"` attribute on `<panel-live>` that re-executes code after a configurable delay (e.g. 1 second) of no typing. Improves the interactive development experience in editor/playground modes. (Source: stlite's sharing editor auto-saves and re-runs on code changes.)
+
+**Acceptance:** `auto-run="debounce"` re-executes code after typing stops.
 
 ---

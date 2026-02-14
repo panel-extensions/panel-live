@@ -1,33 +1,28 @@
-/* ---- Base ---- */
 panel-live {
   display: block;
   font-family:
     system-ui,
     -apple-system,
     sans-serif;
-  font-size: 0; /* hide raw text nodes (code content) before render */
+  font-size: 0;
   overflow: hidden;
 }
 panel-live:not(:defined) {
   display: none;
 }
 panel-live > :not(.pl-container) {
-  display: none !important; /* hide stray DOM elements parsed from inline code */
+  display: none !important;
 }
 panel-live > .pl-container {
-  display: flex !important; /* restore — overrides the :not() rule above */
+  display: flex !important;
   flex-direction: column;
-  font-size: 1rem; /* restore normal sizing for rendered UI */
+  font-size: 1rem;
 }
-
-/* Hide source children — they're extracted by _extractCode(), not rendered directly */
 panel-file,
 panel-requirements,
 panel-example {
   display: none;
 }
-
-/* ---- Theme presets via data-resolved-theme ---- */
 panel-live[data-resolved-theme="light"] {
   --pl-border: #e0e0e0;
   --pl-radius: 6px;
@@ -76,16 +71,12 @@ panel-live[data-resolved-theme="dark"] {
   --pl-handle-bg: #44475a;
   --pl-handle-hover-bg: #3b82f6;
 }
-
-/* ---- Container ---- */
 .pl-container {
   border: 1px solid var(--pl-border, #e0e0e0);
   border-radius: var(--pl-radius, 6px);
   overflow: hidden;
   background: var(--pl-bg, #fff);
 }
-
-/* ---- Output wrapper (positions status overlay) ---- */
 .pl-output-wrapper {
   position: relative;
   flex: 1;
@@ -93,8 +84,6 @@ panel-live[data-resolved-theme="dark"] {
   display: flex;
   flex-direction: column;
 }
-
-/* ---- Status bar ---- */
 .pl-status {
   position: absolute;
   top: 0;
@@ -130,20 +119,31 @@ panel-live[data-resolved-theme="dark"] {
     transform: rotate(360deg);
   }
 }
-
-/* ---- Output area ---- */
 .pl-output {
   min-height: var(--pl-output-min-height, 100px);
   background: var(--pl-output-bg, #ffffff);
   padding: 0;
+  overflow: hidden;
 }
 .pl-output img {
   max-width: 100%;
   height: auto;
   display: block;
 }
-
-/* ---- Editor header ---- */
+.pl-stdout {
+  font-family: var(--pl-font-mono, "JetBrains Mono", "Fira Code", "Cascadia Code", monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 8px 12px;
+  margin: 0;
+  background: var(--pl-editor-bg, #fafafa);
+  color: var(--pl-editor-color, #1a1a2e);
+  border-bottom: 1px solid var(--pl-border, #e0e0e0);
+  max-height: 200px;
+  overflow-y: auto;
+}
 .pl-editor-header {
   display: flex;
   align-items: center;
@@ -170,8 +170,6 @@ panel-live[data-resolved-theme="dark"] {
   opacity: 0.5;
   font-size: 11px;
 }
-
-/* ---- Buttons ---- */
 .pl-btn {
   background: var(--pl-btn-bg, #a6e3a1);
   color: var(--pl-btn-color, #1e1e2e);
@@ -185,6 +183,13 @@ panel-live[data-resolved-theme="dark"] {
 .pl-btn:hover {
   filter: brightness(1.1);
 }
+.pl-help-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+}
 .pl-btn.secondary {
   background: transparent;
   color: var(--pl-header-color, #cdd6f4);
@@ -195,26 +200,15 @@ panel-live[data-resolved-theme="dark"] {
 .pl-btn.secondary:hover {
   opacity: 1;
 }
-
-/* ---- Editor textarea ---- */
 .pl-editor-area {
   width: 100%;
   min-height: 180px;
   max-height: 700px;
-  border: none;
-  resize: vertical;
-  font-family: var(--pl-font-mono, "JetBrains Mono", "Fira Code", "Cascadia Code", monospace);
-  font-size: var(--pl-editor-font-size, 14px);
-  line-height: var(--pl-editor-line-height, 1.6);
-  padding: 12px 16px;
-  tab-size: 4;
-  outline: none;
+  overflow: auto;
   box-sizing: border-box;
   background: var(--pl-editor-bg, #1e1e2e);
   color: var(--pl-editor-color, #cdd6f4);
 }
-
-/* ---- Playground layout ---- */
 .pl-playground {
   display: flex;
   flex: 1;
@@ -240,7 +234,7 @@ panel-live[data-resolved-theme="dark"] {
 }
 .pl-playground > .pl-preview-pane > .pl-output {
   flex: 1;
-  height: 0; /* explicit value so Bokeh's height:100% children resolve */
+  height: 0;
   overflow: auto;
 }
 .pl-playground.vertical > .pl-preview-pane {
@@ -253,20 +247,29 @@ panel-live[data-resolved-theme="dark"] {
   min-height: 300px;
   max-height: none;
 }
-/* Collapsed editor pane in horizontal split — shrink to toggle button width */
 .pl-playground > .pl-editor-pane.pl-pane-collapsed {
   flex: 0 0 auto;
 }
 .pl-playground > .pl-editor-pane.pl-pane-collapsed > .pl-code-section.pl-collapsed {
   display: none;
 }
-
-/* ---- Editor mode (stacked) ---- */
+@media (max-width: 768px) {
+  panel-live[data-layout="auto"] .pl-playground {
+    flex-direction: column;
+  }
+  panel-live[data-layout="auto"] .pl-playground > .pl-preview-pane {
+    border-left: none;
+    border-top: 1px solid var(--pl-border, #e0e0e0);
+  }
+  panel-live[data-layout="auto"] .pl-playground > .pl-drag-handle {
+    width: auto;
+    height: 6px;
+    cursor: row-resize;
+  }
+}
 .pl-editor-stacked .pl-output-wrapper {
   border-top: 1px solid var(--pl-border, #e0e0e0);
 }
-
-/* ---- Code visibility ---- */
 .pl-code-section {
   overflow: hidden;
 }
@@ -309,14 +312,9 @@ panel-live[data-resolved-theme="dark"] {
 .pl-code-toggle button:hover {
   filter: brightness(0.9);
 }
-
-/* ---- Fullscreen playground ---- */
 panel-live[fullscreen] {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 10000;
   margin: 0;
   border-radius: 0;
@@ -345,8 +343,6 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .pl-editor-area {
 panel-live[fullscreen] .pl-playground > .pl-preview-pane {
   overflow: auto;
 }
-
-/* ---- Vertical resize handle on playground container ---- */
 .pl-container.pl-resizable {
   resize: vertical;
   overflow: hidden;
@@ -355,16 +351,12 @@ panel-live[fullscreen] .pl-playground > .pl-preview-pane {
 panel-live[fullscreen] .pl-container.pl-resizable {
   resize: none;
 }
-
-/* ---- Maximize button ---- */
 .pl-btn.maximize-btn {
   font-size: 15px;
   line-height: 1;
   padding: 4px 8px;
 }
-
-/* ---- CodeMirror overrides ---- */
-.pl-container .CodeMirror {
+.pl-container .cm-editor {
   height: auto;
   min-height: 180px;
   max-height: 700px;
@@ -373,20 +365,17 @@ panel-live[fullscreen] .pl-container.pl-resizable {
   line-height: var(--pl-editor-line-height, 1.6);
   border: none;
 }
-.pl-playground > .pl-editor-pane .CodeMirror {
+.pl-container .cm-scroller {
+  overflow: auto;
+}
+.pl-playground > .pl-editor-pane .cm-editor {
   height: 100%;
   max-height: none;
   min-height: 300px;
 }
-panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
+panel-live[fullscreen] .pl-playground > .pl-editor-pane .cm-editor {
   min-height: 0;
 }
-/* Hide the raw textarea when CodeMirror is active */
-.pl-editor-area.pl-cm-active {
-  display: none;
-}
-
-/* ---- Examples dropdown ---- */
 .pl-examples-select {
   background: transparent;
   color: inherit;
@@ -406,11 +395,7 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
   color: #1a1a2e;
   background: #fff;
 }
-
-/* ---- Share button feedback ---- */
-.pl-btn.share-btn {
-  position: relative;
-}
+.pl-btn.share-btn,
 .pl-btn.copy-btn {
   position: relative;
 }
@@ -418,7 +403,7 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%);
   background: #333;
   color: #fff;
   padding: 4px 10px;
@@ -433,8 +418,6 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 .pl-toast.show {
   opacity: 1;
 }
-
-/* ---- Draggable split handle ---- */
 .pl-drag-handle {
   width: 6px;
   cursor: col-resize;
@@ -451,8 +434,6 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
   height: 6px;
   cursor: row-resize;
 }
-
-/* ---- code-position="last" — flip pane order via CSS order ---- */
 .pl-playground.code-last > .pl-preview-pane {
   order: 1;
   border-left: none;
@@ -474,8 +455,6 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 .pl-playground.vertical.code-last > .pl-editor-pane {
   border-top: none;
 }
-
-/* Editor stacked: code-position="last" */
 .pl-editor-stacked.code-last > .pl-output-wrapper {
   order: 1;
   border-bottom: 1px solid var(--pl-border, #e0e0e0);
@@ -486,20 +465,12 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 .pl-editor-stacked.code-last > .pl-editor-header {
   order: 3;
 }
-.pl-editor-stacked.code-last > .CodeMirror {
-  order: 4;
-}
 .pl-editor-stacked.code-last > .pl-code-section {
   order: 3;
 }
 .pl-editor-stacked.code-last > .pl-code-toggle {
   order: 5;
 }
-.pl-editor-stacked.code-last > textarea.pl-editor-area {
-  order: 4;
-}
-
-/* ---- Error panel ---- */
 .pl-error-panel {
   padding: 16px;
   border-radius: 4px;
@@ -513,14 +484,38 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
   font-family: var(--pl-font-mono, monospace);
   white-space: pre-wrap;
 }
-.pl-error-body {
+.pl-error-trace {
+  margin-top: 8px;
+  font-family: var(--pl-font-mono, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.pl-error-frame-loc {
+  opacity: 0.75;
+}
+.pl-error-frame-code {
+  display: block;
+  padding-left: 1em;
+}
+.pl-error-details {
   margin-top: 8px;
 }
-.pl-error-body pre {
+.pl-error-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.6;
+}
+.pl-error-details summary:hover {
+  opacity: 1;
+}
+.pl-error-full-trace {
   white-space: pre-wrap;
   margin: 8px 0 0;
-  font-size: 12px;
-  opacity: 0.85;
+  font-size: 11px;
+  opacity: 0.75;
+  max-height: 300px;
+  overflow-y: auto;
 }
 .pl-error-copy-btn {
   margin-top: 8px;
@@ -536,3 +531,4 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .CodeMirror {
 .pl-error-copy-btn:hover {
   opacity: 1;
 }
+/*# sourceMappingURL=panel-live.css.map */

@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "name": "panel-live",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:dev": "node build.mjs --dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "vitest": "^3.0.0",
+    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "@codemirror/state": "^6.4.0",
+    "@codemirror/view": "^6.34.0",
+    "@codemirror/lang-python": "^6.1.0",
+    "@codemirror/language": "^6.10.0",
+    "@codemirror/autocomplete": "^6.18.0",
+    "@codemirror/commands": "^6.7.0",
+    "@codemirror/search": "^6.5.0",
+    "@codemirror/theme-one-dark": "^6.1.0"
+  }
+}

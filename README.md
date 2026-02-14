@@ -2,7 +2,7 @@
 
 > **Early-stage development** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
-> **Only works in FireFox** - Issue reported [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737)
+> **Browser note:** Some Edge/Chrome users may experience crashes — Firefox is a known workaround. See [known issues](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
@@ -99,8 +99,10 @@ custom_fences = [
 ## Features
 
 - **3 modes:** app (output only), editor (code + output), playground (side-by-side)
+- **Web Worker execution** — Pyodide runs in a Dedicated Worker, keeping the page responsive
 - **Light / dark / auto theming** that follows the host page
 - **CSS custom properties** for full branding control
+- **Real-time print output** — `print()` streams incrementally as code executes
 - **Multi-file support** via `<panel-file>` child elements
 - **Explicit requirements** via `<panel-requirements>`
 - **MkDocs integration** via fenced code blocks and `pymdownx.superfences`
@@ -129,22 +131,25 @@ git clone https://github.com/panel-extensions/panel-live
 cd panel-live
 ```
 
-For a simple setup use [`uv`](https://docs.astral.sh/uv/):
+All development uses [pixi](https://pixi.sh) for environment management:
 
 ```bash
-uv venv
-source .venv/bin/activate
-uv pip install -e .[dev]
-pre-commit run install
-pytest tests
-```
+# Setup
+pixi run postinstall                 # pip install -e . (editable install)
+pixi run npm-install                 # install npm dependencies (esbuild, vitest)
+pixi run lint-install                # install pre-commit hooks
 
-For the full GitHub Actions setup use [pixi](https://pixi.sh):
+# Python
+pixi run test                        # pytest
+pixi run test-coverage               # pytest with coverage
 
-```bash
-pixi run pre-commit-install
-pixi run postinstall
-pixi run test
+# JavaScript
+pixi run build-js                    # bundle lib/ → dist/ (production)
+pixi run test-js                     # run Vitest unit tests (69 tests)
+pixi run test-js-coverage            # Vitest with V8 coverage
+
+# Docs
+pixi run -e docs serve               # live dev server
 ```
 
 ## Contributing

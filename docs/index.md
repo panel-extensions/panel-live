@@ -137,8 +137,10 @@ Explore and configure every `<panel-live>` attribute interactively with the [API
 ## Features
 
 - **3 modes:** app (output only), editor (code + output), playground (side-by-side)
+- **Web Worker execution** — Pyodide runs in a Dedicated Worker, keeping the page responsive
 - **Light / dark / auto theming** that follows the host page
 - **CSS custom properties** for full branding control
+- **Real-time print output** — `print()` streams incrementally as code executes
 - **Multi-file support** via `<panel-file>` child elements
 - **Explicit requirements** via `<panel-requirements>`
 - **MkDocs integration** via fenced code blocks and `pymdownx.superfences`

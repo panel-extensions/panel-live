@@ -20,6 +20,17 @@ import panel as pn
 pn.panel("**Horizontal layout** — code left, output right.").servable()
 ```
 
+## Auto layout (responsive)
+
+`layout="auto"` switches between horizontal on wide viewports and vertical on narrow viewports (≤768px). This is the default for **playground** mode.
+
+```{.panel mode="playground" layout="auto" auto-run="true"}
+import panel as pn
+pn.panel("**Auto layout** — resize the browser to see it switch.").servable()
+```
+
+Try resizing your browser window below 768px to see the layout switch from side-by-side to stacked.
+
 ## Overriding defaults
 
 You can override the default layout for any mode:
@@ -39,7 +50,13 @@ pn.panel("Editor mode with **horizontal** layout override.").servable()
 
 ````markdown
 ```{.panel mode="playground" layout="horizontal"}
-# horizontal: side by side (playground default)
+# horizontal: side by side
+```
+````
+
+````markdown
+```{.panel mode="playground" layout="auto"}
+# auto: horizontal on wide screens, vertical on narrow (playground default)
 ```
 ````
 
@@ -49,4 +66,4 @@ pn.panel("Editor mode with **horizontal** layout override.").servable()
 |------|---------------|
 | `app` | N/A (output only) |
 | `editor` | `vertical` |
-| `playground` | `horizontal` |
+| `playground` | `auto` |

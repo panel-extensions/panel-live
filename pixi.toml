@@ -6,7 +6,12 @@ platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
 [tasks]
 postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
 serve = "python serve.py"
-sync-assets = "cp lib/panel-live.js docs/assets/js/ && cp lib/panel-live.css docs/assets/css/"
+npm-install = "npm install"
+build-js = { cmd = "node build.mjs", depends-on = ["npm-install"] }
+build-js-dev = { cmd = "node build.mjs --dev", depends-on = ["npm-install"] }
+test-js = { cmd = "npx vitest run", depends-on = ["npm-install"] }
+test-js-coverage = { cmd = "npx vitest run --coverage", depends-on = ["npm-install"] }
+sync-assets = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js docs/assets/js/ && cp dist/panel-live.css docs/assets/css/", depends-on = ["build-js"] }
 
 [dependencies]
 python = ">=3.12"
@@ -79,14 +84,17 @@ setuptools-scm = "*"
 
 [feature.docs.tasks]
 _postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
+_npm-install = "npm install"
+_build-js = { cmd = "node build.mjs", depends-on = ["_npm-install"] }
+_sync-assets = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js docs/assets/js/ && cp dist/panel-live.css docs/assets/css/", depends-on = ["_build-js"] }
 
 [feature.docs.tasks.serve]
 cmd = "zensical serve"
-depends-on = ["_postinstall"]
+depends-on = ["_postinstall", "_sync-assets"]
 
 [feature.docs.tasks.build]
 cmd = "zensical build"
-depends-on = ["_postinstall"]
+depends-on = ["_postinstall", "_sync-assets"]
 
 [environments]
 default = ["test"]

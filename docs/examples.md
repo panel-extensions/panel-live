@@ -9,6 +9,13 @@ Explore interactive examples below. Each example auto-runs on load — expand th
 ```{.panel mode="editor" src="../assets/examples/hello.py" code-visibility="collapsed" code-position="last" auto-run="true"}
 ```
 
+### Print Output
+
+`print()` statements produce visible output above the app. Useful for debugging and progress feedback.
+
+```{.panel mode="editor" src="../assets/examples/print-demo.py" code-visibility="collapsed" code-position="last" auto-run="true"}
+```
+
 ## Data Visualization
 
 ### Matplotlib (No Panel)
