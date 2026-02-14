@@ -4,7 +4,7 @@ This page explains *why* `panel-live` is designed the way it is. For *how* to us
 
 ## Custom element (`<panel-live>`)
 
-Three of four competitors (gradio-lite, stlite, PyScript) use custom HTML elements. Attributes are the natural way to configure HTML, and child elements compose naturally. A custom element also means zero framework dependencies — it works in any HTML page, any static site generator, any CMS.
+Three of four alternatives (gradio-lite, stlite, PyScript) use custom HTML elements. Attributes are the natural way to configure HTML, and child elements compose naturally. A custom element also means zero framework dependencies — it works in any HTML page, any static site generator, any CMS.
 
 ## Light DOM (no Shadow DOM)
 
@@ -30,9 +30,33 @@ The default `theme="auto"` detects the user's OS preference via `window.matchMed
 
 This means `<panel-live>` elements match the host page without any configuration in most cases.
 
-## Execution queue
+## Dedicated Worker
 
-Pyodide is single-threaded. The global `state.curdoc` means concurrent app executions would corrupt each other's document state. All executions are serialized through a promise-based queue. This is transparent — multiple `<panel-live>` elements on a page initialize Pyodide once and run sequentially.
+Pyodide loads 300-500MB of data and runs computationally intensive Python code. Running this on the main thread blocks the page — spinners freeze, buttons don't respond, and the user sees a hung page for 5-15 seconds during initialization.
+
+Moving Pyodide to a Dedicated Worker (`panel-live-worker.js`) keeps the main thread free. Spinners animate smoothly, the page remains interactive during load and execution, and the ~300-500MB memory footprint is isolated from the main thread. The singleton worker bridge (`worker-bridge.js`) manages all communication: Pyodide initialization, code execution, Bokeh `embed_items()` calls back to the main thread, bidirectional document sync via JSON patches, and real-time `print()` streaming.
+
+A SharedWorker mode (sharing a single Pyodide runtime across multiple elements) is planned as a follow-on for documentation pages with many examples.
+
+## Execution in Worker
+
+All three execution branches (servable, servable-target, expression) are unified into two Python scripts loaded as text strings via esbuild's `.py` text loader:
+
+- `worker-setup.py` — sets up the execution environment for all branches, including `StreamingWriter` for real-time `print()` output via JS callbacks
+- `worker-render.py` — serializes the Bokeh Document to JSON via `_doc_json()` for transfer to the main thread
+
+The worker has an internal execution queue. Pyodide is single-threaded, and the global `state.curdoc` means concurrent app executions would corrupt each other's document state. All executions are serialized through a promise-based queue. This is transparent — multiple `<panel-live>` elements on a page initialize Pyodide once and run sequentially.
+
+## Modular ES modules
+
+The original monolithic `panel-live.js` was decomposed into 13 focused ES modules in `lib/`, each with a single responsibility and named exports. This makes the codebase navigable, testable, and maintainable:
+
+- Configuration is separate from rendering (`config.js` vs `panel-live-element.js`)
+- The worker bridge is isolated from the custom element (`worker-bridge.js`)
+- Error rendering is reusable across contexts (`error-renderer.js`)
+- URL sharing logic is independent of the UI (`url-sharing.js`)
+
+esbuild bundles these into `dist/panel-live.js` (main IIFE) + `dist/panel-live-worker.js` (worker IIFE) + `dist/panel-live.css` with source maps. The `.py` text loader pattern allows Python bootstrap scripts to live as `.py` files in `lib/python/` while being imported as strings in JavaScript — keeping Python code readable and lintable.
 
 ## Version coupling
 
@@ -47,7 +71,7 @@ cdn.holoviz.org/panel-live/{version}/panel-live.min.js
 cdn.holoviz.org/panel-live/latest/panel-live.min.js
 ```
 
-## Competitor comparison
+## Comparison with alternatives
 
 | Feature | panel-live | gradio-lite | stlite | PyScript | shinylive |
 |---------|-----------|-------------|--------|----------|-----------|
@@ -61,13 +85,14 @@ cdn.holoviz.org/panel-live/latest/panel-live.min.js
 | **JS API** | `PanelLive.mount()` | N/A | `mount()` | Programmatic | CLI export |
 | **CSS variables** | `--pl-*` | N/A | N/A | N/A | N/A |
 | **Events** | `pl-status`, `pl-ready`, etc. | N/A | N/A | N/A | N/A |
-| **Worker** | Future (v1.x) | Dedicated/Shared | Dedicated/Shared | Optional | Dedicated |
+| **Worker** | Dedicated | Dedicated/Shared | Dedicated/Shared | Optional | Dedicated |
 
 ### Differentiators
 
-1. **Three display modes in one element** — no other competitor offers app, editor, and playground from a single tag.
-2. **Full CSS custom property system** — no competitor exposes comprehensive `--pl-*` theming.
+1. **Three display modes in one element** — no other alternative offers app, editor, and playground from a single tag.
+2. **Full CSS custom property system** — no alternative exposes comprehensive `--pl-*` theming.
 3. **`<panel-example>` child elements** — built-in example selector for playground mode.
-4. **`PanelLiveController`** — richer runtime interaction than any competitor's JS API.
+4. **`PanelLiveController`** — richer runtime interaction than any alternative's JS API.
 5. **`theme="auto"`** — automatic light/dark detection via `prefers-color-scheme`.
 6. **Panel/HoloViz ecosystem** — hvPlot, HoloViews, Param, panel-material-ui provide a richer widget/visualization toolkit.
+7. **Lightweight, zero-framework architecture** — CodeMirror 6 + esbuild is lighter than Monaco + Vite (stlite) or React + webpack (shinylive). No framework dependency — works in any HTML page.

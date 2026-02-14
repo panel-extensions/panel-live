@@ -16,7 +16,7 @@ def kpi_card(title, value, delta, color):
     </div>""", sizing_mode="stretch_width")
 
 gauge = pn.indicators.Gauge(
-    name="Quarterly Target", value=72, bounds=(0, 100), format="{value}%",
+    name="Target", value=72, bounds=(0, 100), format="{value}%",
     colors=[(0.4, "#ef4444"), (0.7, "#f59e0b"), (1, "#22c55e")],
     height=250, width=250,
     custom_opts={

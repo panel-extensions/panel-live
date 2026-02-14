@@ -11,6 +11,39 @@ Point the `src` attribute to any publicly accessible `.py` file:
 
 The code is fetched at runtime and displayed in the editor. Users can still edit and re-run the loaded code.
 
+## GitHub URLs
+
+GitHub blob URLs are automatically converted to raw URLs. You can use a regular GitHub file link as the `src` value:
+
+```{.panel mode="editor" src="https://github.com/panel-extensions/panel-live/blob/main/docs/assets/examples/hello.py" auto-run="true"}
+```
+
+The URL `https://github.com/owner/repo/blob/branch/path.py` is rewritten to `https://raw.githubusercontent.com/owner/repo/branch/path.py` before fetching.
+
+### HTML syntax
+
+```html
+<panel-live mode="editor"
+  src="https://github.com/panel-extensions/panel-live/blob/main/docs/assets/examples/hello.py"
+  auto-run>
+</panel-live>
+```
+
+## Error handling
+
+If `src` points to a non-Python resource (e.g. an HTML 404 page or a wrong URL), panel-live shows a clear error message instead of a confusing `SyntaxError` on `<!doctype html>`.
+
+The fetch validates:
+
+- **HTTP status** — non-200 responses produce an error with the status code
+- **Content-Type** — HTML responses are detected and rejected
+- **HTML detection** — responses starting with `<!` are flagged as non-Python
+
+```html
+<!-- This would show: "Expected Python source from ... but received HTML" -->
+<panel-live src="https://example.com/nonexistent.py"></panel-live>
+```
+
 ## Fence syntax
 
 ````markdown

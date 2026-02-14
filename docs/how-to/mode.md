@@ -30,6 +30,17 @@ slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=42)
 pn.Column(slider, pn.bind(lambda v: f"**Value:** {v}", slider)).servable()
 ```
 
+## Org mode (static code block)
+
+Renders a standard syntax-highlighted code block — no `<panel-live>` element, no interactivity. Useful when you want to show Panel code with syntax highlighting but without live execution.
+
+````markdown
+```{.panel mode="org"}
+import panel as pn
+pn.panel("This renders as a static code block.").servable()
+```
+````
+
 ## Fence syntax
 
 ````markdown
@@ -50,6 +61,12 @@ pn.Column(slider, pn.bind(lambda v: f"**Value:** {v}", slider)).servable()
 ```
 ````
 
+````markdown
+```{.panel mode="org"}
+# static code block (no interactivity)
+```
+````
+
 ## When to use each
 
 | Scenario | Recommended Mode |
@@ -58,3 +75,4 @@ pn.Column(slider, pn.bind(lambda v: f"**Value:** {v}", slider)).servable()
 | Tutorials with editable examples | `editor` |
 | Interactive exploration / playground | `playground` |
 | Showcase pages | `app` or `editor` with `code-visibility="collapsed"` |
+| Static code display (no execution) | `org` |

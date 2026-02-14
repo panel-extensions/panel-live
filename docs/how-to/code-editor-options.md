@@ -24,7 +24,7 @@ pn.panel("Code is **hidden** — output only.").servable()
 
 ### Collapsed
 
-The code editor is collapsed behind a toggle. Users can expand it to view and edit.
+The code editor is collapsed behind a toggle button. Click **Expand Code** to reveal the editor; it changes to **Collapse Code** when expanded.
 
 ```{.panel mode="editor" code-visibility="collapsed" auto-run="true"}
 import panel as pn

@@ -6,9 +6,9 @@ Complete reference for the `<panel-live>` custom element's declarative HTML API.
 
 | Attribute | Default | Values | Description |
 |-----------|---------|--------|-------------|
-| `mode` | `"app"` | `app`, `editor`, `playground` | Display mode |
+| `mode` | `"app"` | `app`, `editor`, `playground`, `org` | Display mode (`org` renders a static code block in MkDocs) |
 | `theme` | `"auto"` | `auto`, `light`, `dark` | Color scheme (`auto` = follows `prefers-color-scheme`) |
-| `layout` | mode-aware | `horizontal`, `vertical` | Editor/preview split direction. Defaults to `"vertical"` for editor mode, `"horizontal"` for playground. |
+| `layout` | mode-aware | `auto`, `horizontal`, `vertical` | Editor/preview split direction. Defaults to `"vertical"` for editor, `"auto"` for playground. `auto` switches to vertical on viewports narrower than 768px. |
 | `src` | — | URL | External Python file URL |
 | `fullscreen` | — | boolean attribute | Toggle fullscreen (playground) |
 | `height` | — | CSS length | Explicit height (e.g. `"500px"`) |

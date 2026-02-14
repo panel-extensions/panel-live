@@ -9,8 +9,8 @@ pn.extension("tabulator", sizing_mode="stretch_width")
 
 df = pd.DataFrame(np.random.randn(10, 4), columns=list("ABCD")).cumsum()
 
-rollover = pn.widgets.IntInput(name="Rollover", value=15)
-follow = pn.widgets.Checkbox(name="Follow", value=True, align="end")
+rollover = pn.widgets.IntInput(name="Rollover", value=50)
+follow = pn.widgets.Toggle(name="Follow", value=True, align="end")
 
 tabulator = pn.widgets.Tabulator(df, height=350, sizing_mode="stretch_width")
 

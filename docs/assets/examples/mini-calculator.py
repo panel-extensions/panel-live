@@ -4,7 +4,7 @@ pn.extension(sizing_mode="stretch_width")
 
 a = pn.widgets.FloatInput(name="A", value=10, step=1)
 b = pn.widgets.FloatInput(name="B", value=3, step=1)
-op = pn.widgets.Select(name="Operator", options=["+", "-", "*", "/"], value="+")
+op = pn.widgets.RadioButtonGroup(name="Operator", options=["+", "-", "*", "/"], value="+", margin=(23, 5,10,5), button_type="primary", button_style="outline")
 
 def compute(a, op, b):
     ops = {"+": a + b, "-": a - b, "*": a * b, "/": a / b if b != 0 else float("inf")}
