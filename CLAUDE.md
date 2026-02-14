@@ -61,7 +61,7 @@ Source ES modules in `lib/`, bundled by esbuild into `dist/panel-live.js` (main 
 
 **Main thread:**
 - **`index.js`** — entry point: service worker cleanup, imports all modules
-- **`config.js`** — `_defaults`, `_config`, `cdnUrls()` (Pyodide/Panel/Bokeh versions)
+- **`config.js`** — `_defaults`, `_config`, `cdnUrls()` (Pyodide/Panel/Bokeh versions, package aliases)
 - **`utils.js`** — `uid()`, `loadScript()`, `loadCSS()`
 - **`theme.js`** — `resolveTheme()`, dark mode media query
 - **`codemirror.js`** — CodeMirror loading + `createCMEditor()`
