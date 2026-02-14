@@ -7,7 +7,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-pytestmark = pytest.mark.ui
+pytestmark = [pytest.mark.ui, pytest.mark.xdist_group("ui")]
 
 SITE_DIR = "site"
 SERVER_PORT = 8787
@@ -26,17 +26,17 @@ def docs_server():
         [
             "python",
             "-c",
-            f"from functools import partial; "
-            f"from http.server import HTTPServer, SimpleHTTPRequestHandler; "
-            f"class H(SimpleHTTPRequestHandler):\n"
-            f"  def end_headers(self):\n"
-            f"    self.send_header('Cross-Origin-Opener-Policy','same-origin');\n"
-            f"    self.send_header('Cross-Origin-Embedder-Policy','credentialless');\n"
-            f"    super().end_headers()\n"
+            "from functools import partial\n"
+            "from http.server import HTTPServer, SimpleHTTPRequestHandler\n"
+            "class H(SimpleHTTPRequestHandler):\n"
+            "  def end_headers(self):\n"
+            "    self.send_header('Cross-Origin-Opener-Policy','same-origin')\n"
+            "    self.send_header('Cross-Origin-Embedder-Policy','credentialless')\n"
+            "    super().end_headers()\n"
             f"HTTPServer(('',{SERVER_PORT}),partial(H,directory='{SITE_DIR}')).serve_forever()",
         ],
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
     time.sleep(1)  # Wait for server to start
     yield BASE_URL
