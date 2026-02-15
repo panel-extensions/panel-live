@@ -5,8 +5,13 @@ This tutorial shows you how to use the `PanelLive` component in a Panel server a
 ## Installation
 
 ```bash
-pip install panel-live
+pip install git+https://github.com/panel-extensions/panel-live.git
 ```
+
+!!! warning "Pre-release"
+    panel-live has not been published to npm or PyPI yet. The install command above uses a GitHub source install, which works now. Once released, it will change to:
+
+    - **Python:** `pip install panel-live`
 
 Or with pixi (for development):
 
@@ -187,7 +192,8 @@ panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
 
 !!! note "CDN assets"
 
-    By default, `PanelLive` loads JS/CSS from `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
+    By default, `PanelLive` loads JS/CSS from GitHub Pages (`panel-extensions.github.io/panel-live/assets/`).
+    Once published to npm, this will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
     Use `PanelLive.configure()` to override with local assets for offline development.
 
 ## Next Steps

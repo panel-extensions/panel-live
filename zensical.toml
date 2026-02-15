@@ -11,9 +11,9 @@ nav = [
   {"Playground" = "playground.md"},
   {"API Explorer" = "api-explorer.md"},
   {"Tutorials" = [
-    {"Getting Started with HTML" = "tutorials/getting-started.md"},
+    {"Getting Started with HTML" = "tutorials/getting-started-html.md"},
     {"Getting Started with MkDocs" = "tutorials/getting-started-mkdocs.md"},
-    {"Getting Started with Panel" = "tutorials/panel-component.md"},
+    {"Getting Started with Panel" = "tutorials/getting-started-panel.md"},
     {"Getting Started with Quarto" = "tutorials/getting-started-quarto.md"},
     {"Getting Started with Sphinx" = "tutorials/getting-started-sphinx.md"},
   ]},

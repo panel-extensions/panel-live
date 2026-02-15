@@ -2,8 +2,6 @@
 
 > **Not yet released** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
-> **Browser note:** Some Chrome/Edge users may experience crashes — Firefox is a known workaround. Issue tracked [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737).
-
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
 [![pypi-version](https://img.shields.io/pypi/v/panel-live.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/panel-live)
@@ -17,12 +15,14 @@ Turn any web page into an interactive Python playground with the `<panel-live>` 
 
 ### HTML (any web page)
 
-Include the CSS and JS from the CDN:
+Include the CSS and JS:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
-<script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
+<link rel="stylesheet" href="https://panel-extensions.github.io/panel-live/assets/css/panel-live.css">
+<script src="https://panel-extensions.github.io/panel-live/assets/js/panel-live.js"></script>
 ```
+
+> **Pre-release:** The JS/CSS URLs above point to GitHub Pages. Once published to npm, they will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`. Similarly, `pip install panel-live` will work once published to PyPI.
 
 Then add a `<panel-live>` element with your Panel code inside:
 
@@ -88,8 +88,10 @@ This project has **not been released yet**, so if you find a version that suits 
 ## Installation
 
 ```bash
-pip install panel-live
+pip install git+https://github.com/panel-extensions/panel-live.git
 ```
+
+> **Pre-release:** `pip install panel-live` will work once the package is published to PyPI.
 
 ## Development
 
