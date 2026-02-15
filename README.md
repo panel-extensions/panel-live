@@ -15,8 +15,6 @@ Turn any web page into an interactive Python playground with the `<panel-live>` 
 
 ## Quick Start
 
-> **Not Possible Yet!** - The panel-live css and js assets have not yet been deployed.
-
 ### HTML (any web page)
 
 Include the CSS and JS from the CDN:
@@ -150,6 +148,10 @@ pixi run test-js-coverage            # Vitest with V8 coverage
 
 # Docs
 pixi run -e docs serve               # live dev server
+pixi run -e sphinx build             # build Sphinx test site
+pixi run -e sphinx serve             # serve Sphinx site on localhost:8001
+pixi run -e quarto build             # render Quarto test site
+pixi run -e quarto serve             # preview Quarto site
 ```
 
 ## Contributing

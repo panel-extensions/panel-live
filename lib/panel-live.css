@@ -529,6 +529,10 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .cm-editor {
 }
 
 /* Editor stacked: code-position="last" */
+.pl-editor-stacked.code-last {
+  display: flex;
+  flex-direction: column;
+}
 .pl-editor-stacked.code-last > .pl-output-wrapper {
   order: 1;
   border-bottom: 1px solid var(--pl-border, #e0e0e0);
@@ -538,6 +542,9 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .cm-editor {
 }
 .pl-editor-stacked.code-last > .pl-editor-header {
   order: 3;
+}
+.pl-editor-stacked.code-last > .pl-editor-area {
+  order: 4;
 }
 .pl-editor-stacked.code-last > .pl-code-section {
   order: 3;

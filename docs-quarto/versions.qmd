@@ -1,0 +1,17 @@
+---
+title: "Version Configuration"
+panel-live:
+  pyodide-version: "v0.28.2"
+  panel-version: "1.8.7"
+  bokeh-version: "3.8.2"
+---
+
+# Version Configuration Demo
+
+This page demonstrates per-document version configuration via YAML metadata.
+
+```{.panel-live}
+#| mode: editor
+import panel as pn
+pn.panel(f"Panel version: {pn.__version__}").servable()
+```

@@ -1,0 +1,28 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "panel-live Quarto Test"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: examples.qmd
+        text: Examples
+      - href: pre-rendering.qmd
+        text: Pre-Rendering
+      - href: versions.qmd
+        text: Versions
+
+format:
+  html:
+    theme: cosmo
+
+filters:
+  - panel-live
+
+panel-live:
+  pyodide-version: "v0.28.2"
+  panel-version: "1.8.7"
+  bokeh-version: "3.8.2"

@@ -20,7 +20,7 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machin
 
 ## P1 — Distribution `PARTIAL`
 
-esbuild bundling is done. CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. **Remaining:** CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag, npm package, minified builds, automated release workflow. Users should be able to load specific versioned assets (including `mini-coi.js` and other dependencies) instead of only `latest/`, to ensure reproducibility.
+esbuild bundling is done. CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. ~~CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag.~~ **Done:** `build.yml` now has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags (including alpha/beta/rc). `scripts/cdn_upload.py` syncs to both versioned and latest S3 paths. **Remaining:** npm package, SRI hashes, bundle size tracking.
 
 Additional items informed by competitor research:
 
@@ -32,7 +32,7 @@ Additional items informed by competitor research:
 
 ## P1 — Documentation `PARTIAL`
 
-Docs site built with MkDocs/zensical. Getting Started tutorial created (`docs/tutorials/getting-started.md`). Security model documented (`docs/explanation/security.md`). Known limitations, browser compatibility reference pages added. How-to guides for self-hosting, auth proxy setup, Claude artifacts, and iframe embedding created. **Remaining:** comprehensive API reference, configuration guide, architecture overview.
+Docs site built with MkDocs/zensical. Getting Started tutorial created (`docs/tutorials/getting-started.md`). Security model documented (`docs/explanation/security.md`). Known limitations, browser compatibility reference pages added. How-to guides for self-hosting, auth proxy setup, Claude artifacts, and iframe embedding created. Sphinx integration guide (`docs/how-to/sphinx-integration.md`), Quarto integration guide (`docs/how-to/quarto-integration.md`), and framework-specific getting-started tutorials (MkDocs, Sphinx, Quarto) added. **Remaining:** comprehensive API reference, configuration guide, architecture overview.
 
 ---
 
@@ -56,9 +56,9 @@ Prose descriptions added before every example in `docs/examples.md` for LLM acce
 
 ---
 
-## P1 — Release v0.1.0
+## P1 — Release v0.1.0 `PARTIAL`
 
-No formal release yet. Depends on: browser crash fix, documentation, distribution, testing, known limitations. (Sphinx extension is P2, not a blocker.)
+~~No formal release yet.~~ **Update:** Alpha release infrastructure is in place. `build.yml` supports tag-triggered publishing to PyPI (OIDC), CDN (S3), and GitHub Releases. `pyproject.toml` classifier updated to Alpha. **Remaining:** actual tag push (`v0.1.0a1`), requires AWS secrets and `publish` environment configured. Depends on: browser crash fix, documentation, distribution, testing, known limitations.
 
 ---
 
@@ -82,35 +82,74 @@ Pyodide proxy functions may accumulate across runs. Needs browser profiling to c
 
 ---
 
-## P2 — Sphinx Extension
+## P2 — Sphinx Extension `PARTIAL`
 
-No Sphinx extension. Required for Panel's own Sphinx-based documentation.
+~~No Sphinx extension.~~ **Done (Phase 1):** `src/panel_live/sphinx.py` implements a Sphinx extension with:
+
+- Configurable directive name (`panel-live`, `pyodide`, or `python`) for backward compat
+- All `<panel-live>` HTML attributes as directive options
+- Pre-rendering at build time (aligned with nbsite.pyodide pattern)
+- Content-hash caching in `.panel-live/` directory
+- Version configuration via `panel_live_conf` dict in conf.py
+- mini-coi.js support for COOP/COEP headers
+- `docs-sphinx/` test project with examples and attributes pages, pixi tasks (`pixi run -e sphinx build`, `pixi run -e sphinx serve`)
+- CI: Sphinx build runs on `code` path changes (including `docs-sphinx/**`)
+- pytest test suite (`tests/test_sphinx.py`)
+- Documentation: integration guide (`docs/how-to/sphinx-integration.md`) and getting-started tutorial (`docs/tutorials/getting-started-sphinx.md`)
+
+**Remaining:**
+
+- Sequential cell execution (shared state across directives on a page)
+- Line-range display (show only selected lines in editor)
+- Adoption testing with Panel's own documentation
+
+**Lessons from jupyterlite-sphinx analysis** (see `dev/research/jupyterlite-sphinx-analysis.md`):
+
+- jupyterlite-sphinx's build-time `jupyter lite build` subprocess causes noise ([#149](https://github.com/jupyterlite/jupyterlite-sphinx/issues/149)), cryptic failures ([#177](https://github.com/jupyterlite/jupyterlite-sphinx/issues/177)), and 22-63 MiB bloat — panel-live's CDN-first approach avoids this entirely
+- Declare `parallel_read_safe=True` and `parallel_write_safe=True` in `setup()` return value ([#146](https://github.com/jupyterlite/jupyterlite-sphinx/issues/146))
+- Use versioned CDN URLs, not cache-busting query params — SciPy's `try_examples.json` became their 4th most requested URL ([#327](https://github.com/jupyterlite/jupyterlite-sphinx/issues/327))
+- Default `auto-run=false` on doc pages (jupyterlite-sphinx's `:prompt:` pattern, [#50](https://github.com/jupyterlite/jupyterlite-sphinx/issues/50))
+- Single directive with `:mode:` option, not multiple directives ([#288](https://github.com/jupyterlite/jupyterlite-sphinx/issues/288) proposes consolidation)
+- Check for existing `source_suffix` registrations before adding new ones ([#27](https://github.com/jupyterlite/jupyterlite-sphinx/issues/27))
+- Test with both pydata-sphinx-theme and alabaster — theme issues are common ([#69](https://github.com/jupyterlite/jupyterlite-sphinx/issues/69))
+- Version coupling is a production issue — SciPy needs documented version to match Pyodide's bundled version ([SciPy #19729](https://github.com/scipy/scipy/issues/19729))
+- Consider `autodoc-process-docstring` hook for auto-converting Panel docstring examples (inspired by TryExamples directive, [#142](https://github.com/jupyterlite/jupyterlite-sphinx/issues/142))
 
 Success Criteria:
 
 - Automated tests. Relevant pytests. Also in Github actions
-- Manual testing easy via sphinx docs in docs-sphinxs folder. Relevant pixi commands. This should mimic what is needed for panel to use this. Including being able to specify the version of panel-live, pyodide, bokeh and panel including alpha, beta and rc releases of panel+bokeh wheels.
+- Manual testing easy via sphinx docs in docs-sphinx folder. Relevant pixi commands.
 - Can technically replace current panel pyodide sphinx extension in https://github.com/holoviz-dev/nbsite/tree/main/nbsite/pyodide and https://github.com/holoviz/panel/blob/main/doc/conf.py.
-- Easy to understand for Panel maintainers that this will be an easy, working and beneficial change. That its a drop in replacement.
-
-Complication:
-
-- Would probably require that code can be pre-executed/ pre-rendered (i.e. a "static" mode)
-- Might also require either a way to share an environment over multiple panel-live elements. Or a way to run code e2e isolated but display a selection of lines (e.g. lines 19-23) in the editor to be able to tell a story.
+- Easy to understand for Panel maintainers that this will be an easy, working and beneficial change.
 
 ---
 
-## P2 — Quarto Extension
+## P2 — Quarto Extension `PARTIAL`
 
-No Quarto extension. Shinylive's Quarto extension provides prior art.
+~~No Quarto extension.~~ **Done (Phase 1):** `quarto/_extensions/panel-live/` implements a Quarto Lua filter extension with:
 
-**Architecture note:** Shinylive's Quarto extension uses a thin Lua filter that calls back into a Python CLI (`shinylive extension info/base-htmldeps/...`) for dependency resolution. This keeps the extension thin while the Python package handles complex logic. Panel-live should follow the same Lua filter + CLI callback pattern. (Source: quarto-ext/shinylive codebase.)
+- `{panel-live}` and `{panel}` code block classes
+- `#|` directive parsing for all HTML attributes
+- `quarto.doc.add_html_dependency()` for JS/CSS injection (once per document)
+- Version configuration via YAML document metadata
+- mini-coi.js bundled with the extension for COOP/COEP support
+- Pre-rendering support via `#| pre-render:` directive
+- Non-HTML format passthrough
+- Built JS/CSS/worker assets tracked in git (enables `quarto add panel-extensions/panel-live --subdir quarto`)
+- `docs-quarto/` test site with examples, versions, and pre-rendering pages; pixi tasks (`pixi run -e quarto build`, `pixi run -e quarto serve`)
+- CI: Quarto build runs on `quarto/**` and `docs-quarto/**` path changes
+- pytest test suite (`tests/test_quarto.py`)
+- Documentation: integration guide (`docs/how-to/quarto-integration.md`) and getting-started tutorial (`docs/tutorials/getting-started-quarto.md`)
+
+**Remaining:**
+
+- Adoption testing with holoviz-quarto replacement
 
 Success Criteria:
 
 - Automated tests. Relevant pytests. Also in Github actions
 - Manual testing easy via quarto docs in docs-quarto folder. Relevant pixi commands to install, run, build and test.
-- Can technically replace https://github.com/awesome-panel/holoviz-quarto. I.e. we can deprecate this repository and refer to panel-live.
+- Can technically replace https://github.com/awesome-panel/holoviz-quarto.
 
 ---
 
@@ -123,6 +162,8 @@ No way to see runtime versions or switch versions in playground mode.
 ## P2 — Zero-Install Deployment / Link Sharing `PARTIAL`
 
 URL sharing via base64-encoded hash is working (playground mode). **Remaining:** graceful COOP/COEP fallback, hosted reference deployment.
+
+**Update from research:** GitHub Pages is a key deployment scenario where custom HTTP headers cannot be set. JupyterLite's approach ([jupyterlite#1409](https://github.com/jupyterlite/jupyterlite/issues/1409)): opt-in `coi-serviceworker` integration that injects COOP/COEP headers at runtime. Critical lesson from [pyodide-kernel#126](https://github.com/jupyterlite/pyodide-kernel/pull/126): `coincident` (SharedArrayBuffer-based) does NOT gracefully degrade — it crashes with `TypeError`. The solution is separate entry points based on `crossOriginIsolated` detection. panel-live's service worker cleanup in `index.js` must not interfere with `coi-serviceworker`/`mini-coi.js`.
 
 ---
 
@@ -169,6 +210,8 @@ The example should show the HTML pattern: load panel-live JS/CSS from CDN, use a
 Add a "render" mode (or "compile" / "save") that pre-renders Panel code to static HTML at build time, rather than running it live in the browser. This is the path to replacing the existing Panel/HoloViz pyodide integration in [nbsite](https://github.com/holoviz-dev/nbsite/tree/main/nbsite/pyodide).
 
 Open questions: Should the output embed directly into the document or load in an iframe? Can previously rendered output be cached and loaded via `src`? Can multiple renders run in parallel during the build?
+
+**Update from research:** jupyterlite-sphinx [#319](https://github.com/jupyterlite/jupyterlite-sphinx/issues/319) describes the same need: "A REPL with mixed static/dynamic mode." This is the most requested pattern in the scientific Python community (NumPy, SciPy, scikit-learn all want static-by-default with a "Make Interactive" toggle). jupyter-sphinx already provides build-time rendering; the gap is combining build-time rendering with runtime interactivity. mkdocs-jupyterlite's `on_post_build` hook for copying build artifacts into `site_dir` is the standard pattern for MkDocs build-time asset injection.
 
 **Acceptance:** `mode="render"` produces static HTML output at build time. The output renders without requiring Pyodide at page load.
 
@@ -226,17 +269,37 @@ Document how to use the browser developer console to debug panel-live issues. Co
 
 ---
 
-## P2 — Analyze mkdocs-jupyterlite
+## P2 — Analyze mkdocs-jupyterlite `DONE`
 
-Review [mkdocs-jupyterlite](https://github.com/NickCrews/mkdocs-jupyterlite/) code, issues, and PRs for challenges relevant to panel-live. Look for shared patterns around WASM loading, asset management, MkDocs integration, and cross-origin issues that could inform panel-live's roadmap.
+~~Review [mkdocs-jupyterlite](https://github.com/NickCrews/mkdocs-jupyterlite/) code, issues, and PRs for challenges relevant to panel-live. Look for shared patterns around WASM loading, asset management, MkDocs integration, and cross-origin issues that could inform panel-live's roadmap.~~
+
+**Done.** Full analysis in `dev/research/mkdocs-jupyterlite-analysis.md`. Reviewed NickCrews/mkdocs-jupyterlite (plugin + iframe approach) and DerThorsten fork (superfences + REPL approach), plus upstream JupyterLite issues. Key findings:
+
+- iframe embedding causes TOC, height, DOM isolation, and theme sync problems — validates panel-live's Light DOM architecture
+- Subprocess-based `jupyter lite build` is fragile (issue [#5](https://github.com/NickCrews/mkdocs-jupyterlite/issues/5)) — validates panel-live's CDN-first approach
+- Browser storage persistence causes stale state on docs rebuild ([jupyterlite#1706](https://github.com/jupyterlite/jupyterlite/issues/1706)) — panel-live's editor state persistence (P2) needs content-hash cache invalidation
+- SharedArrayBuffer requires explicit fallback; `coincident` crashes without it ([pyodide-kernel#126](https://github.com/jupyterlite/pyodide-kernel/pull/126)) — relevant to P0 Browser Crash and P2 Zero-Install Deployment
+- mkdocs-material 61rem width constraint affects embedded WASM elements — panel-live should test at constrained widths
+- Shell command wheel resolution with `{wheels_dir}` placeholder pattern useful for P1 Export CLI
 
 **Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
 
 ---
 
-## P2 — Analyze jupyterlite-sphinx
+## P2 — Analyze jupyterlite-sphinx `DONE`
 
-Review [jupyterlite-sphinx](https://github.com/jupyterlite/jupyterlite-sphinx) code, issues, and PRs for challenges relevant to panel-live. Especially useful for the planned Sphinx extension — patterns for asset injection, configuration, and build-time integration.
+~~Review [jupyterlite-sphinx](https://github.com/jupyterlite/jupyterlite-sphinx) code, issues, and PRs for challenges relevant to panel-live. Especially useful for the planned Sphinx extension — patterns for asset injection, configuration, and build-time integration.~~
+
+**Done.** Full analysis in `dev/research/jupyterlite-sphinx-analysis.md`. Reviewed 20+ issues/PRs, codebase architecture, adopter experiences (NumPy, SciPy), and upstream JupyterLite patterns. Key findings:
+
+- iframe embedding causes URL path resolution bugs ([#36](https://github.com/jupyterlite/jupyterlite-sphinx/issues/36), open 3+ years), theme sync fragility ([#69](https://github.com/jupyterlite/jupyterlite-sphinx/issues/69)), and storage conflicts — validates panel-live's Light DOM custom element
+- Build-time `jupyter lite build` subprocess causes excessive noise ([#149](https://github.com/jupyterlite/jupyterlite-sphinx/issues/149)), cryptic failures ([#177](https://github.com/jupyterlite/jupyterlite-sphinx/issues/177)), and 22-63 MiB build bloat — panel-live should use CDN assets with zero build overhead
+- Click-to-run (`:prompt:` option) is essential for doc pages ([#50](https://github.com/jupyterlite/jupyterlite-sphinx/issues/50)) — Sphinx extension should default `auto-run=false`
+- TryExamples `autodoc-process-docstring` hook converts docstring examples to interactive notebooks — pattern applicable for Panel API docs
+- Mixed static/dynamic mode ([#319](https://github.com/jupyterlite/jupyterlite-sphinx/issues/319)) is the most requested pattern — directly maps to panel-live's planned `mode="render"` (P2)
+- Parallel build safety must be declared in `setup()` ([#146](https://github.com/jupyterlite/jupyterlite-sphinx/issues/146))
+- Cache-busting query params waste bandwidth at scale ([#327](https://github.com/jupyterlite/jupyterlite-sphinx/issues/327), SciPy) — versioned CDN URLs are correct
+- Version coupling is a production issue (SciPy [#19729](https://github.com/scipy/scipy/issues/19729)) — extension needs version config in `conf.py`
 
 **Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
 
@@ -255,6 +318,7 @@ Add examples for known Panel extensions including [panel-graphic-walker](https:/
 Share a single Pyodide runtime across multiple `<panel-live>` elements on the same page via `<panel-live shared-worker>` or `PanelLive.configure({ sharedWorker: true })`. Reduces memory from ~300MB per instance to ~300MB total on documentation pages with many examples.
 
 **Key lessons from competitors:**
+
 - SharedWorker is **not available on Chrome Android** — automatic fallback to DedicatedWorker is required (stlite had a full mobile regression without this).
 - Playwright's WebKit does not support SharedWorker properly — real Safari testing via BrowserStack is needed.
 - DedicatedWorker must remain the default.
@@ -293,7 +357,9 @@ Python utility using the `ast` module to analyze source files and extract import
 
 Auto-save editor content in playground mode to localStorage on changes (debounced). On playground load, offer to restore the last session if saved content exists and differs from the default. Prevents losing work when navigating away. (Source: shinylive feature request.)
 
-**Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session.
+**Update from research:** mkdocs-jupyterlite discovered that browser-persisted state overrides server content after docs rebuilds, causing users to see stale code ([jupyterlite#1706](https://github.com/jupyterlite/jupyterlite/issues/1706)). They solved this by disabling persistence entirely. panel-live should instead store a content hash alongside the editor state and invalidate when the underlying example code changes.
+
+**Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session. Persisted state is invalidated when the underlying example code changes (content-hash comparison).
 
 ---
 

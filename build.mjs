@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { copyFileSync } from 'node:fs';
 
 const isDev = process.argv.includes('--dev');
 
@@ -34,5 +35,8 @@ await build({
   minify: !isDev,
   sourcemap: true,
 });
+
+// Copy mini-coi.js (service worker for COOP/COEP headers)
+copyFileSync('src/panel_live/static/mini-coi.js', 'dist/mini-coi.js');
 
 console.log(isDev ? 'Dev build complete' : 'Production build complete');

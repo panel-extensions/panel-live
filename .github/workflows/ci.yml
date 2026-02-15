@@ -19,6 +19,7 @@ jobs:
     outputs:
       code_change: ${{ steps.filter.outputs.code }}
       js_change: ${{ steps.filter.outputs.js }}
+      quarto_change: ${{ steps.filter.outputs.quarto }}
       img_change: ${{ steps.filter.outputs.img }}
       matrix: ${{ env.MATRIX }}
     steps:
@@ -33,12 +34,16 @@ jobs:
               - 'src/**'
               - 'pyproject.toml'
               - '.github/workflows/ci.yaml'
+              - 'docs-sphinx/**'
             js:
               - 'lib/**'
               - 'tests/js/**'
               - 'package.json'
               - 'vitest.config.js'
               - 'build.mjs'
+            quarto:
+              - 'quarto/**'
+              - 'docs-quarto/**'
             img:
               - '**/*.png'
       - name: Set matrix option
@@ -141,6 +146,44 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.8.1
       - name: Run Vitest
         run: pixi run test-js
+
+  sphinx_build:
+    name: Sphinx build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.code_change == 'true'
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: sphinx
+      - name: Build Sphinx docs
+        run: pixi run -e sphinx build
+
+  quarto_build:
+    name: Quarto build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.quarto_change == 'true'
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: quarto
+      - name: Build Quarto docs
+        run: pixi run -e quarto build
 
   pytest_ui:
     name: ui:${{ matrix.environment }}:${{ matrix.os }}
