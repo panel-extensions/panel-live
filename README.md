@@ -1,6 +1,6 @@
 # panel-live
 
-> **Early-stage development** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
+> **Alpha release** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
 > **Browser note:** Some Edge/Chrome users may experience crashes — Firefox is a known workaround. See [known issues](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
@@ -20,8 +20,8 @@ Turn any web page into an interactive Python playground with the `<panel-live>` 
 Include the CSS and JS from the CDN:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
-<script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
+<script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
 ```
 
 Then add a `<panel-live>` element with your Panel code inside:

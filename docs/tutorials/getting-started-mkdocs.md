@@ -13,17 +13,11 @@ A documentation site with interactive Panel examples that run directly in the br
 
 ## Step 1: Create a project
 
-!!! warning "Pre-release"
-
-    panel-live is not yet published to PyPI or npm. The install command and asset URLs below
-    use the GitHub repository and GitHub Pages. Once released, these will change to
-    `pip install panel-live` and `cdn.jsdelivr.net/npm/panel-live@latest/dist/` URLs respectively.
-
 ```bash
 mkdir my-docs && cd my-docs
 uv init
 uv add mkdocs-material
-uv pip install git+https://github.com/panel-extensions/panel-live.git
+uv pip install panel-live
 ```
 
 ## Step 2: Scaffold the MkDocs site
@@ -52,9 +46,9 @@ markdown_extensions:
           format: !!python/name:panel_live.fences.formatter
 
 extra_javascript:
-  - https://panel-extensions.github.io/panel-live/assets/js/panel-live.js
+  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js
 extra_css:
-  - https://panel-extensions.github.io/panel-live/assets/css/panel-live.css
+  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css
 ```
 
 !!! tip "Alternative fence names"

@@ -4,10 +4,8 @@ This tutorial shows you how to use the `PanelLive` component in a Panel server a
 
 ## Installation
 
-The package is not yet released on PyPI. Install from GitHub:
-
 ```bash
-pip install git+https://github.com/panel-extensions/panel-live.git
+pip install panel-live
 ```
 
 Or with pixi (for development):
@@ -43,12 +41,6 @@ panel serve app.py
 ```
 
 Open `http://localhost:5006/app` in your browser. You'll see a code editor with live Pyodide output.
-
-!!! warning "Pre-release"
-
-    panel-live is not yet published to CDN. By default, `PanelLive` attempts to load from
-    `cdn.holoviz.org`, which is not yet available. Use `PanelLive.configure(js_url=...)` to
-    point to local assets or GitHub Pages. See [Local Assets](#local-assets) below.
 
 ## Display Modes
 
@@ -193,12 +185,10 @@ Then serve with `--static-dirs`:
 panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
 ```
 
-!!! note "Asset URL workaround"
+!!! note "CDN assets"
 
-    The default asset URLs currently point to GitHub Pages
-    (`panel-extensions.github.io/panel-live/assets/`). Once panel-live is
-    released and published to `cdn.holoviz.org`, the defaults will change
-    to CDN URLs and this note can be removed.
+    By default, `PanelLive` loads JS/CSS from `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
+    Use `PanelLive.configure()` to override with local assets for offline development.
 
 ## Next Steps
 

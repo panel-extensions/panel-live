@@ -25,8 +25,8 @@ extensions = ["panel_live.sphinx"]
 
 panel_live_conf = {
     # CDN assets (default — works in production)
-    "panel_live_js": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js",
-    "panel_live_css": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css",
+    "panel_live_js": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js",
+    "panel_live_css": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css",
 
     # mini-coi.js for COOP/COEP headers (Pyodide SharedArrayBuffer)
     "mini_coi": True,  # default: copies bundled mini-coi.js to build root

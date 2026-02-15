@@ -35,7 +35,7 @@ The index.md home page currently auto-runs Pyodide, causing visitors to immediat
 
 ## P1 — Distribution `PARTIAL`
 
-esbuild bundling is done. **Primary distribution: npm** — publishing to npm enables loading via `https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js`, which works everywhere including Claude.ai artifacts (jsDelivr's `cdn.jsdelivr.net/npm/` is widely allowlisted). CI workflow (`build.yml`) has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags. S3 upload (`scripts/cdn_upload.py`) remains as a secondary/backup channel. **Remaining:** actual npm publish, SRI hashes, bundle size tracking.
+esbuild bundling is done. **Primary distribution: npm** — publishing to npm enables loading via `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js`, which works everywhere including Claude.ai artifacts (jsDelivr's `cdn.jsdelivr.net/npm/` is widely allowlisted). CI workflow (`build.yml`) has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags. S3 upload (`scripts/cdn_upload.py`) remains as a secondary/backup channel. **Remaining:** actual npm publish, SRI hashes, bundle size tracking.
 
 Additional items informed by competitor research:
 
@@ -272,6 +272,18 @@ No mechanism to pin specific versions of Pyodide, Panel, Bokeh, or other depende
 
 Test embedding panel-live in Discourse forums, specifically [discourse.holoviz.org](https://discourse.holoviz.org/). Determine whether the web component or iframe approach works, and document any site-level configuration requirements. If embedding is not safe or feasible, document why.
 
+**Update:** Research completed. Three approaches evaluated:
+
+**Option A: Theme Component (Mermaid pattern) — Recommended.** Discourse's [Mermaid theme component](https://github.com/discourse/discourse-mermaid-theme-component) is the direct precedent. Users write standard `` ```panel-live `` code fences. Discourse preserves these as `<pre data-code-wrap="panel-live"><code>...</code></pre>` through sanitization without any plugin. A theme component's JS uses `api.decorateCookedElement()` to detect these blocks and replaces them with a "Run" button + iframe containing panel-live. Requires only admin panel access to install (no server rebuild), works on hosted Discourse. The iframe provides security isolation and naturally solves the COOP/COEP requirement (the iframe loads from a separate origin with proper headers, or uses `mini-coi.js` internally).
+
+**Option B: Iframe embedding — Simpler but worse UX.** Admin adds the panel-live hosting domain to Discourse's `allowed_iframes` site setting (one-time change). Users manually write `<iframe src="...">` HTML in posts. Works but poor UX — no syntax highlighting, users must construct iframe HTML manually.
+
+**Option C: Plugin — Not practical.** A full Discourse plugin could allowlist `<panel-live>` as a custom HTML element, but requires self-hosted Discourse or Business-tier managed hosting, plus Docker container rebuild. Discourse aggressively sanitizes custom elements (any element with a hyphen) — only a plugin calling `helper.allowList()` can override this. Also runs in-page (no iframe isolation), which is a security concern.
+
+**Key constraint — COOP/COEP:** Pyodide needs `SharedArrayBuffer`, which requires cross-origin isolation headers that the Discourse page won't have. The iframe approach (used by Options A and B) solves this naturally since the iframe content loads from a host with COOP/COEP headers.
+
+**Implementation plan (Option A):** Create a `discourse-panel-live` theme component that: (1) detects `data-code-wrap="panel-live"` code blocks, (2) shows the code with syntax highlighting + a "Run" button (click-to-run, no auto-execution), (3) on click, creates an iframe loading panel-live JS/CSS from `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`. Panel-live.js can be bundled as a theme asset (Mermaid bundles ~11MB, so size is not unprecedented) or loaded from CDN via `csp_extensions` theme modifier.
+
 **Acceptance:** Discourse embedding is tested and either works with documentation, or is documented as infeasible with explanation.
 
 ---
@@ -395,11 +407,11 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 - CLI `serve` command for showcase example
 - `__css__` class variable for explicit CSS loading (fixes missing CSS in CDN mode)
 
-**CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because the npm package is not yet published. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once published to npm, update `_CDN_BASE` in `component.py` to `https://cdn.jsdelivr.net/npm/panel-live@latest/dist`.
+**CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because the npm package is not yet published. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once published to npm, update `_CDN_BASE` in `component.py` to `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist`.
 
 **Remaining:**
 
-- Switch `_CDN_BASE` from GitHub Pages to `cdn.jsdelivr.net/npm/panel-live@latest/dist` once published to npm
+- Switch `_CDN_BASE` from GitHub Pages to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist` once published to npm
 - Full bidirectional sync (live param updates without re-run)
 - DataFrame/bytes serialization via Arrow IPC
 - Worker bridge API for state injection
@@ -569,7 +581,7 @@ a static image until the user clicks to activate.
 
 panel-live does not work in Claude.ai artifacts (canvas) due to Content Security Policy restrictions. The artifact `srcdoc` iframe has a strict `script-src` allowlist that does not include `panel-extensions.github.io`. However, `https://cdn.jsdelivr.net/npm/` is allowlisted.
 
-**Resolution:** The npm-first distribution strategy (P1 Distribution) resolves this. Once panel-live is published to npm, artifacts can load it via `https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js`, which is within the CSP allowlist. No workarounds needed.
+**Resolution:** The npm-first distribution strategy (P1 Distribution) resolves this. Once panel-live is published to npm, artifacts can load it via `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js`, which is within the CSP allowlist. No workarounds needed.
 
 **Acceptance:** panel-live loads and runs inside Claude.ai artifacts without CSP violations.
 

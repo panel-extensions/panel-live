@@ -86,8 +86,8 @@ Each release of `panel-live.js` embeds matching defaults for Panel, Bokeh, and P
 The JS/CSS bundle is published to npm and served via jsDelivr:
 
 ```
-cdn.jsdelivr.net/npm/panel-live@{version}/dist/panel-live.js
-cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js
+cdn.jsdelivr.net/npm/@panel-extensions/panel-live@{version}/dist/panel-live.js
+cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js
 ```
 
 jsDelivr's `cdn.jsdelivr.net/npm/` origin is widely allowlisted (including in Claude.ai artifacts), making npm the natural distribution channel for a web component.

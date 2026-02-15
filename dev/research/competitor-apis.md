@@ -792,8 +792,8 @@ hvplot
 
 **Proposed URLs:**
 ```
-https://cdn.jsdelivr.net/npm/panel-live@1.0.0/dist/panel-live.js
-https://cdn.jsdelivr.net/npm/panel-live@1.0.0/dist/panel-live.css
+https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@1.0.0/dist/panel-live.js
+https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@1.0.0/dist/panel-live.css
 ```
 
 Or via holoviz CDN:

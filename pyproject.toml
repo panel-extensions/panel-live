@@ -8,9 +8,6 @@ requires = [
 build-backend = "hatchling.build"
 
 
-[tool.setuptools_scm]
-version_scheme = "post-release"
-
 [project]
 name = "panel-live"
 dynamic = ["version"]
