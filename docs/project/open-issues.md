@@ -6,16 +6,6 @@ Outstanding issues and planned improvements for panel-live.
 
 ---
 
-## P0 — Browser Crash (STATUS_ACCESS_VIOLATION)
-
-The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machines. Firefox is more stable. `serve.py` adds COOP/COEP headers for SharedArrayBuffer, but crashes still occur.
-
-**Update:** Scope appears narrow — only reproducible on one specific Windows laptop in Edge/Chrome. Testing on iOS tablet, iOS iPhone, and a second Windows laptop all work fine. ~~Crash warnings in README.md and index.md should be softened to reflect that this affects some Edge/Chrome users, with Firefox as a known workaround.~~ **Done:** Banner in `docs/overrides/main.html` softened, README.md updated.
-
-**Likely causes:** Main thread memory pressure (~300-500MB), missing COOP/COEP headers behind proxies, version incompatibilities. Moving Pyodide to a Dedicated Worker (now done) isolates the ~300-500MB from the main thread, which may mitigate this.
-
-**Acceptance:** No crashes on 8GB RAM machines with up to 3 concurrent apps.
-
 ---
 
 ## P1 — Don't Auto-Run Pyodide on Home Page

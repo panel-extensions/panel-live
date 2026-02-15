@@ -32,7 +32,7 @@ class PanelLive(JSComponent):
 
         PanelLive.configure(js_url="./pl/panel-live.js")
 
-    Parameters
+    Attributes
     ----------
     code : str
         Python code to execute in Pyodide.

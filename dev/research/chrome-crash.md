@@ -204,7 +204,40 @@ Add stall detection and auto-recovery for silent worker death (STATUS_ACCESS_VIO
 
 ---
 
-## 8. References
+## 8. Results
+
+### 8.1 Targeted Experiments (4 tests)
+
+| Test | JSPI | Thread | Method | Result |
+|------|------|--------|--------|--------|
+| `test-async-main.html` | Enabled (default) | Main | `runPythonAsync` | **CRASHES** |
+| `test-jspi-disabled-main.html` | **Disabled** | Main | `runPythonAsync` | Works (many runs) |
+| `test-jspi-disabled-two.html` | **Disabled** | Main x2 | `runPythonAsync` | Works (many runs) |
+| `test-jspi-disabled-worker.html` | **Disabled** | Worker | `runPythonAsync` | Works (Panel loaded + rendered) |
+
+**Conclusion:** JSPI is confirmed as the root cause. Disabling JSPI (deleting `WebAssembly.Suspending`/`.promising` + `enableRunUntilComplete: false`) prevents the crash in all configurations.
+
+### 8.2 Stress Test (27 examples)
+
+A comprehensive stress test (`test-jspi-disabled-stress.html`) runs 27 examples from the docs site sequentially in a single Pyodide instance with JSPI disabled. Examples cover: Panel-only widgets, ECharts, matplotlib/numpy/FFT, seaborn, bokeh models, tabulator, altair, plotly, hvplot, holoviews, colorcet, polars, and xarray.
+
+**Result: ALL PASSED — 26/26 examples in 6.0s.** Confirmed on the crash-prone Windows machine in Chrome/Edge.
+
+### 8.3 Implementation
+
+Fix implemented in `lib/config.js`, `lib/panel-live-worker.js`, and `lib/worker-bridge.js`:
+
+1. `disableJSPI: true` default config — users opt out via `PanelLive.configure({ disableJSPI: false })`
+2. JSPI APIs deleted before `importScripts(pyodideUrl)` in the worker
+3. `enableRunUntilComplete: false` passed to `loadPyodide()`
+4. Stall detection (45s timeout) + crash recovery (1 retry) in the worker bridge
+5. Enhanced `_onWorkerError` with recovery for crash-like errors
+
+Unit tests added for all new functionality (config default, init message, stall detection, recovery, error handling).
+
+---
+
+## 9. References
 
 - [pyodide#5702](https://github.com/pyodide/pyodide/issues/5702) — JSPI async crash
 - [pyodide#5705](https://github.com/pyodide/pyodide/issues/5705) — STATUS_STACK_BUFFER_OVERRUN

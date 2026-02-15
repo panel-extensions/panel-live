@@ -46,4 +46,8 @@ describe('config', () => {
     expect(urls.bokehJs[1]).toContain('bokeh-widgets-');
     expect(urls.bokehJs[2]).toContain('bokeh-tables-');
   });
+
+  it('has disableJSPI default set to true', () => {
+    expect(_defaults.disableJSPI).toBe(true);
+  });
 });

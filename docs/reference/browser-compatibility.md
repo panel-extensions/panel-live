@@ -40,11 +40,13 @@ panel-live requires modern browser features including WebAssembly, ES2020+, and 
 
 Corporate proxies, CDNs, and authentication gateways may strip or block the `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers required for SharedArrayBuffer. panel-live works without SharedArrayBuffer but with reduced performance. See [Auth Proxy Setup](../how-to/auth-proxy-setup.md).
 
-### STATUS_ACCESS_VIOLATION (some Edge/Chrome on Windows)
+### STATUS_ACCESS_VIOLATION (Chrome/Edge on some Windows machines)
 
-A small number of Windows machines (specific hardware/driver combinations) experience `STATUS_ACCESS_VIOLATION` crashes in Edge and Chrome. Firefox is not affected. This appears to be related to WebAssembly memory allocation and is not specific to panel-live.
+Chrome 137+ ships JSPI (JavaScript Promise Integration) enabled by default, which can conflict with Pyodide's async scheduler on some hardware/driver combinations, causing `STATUS_ACCESS_VIOLATION` crashes. This is hardware-dependent — most machines are unaffected. Firefox is not affected.
 
-**Workaround:** Use Firefox, or ensure the machine has at least 8GB RAM with no memory-intensive applications running.
+**Mitigation (built-in):** panel-live disables JSPI by default (`disableJSPI: true`), removing the crash trigger. A stall detection timer (45s) and automatic crash recovery provide defense-in-depth for any remaining edge cases. No user action required.
+
+**Note:** Enterprise antivirus software (e.g. Sophos StackPivot detection) may separately flag WASM memory operations. This requires endpoint configuration and cannot be mitigated in JavaScript.
 
 ### Chrome Android — no SharedWorker
 

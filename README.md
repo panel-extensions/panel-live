@@ -1,8 +1,8 @@
 # panel-live
 
-> **Alpha release** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
+> **Not yet released** — APIs may change. If you find a version that works, pin it. Check out the [roadmap](https://panel-extensions.github.io/panel-live/project/open-issues/).
 
-> **Browser note:** Some Edge/Chrome users may experience crashes — Firefox is a known workaround. See [known issues](https://panel-extensions.github.io/panel-live/project/open-issues/).
+> **Browser note:** Some Chrome/Edge users may experience crashes — Firefox is a known workaround. Issue tracked [here](https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737).
 
 [![CI](https://img.shields.io/github/actions/workflow/status/panel-extensions/panel-live/ci.yml?style=flat-square&branch=main)](https://github.com/panel-extensions/panel-live/actions/workflows/ci.yml)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/panel-live?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/panel-live)
@@ -83,7 +83,7 @@ See the [full playground](https://panel-extensions.github.io/panel-live/playgrou
 
 ## Pin Your Version
 
-This project is **in its early stages**, so if you find a version that suits your needs, it's recommended to **pin your version**, as updates may introduce changes.
+This project has **not been released yet**, so if you find a version that suits your needs, it's recommended to **pin your version**, as updates may introduce changes.
 
 ## Installation
 
