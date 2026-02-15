@@ -1,1 +1,0 @@
-recursive-include panel_live models/*.js

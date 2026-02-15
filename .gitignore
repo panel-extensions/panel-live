@@ -382,3 +382,8 @@ $RECYCLE.BIN/
 .pixi
 node_modules/
 coverage/js/
+docs-sphinx/_build/
+docs-sphinx/.panel-live/
+docs-quarto/_extensions
+docs-quarto/_site/*
+notes.md

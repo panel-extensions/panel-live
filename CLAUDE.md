@@ -27,9 +27,17 @@ pixi run test-js-coverage            # run Vitest with V8 coverage report
 pixi run lint-install                # install pre-commit hooks
 pixi run lint                        # run pre-commit on all files
 
-# Docs (automatically builds JS and syncs assets before serving/building)
+# Docs — MkDocs (automatically builds JS and syncs assets before serving/building)
 pixi run -e docs serve               # live dev server (zensical/mkdocs)
 pixi run -e docs build               # build static site to site/
+
+# Docs — Sphinx
+pixi run -e sphinx build             # build Sphinx test site to docs-sphinx/_build
+pixi run -e sphinx serve             # serve Sphinx site on localhost:8001
+
+# Docs — Quarto
+pixi run -e quarto build             # render Quarto test site to docs-quarto/_site
+pixi run -e quarto serve             # preview Quarto site
 
 # Building
 pixi run -e build build-wheel        # build package wheel
@@ -54,6 +62,7 @@ pixi run python -m pytest tests/test_core.py::test_import -x
 - **`__init__.py`** — exports `create_app()` and `__version__`
 - **`main.py`** — `create_app()` returns a demo Panel Row (slider + reactive callback)
 - **`fences.py`** — custom `pymdownx.superfences` validator/formatter that transforms `` ```panel `` Markdown fences into `<panel-live>` HTML elements. Configured in `zensical.toml` under `custom_fences`. Defaults: `mode="editor"`, `code-position="last"`.
+- **`sphinx.py`** — Sphinx extension that registers a configurable RST directive (default `panel-live`, switchable to `pyodide`/`python`) and transforms directive content into `<panel-live>` HTML. Supports pre-rendering at build time (aligned with nbsite.pyodide), content-hash caching, and version configuration via `panel_live_conf` dict in `conf.py`.
 
 ### Web component (`lib/` → `dist/`)
 
@@ -101,9 +110,21 @@ With optional attributes:
 
 Known attributes: `mode`, `theme`, `height`, `layout`, `auto-run`, `label`, `code-visibility`, `code-position`.
 
+### Sphinx extension (`docs-sphinx/`)
+
+Test project for the Sphinx extension. `conf.py` uses `panel_live.sphinx` with `panel_live_conf` dict for configuration.
+
+### Quarto extension (`quarto/` → `docs-quarto/`)
+
+Lua filter extension at `quarto/_extensions/panel-live/`. Transforms `{panel-live}` code blocks into `<panel-live>` HTML elements. Test site at `docs-quarto/`.
+
+### CDN upload (`scripts/`)
+
+- **`cdn_upload.py`** — uploads `dist/` JS/CSS to `s3://cdn.holoviz.org/panel-live/{version}/` and `latest/`
+
 ### Configuration files
 
-- **`pixi.toml`** — environments (default, py312, test-ui, docs, build, lint) and tasks
+- **`pixi.toml`** — environments (default, py312, test-ui, docs, sphinx, quarto, build, lint) and tasks
 - **`pyproject.toml`** — package metadata, ruff config (line-length=165), mypy strict mode, pytest options
 - **`zensical.toml`** — MkDocs/Material theme config, markdown extensions, superfences custom fence registration
 - **`.pre-commit-config.yaml`** — ruff, codespell, prettier (CSS), notebook cleanup

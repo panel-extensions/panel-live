@@ -1,0 +1,83 @@
+---
+title: "Pre-Rendering"
+---
+
+# Pre-Rendering
+
+Pre-rendering executes Panel code at build time and embeds the static HTML output
+directly into the page. When the page loads, the pre-rendered output appears
+instantly. Once Pyodide finishes loading, the output transitions to a fully
+interactive app.
+
+This page shows all four combinations of pre-render and auto-run so you can
+compare the page-load experience.
+
+:::{.callout-note}
+Pre-rendering is currently a Sphinx-only feature (build-time execution via
+`sphinx-build`). The `pre-render` attribute is passed through as an HTML
+attribute in Quarto but does not execute at build time. This page serves as
+documentation and a test case for when pre-rendering support is added to the
+Quarto extension.
+:::
+
+## Pre-render + auto-run (recommended)
+
+Default behavior. The output appears instantly from the pre-rendered HTML.
+Pyodide loads in the background and replaces the static output with the
+interactive app. Best for most use cases.
+
+```{.panel-live}
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=42)
+pn.Column(
+    "**Pre-render + auto-run** — output appears instantly, becomes interactive when Pyodide loads.",
+    pn.Row(slider, pn.bind(lambda v: f"### {v}", slider)),
+).servable()
+```
+
+## Pre-render + no auto-run
+
+The pre-rendered output appears instantly and stays static until the user
+clicks Run. Best for documentation pages with many examples — avoids
+loading Pyodide until the user explicitly requests interactivity.
+
+```{.panel-live}
+#| auto-run: false
+import panel as pn
+slider = pn.widgets.IntSlider(name="Brightness", start=0, end=100, value=75)
+pn.Column(
+    "**Pre-render + no auto-run** — static output until the user clicks Run.",
+    pn.Row(slider, pn.bind(lambda v: f"### Brightness: {v}%", slider)),
+).servable()
+```
+
+## No pre-render + auto-run
+
+No build-time output. The page shows a loading state, then renders the
+output once Pyodide has loaded and executed the code.
+
+```{.panel-live}
+#| pre-render: false
+import panel as pn
+slider = pn.widgets.IntSlider(name="Speed", start=1, end=10, value=5)
+pn.Column(
+    "**No pre-render + auto-run** — loading state, then output once Pyodide is ready.",
+    pn.Row(slider, pn.bind(lambda v: f"### Speed: {v}x", slider)),
+).servable()
+```
+
+## No pre-render + no auto-run
+
+No build-time output and no automatic execution. The output area is blank
+until the user clicks Run. Lightest possible page load.
+
+```{.panel-live}
+#| pre-render: false
+#| auto-run: false
+import panel as pn
+slider = pn.widgets.IntSlider(name="Volume", start=0, end=100, value=50)
+pn.Column(
+    "**No pre-render + no auto-run** — blank until the user clicks Run.",
+    pn.Row(slider, pn.bind(lambda v: f"### Volume: {v}%", slider)),
+).servable()
+```

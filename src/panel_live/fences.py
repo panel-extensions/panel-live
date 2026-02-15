@@ -13,6 +13,9 @@ or with attributes:
     import panel as pn
     pn.panel("Hello").servable()
     ```
+
+Pre-rendering can be enabled via :func:`configure` so that Panel code is
+executed at MkDocs build time and the output is embedded as static HTML.
 """
 
 import re
@@ -41,10 +44,41 @@ _KNOWN_ATTRS = frozenset(
         "code-visibility",
         "code-position",
         "src",
+        "pre-render",
     }
 )
 
 _DEFAULTS = {}
+
+_PRERENDER_CONF: dict = {
+    "pre_render": False,
+    "cache_dir": ".panel-live",
+    "setup_code": "",
+    "timeout": 120,
+}
+
+
+def configure(*, pre_render=False, cache_dir=".panel-live", setup_code="", timeout=120):
+    """Configure pre-rendering for the MkDocs fence formatter.
+
+    Call this from a MkDocs hook (``on_startup`` or ``on_config``) to enable
+    build-time pre-rendering of ``panel`` fenced code blocks.
+
+    Parameters
+    ----------
+    pre_render : bool
+        Enable pre-rendering (default ``False``).
+    cache_dir : str
+        Directory for the content-hash cache (default ``".panel-live"``).
+    setup_code : str
+        Python code prepended before every fence's code.
+    timeout : int
+        Maximum seconds to wait for each subprocess (default ``120``).
+    """
+    _PRERENDER_CONF["pre_render"] = pre_render
+    _PRERENDER_CONF["cache_dir"] = cache_dir
+    _PRERENDER_CONF["setup_code"] = setup_code
+    _PRERENDER_CONF["timeout"] = timeout
 
 
 def _escape(text):
@@ -127,8 +161,13 @@ def formatter(source, language, css_class, options, md, **kwargs):
         standard ``<pre><code>`` block when ``mode="org"``.
     """
     attrs = dict(_DEFAULTS)
+    fence_prerender = None  # None = unset (use global)
     for key in _KNOWN_ATTRS:
         value = options.get(key, "")
+        if key == "pre-render":
+            if value:
+                fence_prerender = value.lower() == "true"
+            continue
         if value:
             attrs[key] = value
 
@@ -146,6 +185,62 @@ def formatter(source, language, css_class, options, md, **kwargs):
     code = _CHILD_RE.sub("", source)
 
     attr_str = "".join(f' {k}="{_escape(v)}"' for k, v in attrs.items())
+
+    # Pre-render if enabled (per-fence overrides global)
+    if fence_prerender is not None:
+        should_prerender = fence_prerender
+    else:
+        should_prerender = _PRERENDER_CONF["pre_render"]
+    pre_rendered_html = ""
+    if should_prerender and code.strip():
+        from panel_live.prerender import embed_script_tag
+        from panel_live.prerender import pre_render
+
+        output = pre_render(
+            code.strip(),
+            _PRERENDER_CONF["cache_dir"],
+            setup_code=_PRERENDER_CONF["setup_code"],
+            timeout=_PRERENDER_CONF["timeout"],
+        )
+        if output:
+            pre_rendered_html = "\n" + embed_script_tag(output)
+
     if code.strip():
-        return f"<panel-live{attr_str}>\n{_escape(code)}\n</panel-live>"
+        return f"<panel-live{attr_str}>\n{_escape(code)}{pre_rendered_html}\n</panel-live>"
     return f"<panel-live{attr_str}></panel-live>"
+
+
+def prerender_formatter(source, language, css_class, options, md, **kwargs):
+    """Wrap *source* in a ``<panel-live>`` element with pre-rendering forced on.
+
+    Drop-in replacement for :func:`formatter` that always pre-renders,
+    regardless of the global ``configure()`` setting.  Use this in your
+    superfences configuration when you want **every** fence to be
+    pre-rendered without needing a MkDocs hook::
+
+        custom_fences = [
+            {
+                "name": "panel",
+                "class": "panel-live",
+                "validator": "panel_live.fences.validator",
+                "format": "panel_live.fences.prerender_formatter",
+            }
+        ]
+
+    Parameters
+    ----------
+    source, language, css_class, options, md, **kwargs
+        Same as :func:`formatter`.
+
+    Returns
+    -------
+    str
+        An HTML string containing a ``<panel-live>`` element with
+        pre-rendered output embedded.
+    """
+    old = _PRERENDER_CONF["pre_render"]
+    _PRERENDER_CONF["pre_render"] = True
+    try:
+        return formatter(source, language, css_class, options, md, **kwargs)
+    finally:
+        _PRERENDER_CONF["pre_render"] = old

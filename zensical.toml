@@ -11,7 +11,10 @@ nav = [
   {"Playground" = "playground.md"},
   {"API Explorer" = "api-explorer.md"},
   {"Tutorials" = [
-    {"Getting Started" = "tutorials/getting-started.md"},
+    {"Getting Started with HTML" = "tutorials/getting-started.md"},
+    {"Getting Started with MkDocs" = "tutorials/getting-started-mkdocs.md"},
+    {"Getting Started with Sphinx" = "tutorials/getting-started-sphinx.md"},
+    {"Getting Started with Quarto" = "tutorials/getting-started-quarto.md"},
   ]},
   {"How-to Guides" = [
     {"HTML Attributes" = [
@@ -21,6 +24,7 @@ nav = [
       {"Code Editor Options" = "how-to/code-editor-options.md"},
       {"Height" = "how-to/height.md"},
       {"Auto-Run" = "how-to/auto-run.md"},
+      {"Pre-Rendering" = "how-to/pre-rendering.md"},
       {"Labels" = "how-to/label.md"},
       {"External Source" = "how-to/src.md"},
       {"Fullscreen" = "how-to/fullscreen.md"},
@@ -46,6 +50,8 @@ nav = [
       {"Claude Artifacts" = "how-to/claude-artifacts.md"},
       {"Iframe Embedding" = "how-to/iframe-embedding.md"},
       {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
+      {"Sphinx Integration" = "how-to/sphinx-integration.md"},
+      {"Quarto Integration" = "how-to/quarto-integration.md"},
     ]},
   ]},
   {"Reference" = [
@@ -59,6 +65,7 @@ nav = [
     {"Browser Compatibility" = "reference/browser-compatibility.md"},
     {"Design Decisions" = "explanation/design.md"},
     {"Known Limitations" = "reference/known-limitations.md"},
+    {"Pre-Rendering" = "explanation/pre-rendering.md"},
     {"Security Model" = "explanation/security.md"},
   ]},
   {"Project" = [

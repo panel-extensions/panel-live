@@ -36,7 +36,7 @@ twine = "*"
 wheel = "*"
 [feature.build.tasks]
 build-wheel = "python -m build --no-isolation ."
-check-wheel = "twine check dist/*"
+check-wheel = "twine check dist/*.whl dist/*.tar.gz"
 
 [feature.lint.dependencies]
 pre-commit = "*"
@@ -95,10 +95,71 @@ depends-on = ["_postinstall", "_sync-assets"]
 cmd = "zensical build"
 depends-on = ["_postinstall", "_sync-assets"]
 
+[feature.sphinx.dependencies]
+sphinx = ">=4.0"
+pydata-sphinx-theme = "*"
+panel = ">=1.5.0"
+bokeh = "*"
+holoviews = "*"
+hvplot = "*"
+pytest = ">=6"
+pip = "*"
+hatchling = "*"
+hatch-vcs = "*"
+setuptools = ">=61"
+setuptools-scm = "*"
+nodejs = "*"
+esbuild = "*"
+
+[feature.sphinx.pypi-dependencies]
+portalocker = "*"
+
+[feature.sphinx.tasks]
+_sphinx-postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
+_sphinx-npm-install = "npm install"
+_sphinx-build-js = { cmd = "node build.mjs", depends-on = ["_sphinx-npm-install"] }
+_sphinx-sync-assets = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js docs-sphinx/_static/ && cp dist/panel-live.css docs-sphinx/_static/", depends-on = ["_sphinx-build-js"] }
+
+[feature.sphinx.tasks.build]
+cmd = "sphinx-build -b html docs-sphinx docs-sphinx/_build"
+depends-on = ["_sphinx-postinstall", "_sphinx-sync-assets"]
+
+[feature.sphinx.tasks.serve]
+cmd = "python -m http.server -d docs-sphinx/_build 8001"
+depends-on = ["build"]
+
+[feature.quarto.dependencies]
+quarto = "*"
+jupyter = "*"
+pip = "*"
+hatchling = "*"
+hatch-vcs = "*"
+setuptools = ">=61"
+setuptools-scm = "*"
+nodejs = "*"
+esbuild = "*"
+
+[feature.quarto.tasks]
+_quarto-postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
+_quarto-link-extension = "ln -sfn ../quarto/_extensions docs-quarto/_extensions"
+_quarto-npm-install = "npm install"
+_quarto-build-js = { cmd = "node build.mjs", depends-on = ["_quarto-npm-install"] }
+_quarto-sync-assets = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js dist/panel-live.css dist/mini-coi.js quarto/_extensions/panel-live/", depends-on = ["_quarto-build-js"] }
+
+[feature.quarto.tasks.build]
+cmd = "quarto render docs-quarto"
+depends-on = ["_quarto-postinstall", "_quarto-link-extension", "_quarto-sync-assets"]
+
+[feature.quarto.tasks.serve]
+cmd = "quarto preview docs-quarto"
+depends-on = ["_quarto-postinstall", "_quarto-link-extension", "_quarto-sync-assets"]
+
 [environments]
 default = ["test"]
 py312 = ["py312", "test"]
 test-ui = ["py312", "test", "test-ui"]
 docs = ["docs"]
+sphinx = ["sphinx"]
+quarto = ["quarto"]
 build = ["build"]
 lint = { features = ["lint"], no-default-feature = true }

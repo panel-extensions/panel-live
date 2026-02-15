@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "panel-live",
+  "version": "0.1.0a1",
   "scripts": {
     "build": "node build.mjs",
     "build:dev": "node build.mjs --dev",

@@ -1,0 +1,51 @@
+---
+title: "panel-live Quarto Test"
+---
+
+This site tests the `panel-live` Quarto extension.
+
+## Default Mode (Editor)
+
+```{.panel-live}
+#| mode: editor
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
+pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```
+
+## App Mode
+
+```{.panel-live}
+#| mode: app
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
+pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```
+
+## App Mode With Requirements
+
+```{.panel-live}
+#| mode: app
+#| requirements: numpy
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
+pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```
+
+## Editor Mode
+
+```{.panel-live}
+#| mode: editor
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
+pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```
+
+## Playground Mode
+
+```{.panel-live}
+#| mode: playground
+import panel as pn
+slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
+pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```

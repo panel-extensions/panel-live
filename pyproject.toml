@@ -24,7 +24,7 @@ maintainers = [
 ]
 classifiers = [
     "License :: OSI Approved :: BSD License",
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -55,6 +55,13 @@ dev = [
     "pytest-xdist",
     "pytest",
     "watchfiles",
+]
+sphinx = [
+    "sphinx>=4.0",
+    "docutils",
+    "portalocker",
+    "panel>=1.5.0",
+    "bokeh",
 ]
 mypy = [
     "mypy",
@@ -122,12 +129,15 @@ convention = "numpy"
 "*_test.py" = ["D"]
 # Embedded Python scripts loaded as text strings by esbuild, not public modules.
 "lib/python/**" = ["D"]
+# Scripts and CLI use print() for user-facing output.
+"scripts/**" = ["D", "T20"]
+"src/panel_live/cli.py" = ["T20"]
 
 [tool.ruff.lint.isort]
 force-single-line = true
 
 [tool.codespell]
-skip = "docs/assets/js/*,docs/assets/css/*,package-lock.json,node_modules,dist,.pixi"
+skip = "docs/assets/js/*,docs/assets/css/*,docs-sphinx/_static/*,quarto/_extensions/panel-live/*.js,quarto/_extensions/panel-live/*.css,package-lock.json,pixi.lock,node_modules,dist,.pixi"
 ignore-words-list = "thur"
 
 [tool.pytest.ini_options]
