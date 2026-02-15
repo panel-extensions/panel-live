@@ -14,7 +14,7 @@ version_scheme = "post-release"
 [project]
 name = "panel-live"
 dynamic = ["version"]
-description = 'Run your Panel and Python code in the browser with panel-live'
+description = 'Run your Python code in the browser with panel-live'
 readme = "README.md"
 license = { text = "BSD" }
 requires-python = ">=3.12"

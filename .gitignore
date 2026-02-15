@@ -387,4 +387,5 @@ docs-sphinx/.panel-live/
 docs-quarto/_extensions
 docs-quarto/_site/*
 notes.md
+dev/screenshots/
 .panel-live/*

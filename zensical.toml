@@ -1,6 +1,6 @@
 [project]
 site_name = "panel-live"
-site_description = "Run your Panel and Python code in the browser with panel-live"
+site_description = "Run your Python code in the browser with panel-live"
 site_author = "Marc SkovMadsen"
 repo_url = "https://github.com/panel-extensions/panel-live"
 repo_name = "panel-extensions/panel-live"

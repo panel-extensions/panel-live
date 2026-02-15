@@ -15,7 +15,7 @@ from typing import ClassVar
 import param
 from panel.custom import JSComponent
 
-_CDN_BASE = "https://cdn.holoviz.org/panel-live/latest"
+_CDN_BASE = "https://panel-extensions.github.io/panel-live/assets"
 
 
 class PanelLive(JSComponent):
@@ -73,22 +73,20 @@ class PanelLive(JSComponent):
     """
 
     # --- Asset URLs (auto-loaded by Panel) ---
-    # __javascript__ loads the panel-live.js bundle into <head>.
-    # The ESM derives the CSS URL from the script tag (co-located).
-    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.js"]
+    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/js/panel-live.js"]
+    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/css/panel-live.css"]
 
     @classmethod
-    def configure(cls, *, js_url: str | None = None) -> None:
-        """Override the panel-live JS asset URL.
+    def configure(cls, *, js_url: str | None = None, css_url: str | None = None) -> None:
+        """Override the panel-live JS and/or CSS asset URLs.
 
-        The CSS is loaded automatically from the same directory as the JS.
         Call before creating any ``PanelLive`` instances::
 
-            PanelLive.configure(js_url="./pl/panel-live.js")
+            PanelLive.configure(js_url="./pl/panel-live.js", css_url="./pl/panel-live.css")
 
-        HTTP(S) URLs are loaded via ``__javascript__``.  Relative URLs
-        (for local ``--static-dirs`` serving) are injected via
-        ``pn.config.js_files`` to avoid Panel's component-path prefix.
+        HTTP(S) URLs are loaded via ``__javascript__`` / ``__css__``.
+        Relative URLs (for local ``--static-dirs`` serving) are injected
+        via ``pn.config.js_files`` / ``pn.config.css_files``.
         """
         if js_url is not None:
             if js_url.startswith(("http://", "https://")):
@@ -98,6 +96,15 @@ class PanelLive(JSComponent):
 
                 cls.__javascript__ = []
                 pn.config.js_files["panel-live"] = js_url
+
+        if css_url is not None:
+            if css_url.startswith(("http://", "https://")):
+                cls.__css__ = [css_url]
+            else:
+                import panel as pn
+
+                cls.__css__ = []
+                pn.config.css_files.append(css_url)
 
     # --- Code ---
     code = param.String(default="", doc="Python code to execute in Pyodide")

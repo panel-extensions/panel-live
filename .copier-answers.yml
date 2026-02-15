@@ -9,5 +9,5 @@ extension_type: panel
 github_url: https://github.com/panel-extensions/panel-live
 github_user: panel-extensions
 minimal_python_version: py312
-project_short_description: Run your Panel and Python code in the browser with panel-live
+project_short_description: Run your Python code in the browser with panel-live
 project_slug: panel-live

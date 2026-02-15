@@ -44,8 +44,11 @@ panel serve app.py
 
 Open `http://localhost:5006/app` in your browser. You'll see a code editor with live Pyodide output.
 
-!!! note
-    By default, `PanelLive` loads the JS/CSS bundle from CDN (`cdn.holoviz.org`). For local development, see [Local Assets](#local-assets) below.
+!!! warning "Pre-release"
+
+    panel-live is not yet published to CDN. By default, `PanelLive` attempts to load from
+    `cdn.holoviz.org`, which is not yet available. Use `PanelLive.configure(js_url=...)` to
+    point to local assets or GitHub Pages. See [Local Assets](#local-assets) below.
 
 ## Display Modes
 
@@ -178,7 +181,10 @@ For local development without CDN, serve the panel-live JS/CSS as static files:
 from panel_live import PanelLive
 
 # Point to locally served assets
-PanelLive.configure(js_url="./pl/panel-live.js")
+PanelLive.configure(
+    js_url="./pl/panel-live.js",
+    css_url="./pl/panel-live.css",
+)
 ```
 
 Then serve with `--static-dirs`:
@@ -186,6 +192,13 @@ Then serve with `--static-dirs`:
 ```bash
 panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
 ```
+
+!!! note "Asset URL workaround"
+
+    The default asset URLs currently point to GitHub Pages
+    (`panel-extensions.github.io/panel-live/assets/`). Once panel-live is
+    released and published to `cdn.holoviz.org`, the defaults will change
+    to CDN URLs and this note can be removed.
 
 ## Next Steps
 

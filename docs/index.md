@@ -127,8 +127,8 @@ For a full list, see [Known Limitations](reference/known-limitations.md).
 ## Get Started
 
 - [Examples](examples.md) — interactive examples across all categories
-- [API Explorer](api-explorer.html) — configure every attribute interactively
 - [Playground](playground.html) — full-screen editing environment
+- [API Explorer](api-explorer.html) — configure every attribute interactively
 - [How-to Guides](how-to/mode.md) — per-attribute guides with live examples
 - [Reference](reference/html-api.md) — complete HTML, JavaScript, CSS, and Events API
 - [Design Decisions](explanation/design.md) — why panel-live is built the way it is
