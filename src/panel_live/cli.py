@@ -2,9 +2,13 @@
 
 Usage::
 
-    python -m panel_live pre-render CODE
-    python -m panel_live pre-render --file script.py
-    python -m panel_live pre-render CODE --cache-dir .cache --setup-code "import panel as pn" --timeout 60
+    panel-live serve --port 5008
+    panel-live pre-render CODE
+    panel-live pre-render --file script.py
+    panel-live pre-render CODE --cache-dir .cache --setup-code "import panel as pn" --timeout 60
+
+The ``serve`` command starts a Panel server with the showcase example app,
+demonstrating all PanelLive display modes.
 
 The ``pre-render`` command executes Panel code and prints the resulting
 Bokeh JSON to stdout.  Exit code 0 on success, 1 on failure.
@@ -17,9 +21,14 @@ import sys
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="panel_live", description="panel-live CLI utilities")
+    parser = argparse.ArgumentParser(prog="panel-live", description="panel-live CLI utilities")
     sub = parser.add_subparsers(dest="command")
 
+    # --- serve ---
+    srv = sub.add_parser("serve", help="Serve the PanelLive showcase example app")
+    srv.add_argument("--port", type=int, default=5008, help="Port to serve on (default: 5008)")
+
+    # --- pre-render ---
     pr = sub.add_parser("pre-render", help="Pre-render Panel code to Bokeh JSON")
     pr.add_argument("code", nargs="?", default=None, help="Python code to pre-render")
     pr.add_argument("--file", dest="file", default=None, help="Read code from a file instead of the positional argument")
@@ -31,7 +40,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Entry point for ``python -m panel_live``."""
+    """Entry point for ``python -m panel_live`` and ``panel-live`` CLI."""
     parser = _build_parser()
     args = parser.parse_args(argv)
 
@@ -39,11 +48,55 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 1
 
+    if args.command == "serve":
+        return _cmd_serve(args)
+
     if args.command == "pre-render":
         return _cmd_pre_render(args)
 
     parser.print_help()
     return 1
+
+
+def _cmd_serve(args: argparse.Namespace) -> int:
+    import pathlib
+
+    import panel as pn
+
+    showcase_path = pathlib.Path(__file__).parent / "examples" / "showcase.py"
+    if not showcase_path.exists():
+        print(f"Error: showcase app not found at {showcase_path}", file=sys.stderr)
+        return 1
+
+    # Find the panel-live JS/CSS assets to serve as static files.
+    # Look for quarto/_extensions/panel-live/ relative to the package root,
+    # or fall back to dist/ in the repo root.
+    package_root = pathlib.Path(__file__).parent.parent.parent
+    static_dir = package_root / "quarto" / "_extensions" / "panel-live"
+    if not static_dir.exists():
+        static_dir = package_root / "dist"
+    if not static_dir.exists():
+        print(
+            "Warning: Could not find panel-live JS assets locally. " "The showcase will use CDN assets instead.",
+            file=sys.stderr,
+        )
+        static_dir = None
+
+    static_dirs = {"pl": str(static_dir)} if static_dir else {}
+
+    print(f"Serving PanelLive showcase on http://localhost:{args.port}")
+    print(f"  App: {showcase_path}")
+    if static_dir:
+        print(f"  Assets: {static_dir}")
+    print()
+
+    pn.serve(
+        {"/": str(showcase_path)},
+        port=args.port,
+        show=True,
+        static_dirs=static_dirs,
+    )
+    return 0
 
 
 def _cmd_pre_render(args: argparse.Namespace) -> int:

@@ -13,8 +13,9 @@ nav = [
   {"Tutorials" = [
     {"Getting Started with HTML" = "tutorials/getting-started.md"},
     {"Getting Started with MkDocs" = "tutorials/getting-started-mkdocs.md"},
-    {"Getting Started with Sphinx" = "tutorials/getting-started-sphinx.md"},
+    {"Getting Started with Panel" = "tutorials/panel-component.md"},
     {"Getting Started with Quarto" = "tutorials/getting-started-quarto.md"},
+    {"Getting Started with Sphinx" = "tutorials/getting-started-sphinx.md"},
   ]},
   {"How-to Guides" = [
     {"HTML Attributes" = [
@@ -53,6 +54,9 @@ nav = [
       {"Sphinx Integration" = "how-to/sphinx-integration.md"},
       {"Quarto Integration" = "how-to/quarto-integration.md"},
     ]},
+    {"Panel Component" = [
+      {"PanelLive Component" = "how-to/panel-component.md"},
+    ]},
   ]},
   {"Reference" = [
     {"Python API" = "reference/python-api.md"},
@@ -67,6 +71,7 @@ nav = [
     {"Known Limitations" = "reference/known-limitations.md"},
     {"Pre-Rendering" = "explanation/pre-rendering.md"},
     {"Security Model" = "explanation/security.md"},
+    {"PanelLive Component" = "explanation/panel-component.md"},
   ]},
   {"Project" = [
     {"Open Issues" = "project/open-issues.md"},

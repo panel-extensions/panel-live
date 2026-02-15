@@ -18,6 +18,21 @@ The browser crashes with `STATUS_ACCESS_VIOLATION` in Chrome/Edge on some machin
 
 ---
 
+## P1 — Don't Auto-Run Pyodide on Home Page
+
+The index.md home page currently auto-runs Pyodide, causing visitors to immediately download 300+ MB and potentially experience browser crashes. First-time visitors should not be subjected to this.
+
+**Proposed solutions:**
+
+- **Pre-rendering:** Use `pre-render` to generate static output at build time. Pages load instantly with pre-rendered content; users click "Run" to activate Pyodide.
+- **`auto-run="false"`:** Set `auto-run="false"` on all home page examples. Add a note explaining that Pyodide is not auto-run on this page but is on other pages (which will download 300+ MB and may crash in some browsers).
+- **"Run All" button:** Add a page-level "Run All" button at the top. All examples start as static/pre-rendered. Clicking "Run All" initializes Pyodide and executes all examples. The button disappears after activation.
+- **Embed options:** Investigate Panel's [embedding export](https://panel.holoviz.org/how_to/export/embedding.html) and the [.embed pattern](https://awesome-panel.github.io/holoviz-quarto/) for providing embed options directly in MkDocs/Sphinx/Quarto code blocks.
+
+**Acceptance:** The index.md home page loads without triggering Pyodide download. Users can opt-in to running examples interactively.
+
+---
+
 ## P1 — Distribution `PARTIAL`
 
 esbuild bundling is done. CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. ~~CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag.~~ **Done:** `build.yml` now has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags (including alpha/beta/rc). `scripts/cdn_upload.py` syncs to both versioned and latest S3 paths. **Remaining:** npm package, SRI hashes, bundle size tracking.
@@ -360,6 +375,33 @@ Auto-save editor content in playground mode to localStorage on changes (debounce
 **Update from research:** mkdocs-jupyterlite discovered that browser-persisted state overrides server content after docs rebuilds, causing users to see stale code ([jupyterlite#1706](https://github.com/jupyterlite/jupyterlite/issues/1706)). They solved this by disabling persistence entirely. panel-live should instead store a content hash alongside the editor state and invalidate when the underlying example code changes.
 
 **Acceptance:** Editor content survives page refreshes in playground mode. Users can restore their last session. Persisted state is invalidated when the underlying example code changes (content-hash comparison).
+
+---
+
+## P1 — PanelLive Server Component `PARTIAL`
+
+A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Panel server applications. Enables bidirectional data exchange between server Python and client-side Pyodide.
+
+**Done:**
+
+- `PanelLive` class with `code`, `requirements`, `mode`, `theme`, `layout`, `auto_run`, `code_visibility`, `value`, `run`, `status`, `error`, `stdout` params
+- ESM module with Shadow DOM workarounds (getElementById patch, CSS mirroring)
+- `configure()` classmethod for local asset overriding
+- Modes: `app`, `editor`, `playground`, `headless`, `compact`, `debug`
+- `output` param for client-to-server data
+- `send()` method for server-to-client push
+- `run_python()` async method for remote code execution
+- Unit tests and POC test app
+- CLI `serve` command for showcase example
+
+**Remaining:**
+
+- Full bidirectional sync (live param updates without re-run)
+- DataFrame/bytes serialization via Arrow IPC
+- Worker bridge API for state injection
+- Adoption testing with real-world use cases
+
+**Acceptance:** PanelLive component works end-to-end with bidirectional data exchange, all modes functional, documented with tutorials and how-to guides.
 
 ---
 

@@ -63,3 +63,11 @@ def cache_cleanup():
     state.clear_caches()
     Design._resolve_modifiers.cache_clear()
     Design._cache.clear()
+
+
+@pytest.fixture
+def document():
+    """Provide a fresh Bokeh Document for model serialization tests."""
+    from bokeh.document import Document
+
+    return Document()

@@ -138,10 +138,16 @@ panel-live[data-resolved-theme="dark"] {
   padding: 0;
   overflow: hidden;
 }
-.pl-output img {
+.pl-output img,
+.pl-output canvas,
+.pl-output svg {
   max-width: 100%;
   height: auto;
   display: block;
+}
+.pl-output .bk-root {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* ---- Captured print output ---- */

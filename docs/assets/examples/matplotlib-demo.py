@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 x = np.linspace(0, 4 * np.pi, 300)
-fig, axes = plt.subplots(2, 2, figsize=(10, 3))
+fig, axes = plt.subplots(2, 2, figsize=(5, 3))
 
 axes[0, 0].plot(x, np.sin(x), color="#3b82f6")
 axes[0, 0].set_title("sin(x)")

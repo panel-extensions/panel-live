@@ -387,3 +387,4 @@ docs-sphinx/.panel-live/
 docs-quarto/_extensions
 docs-quarto/_site/*
 notes.md
+.panel-live/*
