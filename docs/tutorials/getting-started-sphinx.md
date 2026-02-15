@@ -13,16 +13,23 @@ A Sphinx documentation site with interactive Panel examples that run directly in
 
 ## Step 1: Create a project
 
+!!! warning "Pre-release"
+
+    panel-live is not yet published to PyPI or CDN. The install command and asset URLs below
+    use the GitHub repository and GitHub Pages. Once released, these will change to
+    `pip install panel-live` and `cdn.holoviz.org` URLs respectively.
+
 ```bash
 mkdir my-sphinx-docs && cd my-sphinx-docs
 uv init
-uv add sphinx pydata-sphinx-theme panel-live
+uv add sphinx pydata-sphinx-theme
+uv pip install git+https://github.com/panel-extensions/panel-live.git
 ```
 
 ## Step 2: Scaffold the Sphinx site
 
 ```bash
-uv run sphinx-quickstart --sep --project "My Docs" --author "Me" -q .
+uv run sphinx-quickstart --project "My Docs" --author "Me" -q .
 ```
 
 This creates the standard Sphinx layout: `conf.py`, `index.rst`, a `Makefile`, and `_build/`/`_static/`/`_templates/` directories.
@@ -37,10 +44,12 @@ extensions = ["panel_live.sphinx"]
 
 html_theme = "pydata_sphinx_theme"
 
+exclude_patterns = ["_build", ".venv"]
+
 panel_live_conf = {
     # CDN assets
-    "panel_live_js": "https://cdn.holoviz.org/panel-live/latest/panel-live.js",
-    "panel_live_css": "https://cdn.holoviz.org/panel-live/latest/panel-live.css",
+    "panel_live_js": "https://panel-extensions.github.io/panel-live/assets/js/panel-live.js",
+    "panel_live_css": "https://panel-extensions.github.io/panel-live/assets/css/panel-live.css",
 
     # mini-coi.js for SharedArrayBuffer support (see note below)
     "mini_coi": True,

@@ -386,16 +386,20 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 
 - `PanelLive` class with `code`, `requirements`, `mode`, `theme`, `layout`, `auto_run`, `code_visibility`, `value`, `run`, `status`, `error`, `stdout` params
 - ESM module with Shadow DOM workarounds (getElementById patch, CSS mirroring)
-- `configure()` classmethod for local asset overriding
+- `configure()` classmethod for local asset overriding (JS and CSS)
 - Modes: `app`, `editor`, `playground`, `headless`, `compact`, `debug`
 - `output` param for client-to-server data
 - `send()` method for server-to-client push
 - `run_python()` async method for remote code execution
 - Unit tests and POC test app
 - CLI `serve` command for showcase example
+- `__css__` class variable for explicit CSS loading (fixes missing CSS in CDN mode)
+
+**CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because `cdn.holoviz.org` is not yet live. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once `cdn.holoviz.org` is live, update `_CDN_BASE` in `component.py` to `https://cdn.holoviz.org/panel-live/latest`.
 
 **Remaining:**
 
+- Switch `_CDN_BASE` from GitHub Pages to `cdn.holoviz.org` once CDN is live
 - Full bidirectional sync (live param updates without re-run)
 - DataFrame/bytes serialization via Arrow IPC
 - Worker bridge API for state injection
@@ -546,5 +550,17 @@ Make query parameters accessible to running Panel code via a Python-side mechani
 Optional `auto-run="debounce"` attribute on `<panel-live>` that re-executes code after a configurable delay (e.g. 1 second) of no typing. Improves the interactive development experience in editor/playground modes. (Source: stlite's sharing editor auto-saves and re-runs on code changes.)
 
 **Acceptance:** `auto-run="debounce"` re-executes code after typing stops.
+
+---
+
+## P3 — Static Preview Image or GIF
+
+Support a static image or GIF as a preview placeholder for `<panel-live>` elements. Instead of
+immediately rendering the live element, show a screenshot or animated GIF of the expected output.
+Clicking the preview activates the live Pyodide runtime. This reduces page load impact and provides
+a visual preview on platforms where Pyodide cannot run (e.g., PDF exports, email embeds).
+
+**Acceptance:** `<panel-live>` supports a `preview` attribute (image URL or path) that displays
+a static image until the user clicks to activate.
 
 ---

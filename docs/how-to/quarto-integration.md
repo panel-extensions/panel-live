@@ -15,7 +15,7 @@ Install the extension from the panel-live repository:
 quarto add panel-extensions/panel-live --subdir quarto
 ```
 
-This copies the Lua filter and extension metadata into your project's `_extensions/` directory.
+This copies the Lua filter, JS/CSS assets, and extension metadata into your project's `_extensions/` directory.
 
 ### Manual Installation
 
@@ -27,6 +27,10 @@ your-project/
     panel-live/
       _extension.yml
       panel-live.lua
+      panel-live.js
+      panel-live-worker.js
+      panel-live.css
+      mini-coi.js
 ```
 
 ## Configuration

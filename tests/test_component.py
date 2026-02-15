@@ -5,6 +5,7 @@ import asyncio
 import pytest
 from bokeh.document import Document
 
+from panel_live.component import _CDN_BASE
 from panel_live.component import PanelLive
 
 # ---------------------------------------------------------------------------
@@ -462,3 +463,63 @@ def test_debug_mode_works(document):
     comp = PanelLive(mode="debug", code="x = 1")
     model = comp.get_root(document)
     assert model is not None
+
+
+# ---------------------------------------------------------------------------
+# Asset URLs (__javascript__, __css__, configure())
+# ---------------------------------------------------------------------------
+
+
+def test_javascript_default():
+    """__javascript__ points to the CDN JS bundle."""
+    assert PanelLive.__javascript__ is not None
+    assert len(PanelLive.__javascript__) == 1
+    assert "panel-live.js" in PanelLive.__javascript__[0]
+
+
+def test_css_default():
+    """__css__ points to the CDN CSS bundle."""
+    assert PanelLive.__css__ is not None
+    assert len(PanelLive.__css__) == 1
+    assert "panel-live.css" in PanelLive.__css__[0]
+
+
+def test_css_url_matches_cdn_base():
+    """__css__ URL uses the same CDN base as __javascript__."""
+    assert PanelLive.__css__[0].startswith(_CDN_BASE)
+
+
+def test_configure_js_url_https():
+    """configure(js_url=...) with HTTPS URL sets __javascript__."""
+    orig = PanelLive.__javascript__
+    try:
+        PanelLive.configure(js_url="https://example.com/panel-live.js")
+        assert PanelLive.__javascript__ == ["https://example.com/panel-live.js"]
+    finally:
+        PanelLive.__javascript__ = orig
+
+
+def test_configure_css_url_https():
+    """configure(css_url=...) with HTTPS URL sets __css__."""
+    orig = PanelLive.__css__
+    try:
+        PanelLive.configure(css_url="https://example.com/panel-live.css")
+        assert PanelLive.__css__ == ["https://example.com/panel-live.css"]
+    finally:
+        PanelLive.__css__ = orig
+
+
+def test_configure_both_urls():
+    """configure() can set both js_url and css_url at once."""
+    orig_js = PanelLive.__javascript__
+    orig_css = PanelLive.__css__
+    try:
+        PanelLive.configure(
+            js_url="https://cdn.example.com/panel-live.js",
+            css_url="https://cdn.example.com/panel-live.css",
+        )
+        assert PanelLive.__javascript__ == ["https://cdn.example.com/panel-live.js"]
+        assert PanelLive.__css__ == ["https://cdn.example.com/panel-live.css"]
+    finally:
+        PanelLive.__javascript__ = orig_js
+        PanelLive.__css__ = orig_css

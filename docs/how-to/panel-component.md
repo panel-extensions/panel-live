@@ -119,10 +119,16 @@ For development without CDN access:
 from panel_live import PanelLive
 
 # HTTPS URLs
-PanelLive.configure(js_url="https://my-cdn.com/panel-live.js")
+PanelLive.configure(
+    js_url="https://my-cdn.com/panel-live.js",
+    css_url="https://my-cdn.com/panel-live.css",
+)
 
 # Local files via --static-dirs
-PanelLive.configure(js_url="./pl/panel-live.js")
+PanelLive.configure(
+    js_url="./pl/panel-live.js",
+    css_url="./pl/panel-live.css",
+)
 ```
 
 Serve with:
