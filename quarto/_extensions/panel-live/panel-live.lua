@@ -98,7 +98,7 @@ local function ensure_base_setup(meta)
   -- paths correctly for nested pages.
   quarto.doc.add_html_dependency({
     name = "panel-live",
-    version = "0.1.0",
+    version = "0.0.1",
     scripts = { "panel-live.js" },
     stylesheets = { "panel-live.css" },
     resources = { { name = "panel-live-worker.js", path = "panel-live-worker.js" } },
@@ -144,7 +144,7 @@ local function ensure_base_setup(meta)
     -- service worker scope covers the entire site.
     quarto.doc.add_html_dependency({
       name = "panel-live-coi",
-      version = "0.1.0",
+      version = "0.0.1",
       serviceworkers = { "mini-coi.js" },
     })
     table.insert(head_parts,

@@ -15,8 +15,7 @@ from typing import ClassVar
 import param
 from panel.custom import JSComponent
 
-# TODO: Switch to https://cdn.jsdelivr.net/npm/panel-live@latest/dist once published to npm
-_CDN_BASE = "https://panel-extensions.github.io/panel-live/assets"
+_CDN_BASE = "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist"
 
 
 class PanelLive(JSComponent):
@@ -74,8 +73,8 @@ class PanelLive(JSComponent):
     """
 
     # --- Asset URLs (auto-loaded by Panel) ---
-    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/js/panel-live.js"]
-    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/css/panel-live.css"]
+    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.js"]
+    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.css"]
 
     @classmethod
     def configure(cls, *, js_url: str | None = None, css_url: str | None = None) -> None:

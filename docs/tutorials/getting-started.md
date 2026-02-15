@@ -14,12 +14,7 @@ A simple interactive page with a Panel slider widget that updates text in real t
 
 ## Step 1: Create an HTML file
 
-!!! warning "Pre-release"
-
-    panel-live is not yet published to PyPI or npm. The asset URLs below use GitHub Pages.
-    Once released, these will change to `cdn.jsdelivr.net/npm/panel-live@latest/dist/` URLs.
-
-Create a new file called `index.html` with the basic HTML structure and panel-live loaded from GitHub Pages:
+Create a new file called `index.html` with the basic HTML structure and panel-live loaded from CDN:
 
 ```html
 <!DOCTYPE html>
@@ -27,8 +22,8 @@ Create a new file called `index.html` with the basic HTML structure and panel-li
 <head>
   <meta charset="UTF-8">
   <title>My First panel-live Page</title>
-  <link rel="stylesheet" href="https://panel-extensions.github.io/panel-live/assets/css/panel-live.css">
-  <script src="https://panel-extensions.github.io/panel-live/assets/js/panel-live.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
+  <script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
 </head>
 <body>
   <h1>My First panel-live Page</h1>
@@ -63,8 +58,8 @@ Your full `index.html` should now look like:
 <head>
   <meta charset="UTF-8">
   <title>My First panel-live Page</title>
-  <link rel="stylesheet" href="https://panel-extensions.github.io/panel-live/assets/css/panel-live.css">
-  <script src="https://panel-extensions.github.io/panel-live/assets/js/panel-live.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
+  <script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
 </head>
 <body>
   <h1>My First panel-live Page</h1>

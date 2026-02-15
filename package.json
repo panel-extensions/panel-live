@@ -1,7 +1,33 @@
 {
-  "private": true,
-  "name": "panel-live",
-  "version": "0.1.0a1",
+  "name": "@panel-extensions/panel-live",
+  "version": "0.0.0-dev",
+  "description": "Run Panel and Python code live in the browser via Pyodide",
+  "license": "BSD-3-Clause",
+  "main": "dist/panel-live.js",
+  "files": [
+    "dist/panel-live.js",
+    "dist/panel-live-worker.js",
+    "dist/panel-live.css",
+    "dist/mini-coi.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/panel-extensions/panel-live.git"
+  },
+  "homepage": "https://panel-extensions.github.io/panel-live/",
+  "keywords": [
+    "panel",
+    "pyodide",
+    "wasm",
+    "python",
+    "interactive",
+    "holoviz",
+    "web-component",
+    "browser"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node build.mjs",
     "build:dev": "node build.mjs --dev",

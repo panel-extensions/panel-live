@@ -16,8 +16,8 @@ In ``conf.py``::
 
     panel_live_conf = {
         "directive_name": "panel-live",      # or "pyodide", "python"
-        "panel_live_js": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js",
-        "panel_live_css": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css",
+        "panel_live_js": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js",
+        "panel_live_css": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css",
         "mini_coi": True,                    # inject mini-coi.js for SharedArrayBuffer
         "pyodide_version": "v0.28.2",
         "panel_version": "1.8.7",
@@ -68,8 +68,8 @@ _content_hash = content_hash
 
 _DEFAULTS: dict[str, Any] = {
     "directive_name": "panel-live",
-    "panel_live_js": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js",
-    "panel_live_css": "https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css",
+    "panel_live_js": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js",
+    "panel_live_css": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css",
     "mini_coi": True,
     "pyodide_version": "v0.28.2",
     "panel_version": "1.8.7",

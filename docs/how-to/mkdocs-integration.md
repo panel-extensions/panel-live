@@ -47,9 +47,9 @@ Add the panel-live JavaScript and CSS to your site. You can use the CDN:
 
 ```yaml
 extra_javascript:
-  - https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js
+  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js
 extra_css:
-  - https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css
+  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css
 ```
 
 Or copy the files locally (recommended for reproducibility):
@@ -159,7 +159,7 @@ If you cannot configure COOP/COEP headers on your hosting provider (e.g., GitHub
    ```yaml
    extra_javascript:
      - mini-coi.js
-     - https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js
+     - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js
    ```
 
 mini-coi registers a service worker that adds COOP/COEP headers transparently. This avoids the need for server-side configuration and works on any static hosting provider.

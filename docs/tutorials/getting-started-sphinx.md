@@ -13,17 +13,11 @@ A Sphinx documentation site with interactive Panel examples that run directly in
 
 ## Step 1: Create a project
 
-!!! warning "Pre-release"
-
-    panel-live is not yet published to PyPI or npm. The install command and asset URLs below
-    use the GitHub repository and GitHub Pages. Once released, these will change to
-    `pip install panel-live` and `cdn.jsdelivr.net/npm/panel-live@latest/dist/` URLs respectively.
-
 ```bash
 mkdir my-sphinx-docs && cd my-sphinx-docs
 uv init
 uv add sphinx pydata-sphinx-theme
-uv pip install git+https://github.com/panel-extensions/panel-live.git
+uv pip install "panel-live[sphinx]"
 ```
 
 ## Step 2: Scaffold the Sphinx site
@@ -48,8 +42,8 @@ exclude_patterns = ["_build", ".venv"]
 
 panel_live_conf = {
     # CDN assets
-    "panel_live_js": "https://panel-extensions.github.io/panel-live/assets/js/panel-live.js",
-    "panel_live_css": "https://panel-extensions.github.io/panel-live/assets/css/panel-live.css",
+    "panel_live_js": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js",
+    "panel_live_css": "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css",
 
     # mini-coi.js for SharedArrayBuffer support (see note below)
     "mini_coi": True,

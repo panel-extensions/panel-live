@@ -18,12 +18,6 @@ mkdir my-quarto-docs && cd my-quarto-docs
 
 ## Step 2: Install the extension
 
-!!! warning "Pre-release"
-
-    panel-live is not yet published as an official Quarto extension. The command below installs
-    directly from the GitHub repository, which must be public. Once released, a simpler install
-    path will be available.
-
 ```bash
 quarto add panel-extensions/panel-live --subdir quarto
 ```

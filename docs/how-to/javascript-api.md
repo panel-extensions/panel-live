@@ -73,8 +73,8 @@ For pages without JavaScript setup, use `window.PANEL_LIVE_CONFIG`:
     bokehVersion: '3.9.0'
   };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
+<script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
 ```
 
 ## Full example
@@ -83,8 +83,8 @@ For pages without JavaScript setup, use `window.PANEL_LIVE_CONFIG`:
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
-  <script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
+  <script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
 </head>
 <body>
   <div id="app"></div>

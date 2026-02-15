@@ -19,8 +19,8 @@ Claude will generate an artifact like:
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
-  <script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css">
+  <script src="https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js"></script>
 </head>
 <body>
   <panel-live mode="app">
