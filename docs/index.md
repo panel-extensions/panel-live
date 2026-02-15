@@ -132,7 +132,3 @@ For a full list, see [Known Limitations](reference/known-limitations.md).
 - [How-to Guides](how-to/mode.md) — per-attribute guides with live examples
 - [Reference](reference/html-api.md) — complete HTML, JavaScript, CSS, and Events API
 - [Design Decisions](explanation/design.md) — why panel-live is built the way it is
-
-```bash
-pip install panel-live
-```

@@ -17,8 +17,14 @@ A documentation site with interactive Panel examples that run directly in the br
 mkdir my-docs && cd my-docs
 uv init
 uv add mkdocs-material
-uv pip install panel-live
+uv pip install git+https://github.com/panel-extensions/panel-live.git
 ```
+
+!!! warning "Pre-release"
+    panel-live has not been published to npm or PyPI yet. The URLs and install commands above use GitHub Pages and GitHub source installs, which work now. Once released, they will change to:
+
+    - **JS/CSS:** `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.{js,css}`
+    - **Python:** `pip install panel-live`
 
 ## Step 2: Scaffold the MkDocs site
 
@@ -46,9 +52,9 @@ markdown_extensions:
           format: !!python/name:panel_live.fences.formatter
 
 extra_javascript:
-  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js
+  - https://panel-extensions.github.io/panel-live/assets/js/panel-live.js
 extra_css:
-  - https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.css
+  - https://panel-extensions.github.io/panel-live/assets/css/panel-live.css
 ```
 
 !!! tip "Alternative fence names"

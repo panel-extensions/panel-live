@@ -14,6 +14,9 @@ Chrome 137+ ships JSPI (JavaScript Promise Integration) enabled by default. When
 
 **Note on reproducibility:** The crash is hardware/environment-dependent. It reproduces consistently on one specific Windows laptop (Chrome and Edge) in a corporate environment but does not occur on a second Windows laptop, iOS iPhone, iOS tablet, or Firefox. This suggests an interaction between JSPI, specific hardware/driver configurations, and Pyodide's WASM memory operations.
 
+Edge: Version 145.0.3800.58 (Official build) (64-bit)
+Chrome: Version 144.0.7559.133 (Official Build) (64-bit)
+
 ### Environment
 
 - **Pyodide version:** 0.28.2
