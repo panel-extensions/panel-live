@@ -16,8 +16,8 @@ A simple interactive page with a Panel slider widget that updates text in real t
 
 !!! warning "Pre-release"
 
-    panel-live is not yet published to PyPI or CDN. The asset URLs below use GitHub Pages.
-    Once released, these will change to `cdn.holoviz.org` URLs.
+    panel-live is not yet published to PyPI or npm. The asset URLs below use GitHub Pages.
+    Once released, these will change to `cdn.jsdelivr.net/npm/panel-live@latest/dist/` URLs.
 
 Create a new file called `index.html` with the basic HTML structure and panel-live loaded from GitHub Pages:
 

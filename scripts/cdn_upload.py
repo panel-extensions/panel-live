@@ -1,5 +1,9 @@
 """Upload panel-live JS/CSS assets to cdn.holoviz.org S3 bucket.
 
+NOTE: This is a secondary/backup distribution channel. The primary
+distribution is via npm (served by jsDelivr at
+cdn.jsdelivr.net/npm/panel-live@latest/dist/).
+
 Reads the version from package.json and syncs the dist/ directory to:
   1. s3://cdn.holoviz.org/panel-live/{version}/  (versioned)
   2. s3://cdn.holoviz.org/panel-live/latest/      (latest alias)

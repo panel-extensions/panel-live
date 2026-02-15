@@ -35,7 +35,7 @@ The index.md home page currently auto-runs Pyodide, causing visitors to immediat
 
 ## P1 — Distribution `PARTIAL`
 
-esbuild bundling is done. CDN hosting is live at `cdn.holoviz.org/panel-live/latest/`. ~~CI workflow that publishes versioned assets to `cdn.holoviz.org/panel-live/vX.Y.Z/` on git tag.~~ **Done:** `build.yml` now has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags (including alpha/beta/rc). `scripts/cdn_upload.py` syncs to both versioned and latest S3 paths. **Remaining:** npm package, SRI hashes, bundle size tracking.
+esbuild bundling is done. **Primary distribution: npm** — publishing to npm enables loading via `https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js`, which works everywhere including Claude.ai artifacts (jsDelivr's `cdn.jsdelivr.net/npm/` is widely allowlisted). CI workflow (`build.yml`) has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags. S3 upload (`scripts/cdn_upload.py`) remains as a secondary/backup channel. **Remaining:** actual npm publish, SRI hashes, bundle size tracking.
 
 Additional items informed by competitor research:
 
@@ -73,7 +73,7 @@ Prose descriptions added before every example in `docs/examples.md` for LLM acce
 
 ## P1 — Release v0.1.0 `PARTIAL`
 
-~~No formal release yet.~~ **Update:** Alpha release infrastructure is in place. `build.yml` supports tag-triggered publishing to PyPI (OIDC), CDN (S3), and GitHub Releases. `pyproject.toml` classifier updated to Alpha. **Remaining:** actual tag push (`v0.1.0a1`), requires AWS secrets and `publish` environment configured. Depends on: browser crash fix, documentation, distribution, testing, known limitations.
+~~No formal release yet.~~ **Update:** Alpha release infrastructure is in place. `build.yml` supports tag-triggered publishing to PyPI (OIDC), npm (jsDelivr CDN), and GitHub Releases. `pyproject.toml` classifier updated to Alpha. **Remaining:** actual tag push (`v0.1.0a1`), npm publish configuration. Depends on: browser crash fix, documentation, distribution, testing, known limitations.
 
 ---
 
@@ -395,11 +395,11 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 - CLI `serve` command for showcase example
 - `__css__` class variable for explicit CSS loading (fixes missing CSS in CDN mode)
 
-**CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because `cdn.holoviz.org` is not yet live. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once `cdn.holoviz.org` is live, update `_CDN_BASE` in `component.py` to `https://cdn.holoviz.org/panel-live/latest`.
+**CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because the npm package is not yet published. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once published to npm, update `_CDN_BASE` in `component.py` to `https://cdn.jsdelivr.net/npm/panel-live@latest/dist`.
 
 **Remaining:**
 
-- Switch `_CDN_BASE` from GitHub Pages to `cdn.holoviz.org` once CDN is live
+- Switch `_CDN_BASE` from GitHub Pages to `cdn.jsdelivr.net/npm/panel-live@latest/dist` once published to npm
 - Full bidirectional sync (live param updates without re-run)
 - DataFrame/bytes serialization via Arrow IPC
 - Worker bridge API for state injection
@@ -562,5 +562,15 @@ a visual preview on platforms where Pyodide cannot run (e.g., PDF exports, email
 
 **Acceptance:** `<panel-live>` supports a `preview` attribute (image URL or path) that displays
 a static image until the user clicks to activate.
+
+---
+
+## P2 — Claude Artifacts CSP Blocks panel-live
+
+panel-live does not work in Claude.ai artifacts (canvas) due to Content Security Policy restrictions. The artifact `srcdoc` iframe has a strict `script-src` allowlist that does not include `panel-extensions.github.io`. However, `https://cdn.jsdelivr.net/npm/` is allowlisted.
+
+**Resolution:** The npm-first distribution strategy (P1 Distribution) resolves this. Once panel-live is published to npm, artifacts can load it via `https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js`, which is within the CSP allowlist. No workarounds needed.
+
+**Acceptance:** panel-live loads and runs inside Claude.ai artifacts without CSP violations.
 
 ---

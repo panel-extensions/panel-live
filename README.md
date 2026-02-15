@@ -20,8 +20,8 @@ Turn any web page into an interactive Python playground with the `<panel-live>` 
 Include the CSS and JS from the CDN:
 
 ```html
-<link rel="stylesheet" href="https://cdn.holoviz.org/panel-live/latest/panel-live.css">
-<script src="https://cdn.holoviz.org/panel-live/latest/panel-live.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
+<script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
 ```
 
 Then add a `<panel-live>` element with your Panel code inside:
@@ -63,37 +63,6 @@ pn.Column(slider, output).servable()
 
 See the [full playground](https://panel-extensions.github.io/panel-live/playground.html) for an interactive editing experience.
 
-### MkDocs / Documentation
-
-In your MkDocs docs, use fenced code blocks with the `panel` language:
-
-````markdown
-```panel
-import panel as pn
-
-slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=50)
-output = pn.pane.Markdown(pn.bind(lambda v: f"## Value: {v}", slider))
-pn.Column(slider, output).servable()
-```
-````
-
-Add attributes for other modes:
-
-````markdown
-```{.panel mode="editor" theme="dark"}
-# your code here
-```
-````
-
-Configure the custom fence in your `zensical.toml` (or `mkdocs.yml`):
-
-```toml
-[project.markdown_extensions.pymdownx.superfences]
-custom_fences = [
-  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.formatter" }
-]
-```
-
 ## Features
 
 - **3 modes:** app (output only), editor (code + output), playground (side-by-side)
@@ -103,7 +72,7 @@ custom_fences = [
 - **Real-time print output** — `print()` streams incrementally as code executes
 - **Multi-file support** via `<panel-file>` child elements
 - **Explicit requirements** via `<panel-requirements>`
-- **MkDocs integration** via fenced code blocks and `pymdownx.superfences`
+- **Docs integration** via fenced code blocks in MkDocs, Quarto or Sphinx.
 - **No server needed** — runs entirely in the browser via Pyodide
 
 ## Live Demos
