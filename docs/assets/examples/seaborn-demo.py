@@ -14,7 +14,7 @@ tips = pd.DataFrame({
 })
 tips["day"] = pd.Categorical(tips["day"], categories=["Thur", "Fri", "Sat", "Sun"], ordered=True)
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(figsize=(5, 4))
 sns.violinplot(data=tips, x="day", y="total_bill", hue="sex", split=True, ax=ax, palette="Set2")
 ax.set_title("Total Bill by Day and Gender")
 ax.legend(title="Gender", loc="upper left")

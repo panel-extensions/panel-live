@@ -41,6 +41,9 @@ dependencies = [
     "panel >=1.5.0",
 ]
 
+[project.scripts]
+panel-live = "panel_live.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/panel-extensions/panel-live"
 Source = "https://github.com/panel-extensions/panel-live"

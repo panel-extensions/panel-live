@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 x = np.linspace(0, 2 * np.pi, 200)
-fig, ax = plt.subplots(figsize=(8, 3))
+fig, ax = plt.subplots(figsize=(6, 3))
 for n in range(1, 5):
     ax.plot(x, np.sin(n * x) / n, label=f"sin({n}x)/{n}")
 ax.set_title("Harmonic Series")
