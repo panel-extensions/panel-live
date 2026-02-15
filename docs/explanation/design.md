@@ -83,10 +83,14 @@ Bokeh JS version **must** match the Bokeh Python wheel version. Panel JS version
 
 Each release of `panel-live.js` embeds matching defaults for Panel, Bokeh, and Pyodide versions. Users can override via `PanelLive.configure()` or `window.PANEL_LIVE_CONFIG`.
 
+The JS/CSS bundle is published to npm and served via jsDelivr:
+
 ```
-cdn.holoviz.org/panel-live/{version}/panel-live.min.js
-cdn.holoviz.org/panel-live/latest/panel-live.min.js
+cdn.jsdelivr.net/npm/panel-live@{version}/dist/panel-live.js
+cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js
 ```
+
+jsDelivr's `cdn.jsdelivr.net/npm/` origin is widely allowlisted (including in Claude.ai artifacts), making npm the natural distribution channel for a web component.
 
 ## Comparison with alternatives
 

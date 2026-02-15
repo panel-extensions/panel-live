@@ -15,6 +15,7 @@ from typing import ClassVar
 import param
 from panel.custom import JSComponent
 
+# TODO: Switch to https://cdn.jsdelivr.net/npm/panel-live@latest/dist once published to npm
 _CDN_BASE = "https://panel-extensions.github.io/panel-live/assets"
 
 

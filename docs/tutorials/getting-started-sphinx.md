@@ -15,9 +15,9 @@ A Sphinx documentation site with interactive Panel examples that run directly in
 
 !!! warning "Pre-release"
 
-    panel-live is not yet published to PyPI or CDN. The install command and asset URLs below
+    panel-live is not yet published to PyPI or npm. The install command and asset URLs below
     use the GitHub repository and GitHub Pages. Once released, these will change to
-    `pip install panel-live` and `cdn.holoviz.org` URLs respectively.
+    `pip install panel-live` and `cdn.jsdelivr.net/npm/panel-live@latest/dist/` URLs respectively.
 
 ```bash
 mkdir my-sphinx-docs && cd my-sphinx-docs

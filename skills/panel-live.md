@@ -10,8 +10,8 @@ panel-live is a web component (`<panel-live>`) that runs Panel/Python code live 
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="https://cdn.holoviz.org/panel-live/latest/panel-live.css">
-  <script src="https://cdn.holoviz.org/panel-live/latest/panel-live.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.css">
+  <script src="https://cdn.jsdelivr.net/npm/panel-live@latest/dist/panel-live.js"></script>
 </head>
 <body>
   <panel-live mode="editor">

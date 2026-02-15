@@ -120,7 +120,7 @@ Lua filter extension at `quarto/_extensions/panel-live/`. Transforms `{panel-liv
 
 ### CDN upload (`scripts/`)
 
-- **`cdn_upload.py`** — uploads `dist/` JS/CSS to `s3://cdn.holoviz.org/panel-live/{version}/` and `latest/`
+- **`cdn_upload.py`** — secondary/backup: uploads `dist/` JS/CSS to `s3://cdn.holoviz.org/panel-live/{version}/` and `latest/`. Primary distribution is via npm (served by jsDelivr at `cdn.jsdelivr.net/npm/panel-live@latest/dist/`).
 
 ### Configuration files
 
