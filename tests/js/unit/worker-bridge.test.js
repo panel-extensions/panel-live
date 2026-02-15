@@ -399,12 +399,17 @@ describe('getWorkerBridge', () => {
       await expect(initP).rejects.toThrow('Network error loading the worker script');
     });
 
-    it('produces generic error for unknown failures', async () => {
+    it('produces generic error for unknown failures (triggers recovery)', async () => {
       const initP = bridge.init(vi.fn());
 
+      // Generic errors trigger crash recovery on first attempt
       mockWorkerInstance.onerror({ message: 'Something unexpected' });
 
-      await expect(initP).rejects.toThrow('Worker error: Something unexpected');
+      // Init promise is rejected with recovery message
+      await expect(initP).rejects.toThrow('Worker crashed and is being recovered');
+      expect(bridge._crashRetries).toBe(1);
+      bridge._crashRetries = 0;
+      bridge._initPromise = null;
     });
   });
 
@@ -517,6 +522,138 @@ describe('getWorkerBridge', () => {
       expect(bridge._refCount).toBe(0);
       expect(bridge._terminationTimer).toBeNull();
       bridge = getWorkerBridge();
+    });
+  });
+
+  // --- JSPI config ---
+
+  describe('disableJSPI config', () => {
+    it('sends disableJSPI: true in init config by default', async () => {
+      delete mockConfig.disableJSPI;
+      const initP = bridge.init(vi.fn());
+      const initMsg = mockWorkerInstance._posted.find(m => m.type === 'init');
+      expect(initMsg.config.disableJSPI).toBe(true);
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+    });
+
+    it('sends disableJSPI: false when configured', async () => {
+      mockConfig.disableJSPI = false;
+      const initP = bridge.init(vi.fn());
+      const initMsg = mockWorkerInstance._posted.find(m => m.type === 'init');
+      expect(initMsg.config.disableJSPI).toBe(false);
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+      delete mockConfig.disableJSPI;
+    });
+  });
+
+  // --- Stall detection and crash recovery ---
+
+  describe('stall detection', () => {
+    it('triggers after timeout with no worker messages', async () => {
+      mockConfig.stallTimeout = 100; // 100ms for fast test
+
+      const initPromise = bridge.init(vi.fn());
+
+      // Simulate first status message to start things, then go silent
+      mockWorkerInstance._simulateMessage({ type: 'status', msg: 'Loading...' });
+
+      // Catch the expected rejection from recovery
+      const assertion = expect(initPromise).rejects.toThrow('Worker crashed and is being recovered');
+
+      // Advance past stall timeout
+      await vi.advanceTimersByTimeAsync(150);
+
+      await assertion;
+
+      // After stall, init promise should be cleared (recovery attempted)
+      expect(bridge._crashRetries).toBe(1);
+
+      delete mockConfig.stallTimeout;
+      bridge._initPromise = null;
+    });
+
+    it('resets stall timer on each worker message', async () => {
+      mockConfig.stallTimeout = 200;
+
+      bridge.init(vi.fn());
+
+      // Send messages at 150ms intervals (each within the 200ms window)
+      await vi.advanceTimersByTimeAsync(150);
+      mockWorkerInstance._simulateMessage({ type: 'status', msg: 'Step 1...' });
+
+      await vi.advanceTimersByTimeAsync(150);
+      mockWorkerInstance._simulateMessage({ type: 'status', msg: 'Step 2...' });
+
+      await vi.advanceTimersByTimeAsync(150);
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+
+      // No stall should have occurred
+      expect(bridge._crashRetries).toBe(0);
+      expect(bridge._stallTimer).toBeNull(); // Cleared on 'ready'
+
+      delete mockConfig.stallTimeout;
+    });
+
+    it('rejects all pending after max retries exhausted', async () => {
+      mockConfig.stallTimeout = 50;
+      bridge._crashRetries = 1; // Already at max (MAX_CRASH_RETRIES = 1)
+
+      const initPromise = bridge.init(vi.fn());
+
+      // Trigger stall — can't recover since at max retries
+      mockWorkerInstance._simulateMessage({ type: 'status', msg: 'Loading...' });
+
+      const assertion = expect(initPromise).rejects.toThrow('Worker stopped responding');
+      await vi.advanceTimersByTimeAsync(100);
+      await assertion;
+
+      delete mockConfig.stallTimeout;
+      bridge._crashRetries = 0;
+      bridge._initPromise = null;
+    });
+
+    it('clears stall timer on terminate()', async () => {
+      mockConfig.stallTimeout = 5000;
+      bridge.init(vi.fn());
+
+      // Stall timer should be set
+      expect(bridge._stallTimer).not.toBeNull();
+
+      bridge.terminate();
+      expect(bridge._stallTimer).toBeNull();
+      bridge = getWorkerBridge();
+      delete mockConfig.stallTimeout;
+    });
+  });
+
+  describe('crash recovery via _onWorkerError', () => {
+    it('attempts recovery for crash-like errors', async () => {
+      const initP = bridge.init(vi.fn());
+
+      // Simulate a crash-like worker error (not network/file)
+      mockWorkerInstance.onerror({ message: 'Something crashed unexpectedly' });
+
+      // Init promise is rejected with recovery message
+      await expect(initP).rejects.toThrow('Worker crashed and is being recovered');
+
+      // Should have attempted recovery
+      expect(bridge._crashRetries).toBe(1);
+      // Worker should have been terminated for recovery
+      expect(bridge._worker).toBeNull();
+
+      bridge._initPromise = null;
+      bridge._crashRetries = 0;
+    });
+
+    it('does not recover for network errors', async () => {
+      const initP = bridge.init(vi.fn());
+
+      mockWorkerInstance.onerror({ message: 'NetworkError: Failed to fetch' });
+
+      await expect(initP).rejects.toThrow('Network error loading the worker script');
+      expect(bridge._crashRetries).toBe(0);
     });
   });
 

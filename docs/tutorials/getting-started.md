@@ -64,7 +64,7 @@ Your full `index.html` should now look like:
 <body>
   <h1>My First panel-live Page</h1>
 
-  <panel-live mode="app">
+  <panel-live mode="app" layout="horizontal">
 import panel as pn
 pn.extension(sizing_mode="stretch_width")
 

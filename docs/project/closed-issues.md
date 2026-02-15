@@ -427,3 +427,21 @@ Resolved and rejected issues from the panel-live project.
 ## ~~P2 — CSS Button Height and Toggle Visibility~~
 
 **Resolved.** `.pl-btn` uses `display: inline-flex; align-items: center` instead of `line-height: 1`. Playground link stays visible when code is expanded (only Copy is hidden via `.copy-btn.pl-toggle-btn` selector).
+
+---
+
+## ~~P0 — Browser Crash (STATUS_ACCESS_VIOLATION)~~
+
+**Resolved.** Chrome 137+ ships JSPI (JavaScript Promise Integration) enabled by default, which conflicts with Pyodide's async scheduler and causes `STATUS_ACCESS_VIOLATION` crashes during heavy WASM operations like `import panel as pn`. The crash was hardware/environment-dependent — reproducible on one specific Windows laptop (Chrome and Edge) but not on a second Windows laptop, iOS iPhone, iOS tablet, or Firefox.
+
+**Root cause:** JSPI's `WebAssembly.Suspending`/`WebAssembly.promising` APIs. See [pyodide#5702](https://github.com/pyodide/pyodide/issues/5702), [pyodide#5705](https://github.com/pyodide/pyodide/issues/5705).
+
+**Fix:**
+
+1. **JSPI disabled by default** — `disableJSPI: true` in config. Before loading Pyodide in the worker, `WebAssembly.Suspending` and `WebAssembly.promising` are deleted, and `loadPyodide({ enableRunUntilComplete: false })` forces the proven pre-JSPI async scheduler. Users can opt back in via `PanelLive.configure({ disableJSPI: false })` when Pyodide ships a JSPI-compatible release.
+2. **Stall detection + crash recovery** — `STATUS_ACCESS_VIOLATION` kills the worker silently (no `onerror`). A 45-second stall timer detects unresponsive workers. On first stall, the bridge terminates the dead worker and allows re-initialization. After max retries, pending promises are rejected with an actionable error message.
+3. **Enhanced `_onWorkerError`** — Crash-like errors (non-network, non-file) trigger recovery instead of immediate rejection.
+
+**Confirmed:** 4 targeted experiments confirmed JSPI as the cause. Stress test (26 diverse examples including matplotlib, seaborn, altair, plotly, hvplot, holoviews, xarray, colorcet) passed 26/26 in 6.0s on the crash-prone machine. Docs site verified working.
+
+**Note:** Enterprise antivirus (Sophos StackPivot detection, [pyodide#5768](https://github.com/pyodide/pyodide/issues/5768)) is a separate trigger that cannot be mitigated in JavaScript — requires endpoint config or user workaround.
