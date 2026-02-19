@@ -18,10 +18,14 @@ Pre-rendering can be enabled via :func:`configure` so that Panel code is
 executed at MkDocs build time and the output is embedded as static HTML.
 """
 
+import logging
 import re
+from pathlib import Path
 
 from pymdownx.superfences import default_validator
 from pymdownx.superfences import fence_code_format
+
+log = logging.getLogger("panel-live")
 
 _CHILD_RE = re.compile(
     r"(<panel-(?:requirements|file|example)\b[^>]*>.*?</panel-(?:requirements|file|example)>)",
@@ -48,17 +52,18 @@ _KNOWN_ATTRS = frozenset(
     }
 )
 
-_DEFAULTS = {}
+_DEFAULTS = {"auto-run": "false"}
 
 _PRERENDER_CONF: dict = {
     "pre_render": False,
     "cache_dir": ".panel-live",
     "setup_code": "",
     "timeout": 120,
+    "docs_dir": "docs",
 }
 
 
-def configure(*, pre_render=False, cache_dir=".panel-live", setup_code="", timeout=120):
+def configure(*, pre_render=False, cache_dir=".panel-live", setup_code="", timeout=120, docs_dir="docs"):
     """Configure pre-rendering for the MkDocs fence formatter.
 
     Call this from a MkDocs hook (``on_startup`` or ``on_config``) to enable
@@ -74,11 +79,15 @@ def configure(*, pre_render=False, cache_dir=".panel-live", setup_code="", timeo
         Python code prepended before every fence's code.
     timeout : int
         Maximum seconds to wait for each subprocess (default ``120``).
+    docs_dir : str
+        Path to the MkDocs docs directory (default ``"docs"``).
+        Used to resolve ``src`` attribute paths for pre-rendering.
     """
     _PRERENDER_CONF["pre_render"] = pre_render
     _PRERENDER_CONF["cache_dir"] = cache_dir
     _PRERENDER_CONF["setup_code"] = setup_code
     _PRERENDER_CONF["timeout"] = timeout
+    _PRERENDER_CONF["docs_dir"] = docs_dir
 
 
 def _escape(text):
@@ -186,18 +195,39 @@ def formatter(source, language, css_class, options, md, **kwargs):
 
     attr_str = "".join(f' {k}="{_escape(v)}"' for k, v in attrs.items())
 
+    # Resolve src file for pre-rendering (code from external file)
+    src_code = ""
+    src_value = attrs.get("src", "")
+    if src_value and not code.strip():
+        # Skip absolute URLs (e.g. https://...)
+        if src_value.startswith(("http://", "https://", "//")):
+            log.debug("pre-render: skipping absolute URL src: %s", src_value)
+        else:
+            docs_dir = Path(_PRERENDER_CONF.get("docs_dir", "docs"))
+            # src is a URL-relative path (e.g. "../assets/examples/hello.py").
+            # Strip leading "../" and resolve relative to docs_dir.
+            clean = src_value
+            while clean.startswith("../"):
+                clean = clean[3:]
+            candidate = docs_dir / clean
+            if candidate.exists():
+                src_code = candidate.read_text(encoding="utf-8").strip()
+            else:
+                log.warning("pre-render: src file not found: %s (resolved to %s)", src_value, candidate)
+
     # Pre-render if enabled (per-fence overrides global)
     if fence_prerender is not None:
         should_prerender = fence_prerender
     else:
         should_prerender = _PRERENDER_CONF["pre_render"]
     pre_rendered_html = ""
-    if should_prerender and code.strip():
+    prerender_code = code.strip() or src_code
+    if should_prerender and prerender_code:
         from panel_live.prerender import embed_script_tag
         from panel_live.prerender import pre_render
 
         output = pre_render(
-            code.strip(),
+            prerender_code,
             _PRERENDER_CONF["cache_dir"],
             setup_code=_PRERENDER_CONF["setup_code"],
             timeout=_PRERENDER_CONF["timeout"],
@@ -207,7 +237,7 @@ def formatter(source, language, css_class, options, md, **kwargs):
 
     if code.strip():
         return f"<panel-live{attr_str}>\n{_escape(code)}{pre_rendered_html}\n</panel-live>"
-    return f"<panel-live{attr_str}></panel-live>"
+    return f"<panel-live{attr_str}>{pre_rendered_html}</panel-live>"
 
 
 def prerender_formatter(source, language, css_class, options, md, **kwargs):

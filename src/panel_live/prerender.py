@@ -19,8 +19,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from multiprocessing import get_context
 from pathlib import Path
+
+log = logging.getLogger("panel-live")
 
 
 def content_hash(code: str) -> str:
@@ -53,8 +56,8 @@ def model_json(obj) -> str | None:
     Returns
     -------
     str or None
-        A JSON string containing ``docs_json`` and ``render_items`` keys,
-        or ``None`` if serialization fails.
+        A JSON string containing ``docs_json``, ``render_items``, and
+        ``ext_resources`` keys, or ``None`` if serialization fails.
     """
     from bokeh.embed.standalone import standalone_docs_json_and_render_items
     from panel import panel as pn_panel
@@ -67,7 +70,33 @@ def model_json(obj) -> str | None:
     docs_json, render_items = standalone_docs_json_and_render_items(doc)
     docs_json_str = json.dumps(docs_json)
     render_items_str = json.dumps([item.to_json() for item in render_items])
-    return json.dumps({"docs_json": docs_json_str, "render_items": render_items_str})
+
+    # Detect extension resources (JS/CSS) needed by models actually in the
+    # document (not all registered models — that would pull in ReactiveESM etc.
+    # for every example).  Relative paths are resolved to absolute CDN URLs.
+    from panel.io.resources import CDN_DIST
+
+    cdn_base = CDN_DIST.rstrip("/")
+
+    js_urls: list[str] = []
+    css_urls: list[str] = []
+    doc_model_classes = {type(m) for m in doc.models}
+    for cls in doc_model_classes:
+        for url in getattr(cls, "__javascript__", []) or []:
+            if not url.startswith(("http://", "https://", "//")):
+                url = f"{cdn_base}/{url}"
+            if url not in js_urls:
+                js_urls.append(url)
+        for url in getattr(cls, "__css__", []) or []:
+            if not url.startswith(("http://", "https://", "//")):
+                url = f"{cdn_base}/{url}"
+            if url not in css_urls:
+                css_urls.append(url)
+
+    result: dict = {"docs_json": docs_json_str, "render_items": render_items_str}
+    if js_urls or css_urls:
+        result["ext_resources"] = {"js": js_urls, "css": css_urls}
+    return json.dumps(result)
 
 
 def execution_process(code: str, conn) -> None:
@@ -95,7 +124,10 @@ def execution_process(code: str, conn) -> None:
         output = model_json(result)
         conn.send({"error": None, "output": output})
     except Exception as exc:
-        conn.send({"error": str(exc), "output": None})
+        import traceback
+
+        tb = traceback.format_exception(exc)
+        conn.send({"error": f"{exc.__class__.__name__}: {exc}", "traceback": "".join(tb), "output": None})
     finally:
         conn.close()
 
@@ -140,11 +172,20 @@ def pre_render(code: str, cache_dir: Path | str, *, setup_code: str = "", timeou
     proc.start()
     proc.join(timeout=timeout)
 
+    code_preview = full_code.strip().split("\n")[0][:80]
     if proc.exitcode != 0 or not parent_conn.poll():
+        log.warning("pre-render failed (exit code %s) for: %s", proc.exitcode, code_preview)
         return None
 
     result = parent_conn.recv()
-    if result.get("error") or not result.get("output"):
+    if result.get("error"):
+        tb = result.get("traceback", "")
+        log.warning("pre-render error for: %s\n  %s", code_preview, result["error"])
+        if tb:
+            log.debug("pre-render traceback:\n%s", tb)
+        return None
+    if not result.get("output"):
+        log.warning("pre-render produced no output for: %s", code_preview)
         return None
 
     output = result["output"]

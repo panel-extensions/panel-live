@@ -6,5 +6,5 @@ Create, filter, and aggregate a Polars DataFrame with `group_by` operations.
 
 Docs: [Polars](https://docs.pola.rs/)
 
-```{.panel mode="editor" src="../../../assets/examples/polars-demo.py" auto-run="true" label="Python" code-position="last"}
+```{.panel mode="editor" src="../../../assets/examples/polars-demo.py" label="Python" code-position="last"}
 ```

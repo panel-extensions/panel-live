@@ -6,7 +6,7 @@ Load Python code from an external URL using the `src` attribute instead of embed
 
 Point the `src` attribute to any publicly accessible `.py` file:
 
-```{.panel mode="editor" src="../../assets/examples/hello.py" auto-run="true"}
+```{.panel mode="editor" src="../../assets/examples/hello.py"}
 ```
 
 The code is fetched at runtime and displayed in the editor. Users can still edit and re-run the loaded code.
@@ -15,7 +15,7 @@ The code is fetched at runtime and displayed in the editor. Users can still edit
 
 GitHub blob URLs are automatically converted to raw URLs. You can use a regular GitHub file link as the `src` value:
 
-```{.panel mode="editor" src="https://github.com/panel-extensions/panel-live/blob/main/docs/assets/examples/hello.py" auto-run="true"}
+```{.panel mode="editor" src="https://github.com/panel-extensions/panel-live/blob/main/docs/assets/examples/hello.py"}
 ```
 
 The URL `https://github.com/owner/repo/blob/branch/path.py` is rewritten to `https://raw.githubusercontent.com/owner/repo/branch/path.py` before fetching.

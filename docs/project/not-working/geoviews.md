@@ -6,5 +6,5 @@ World map with coastlines, borders, and land/ocean fill using GeoViews feature e
 
 Docs: [GeoViews](https://geoviews.org/)
 
-```{.panel mode="editor" src="../../../assets/examples/geoviews-demo.py" auto-run="true" label="Python" code-position="last"}
+```{.panel mode="editor" src="../../../assets/examples/geoviews-demo.py" label="Python" code-position="last"}
 ```

@@ -8,8 +8,6 @@ edit_uri = "edit/main/docs/"
 nav = [
   {"Home" = "index.md"},
   {"Examples" = "examples.md"},
-  {"Playground" = "playground.md"},
-  {"API Explorer" = "api-explorer.md"},
   {"Tutorials" = [
     {"Getting Started with HTML" = "tutorials/getting-started-html.md"},
     {"Getting Started with MkDocs" = "tutorials/getting-started-mkdocs.md"},
@@ -152,7 +150,7 @@ url_download = true
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
-  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.formatter" }
+  { name = "panel", class = "panel-live", validator = "panel_live.fences.validator", format = "panel_live.fences.prerender_formatter" }
 ]
 
 # Plugins

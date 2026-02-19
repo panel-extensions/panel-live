@@ -8,7 +8,7 @@ Control editor visibility and position using `code-visibility` and `code-positio
 
 The code editor is shown and expanded.
 
-```{.panel mode="editor" code-visibility="visible" auto-run="true"}
+```{.panel mode="editor" code-visibility="visible"}
 import panel as pn
 pn.panel("Code is **visible** by default.").servable()
 ```
@@ -17,7 +17,7 @@ pn.panel("Code is **visible** by default.").servable()
 
 The code editor is completely hidden. The output is shown alone, similar to app mode but with the editor header/controls still available.
 
-```{.panel mode="editor" code-visibility="hidden" auto-run="true"}
+```{.panel mode="editor" code-visibility="hidden"}
 import panel as pn
 pn.panel("Code is **hidden** — output only.").servable()
 ```
@@ -26,7 +26,7 @@ pn.panel("Code is **hidden** — output only.").servable()
 
 The code editor is collapsed behind a toggle button. Click **Expand Code** to reveal the editor; it changes to **Collapse Code** when expanded.
 
-```{.panel mode="editor" code-visibility="collapsed" auto-run="true"}
+```{.panel mode="editor" code-visibility="collapsed"}
 import panel as pn
 pn.panel("Code is **collapsed** — click to expand.").servable()
 ```
@@ -37,7 +37,7 @@ pn.panel("Code is **collapsed** — click to expand.").servable()
 
 Code appears before (above or left of) the output.
 
-```{.panel mode="editor" code-position="first" auto-run="true"}
+```{.panel mode="editor" code-position="first"}
 import panel as pn
 pn.panel("Code is **first** — above the output.").servable()
 ```
@@ -46,7 +46,7 @@ pn.panel("Code is **first** — above the output.").servable()
 
 Code appears after (below or right of) the output.
 
-```{.panel mode="editor" code-position="last" auto-run="true"}
+```{.panel mode="editor" code-position="last"}
 import panel as pn
 pn.panel("Code is **last** — below the output.").servable()
 ```

@@ -6,7 +6,7 @@ Control how the code editor and output preview are arranged using the `layout` a
 
 Code above, output below. This is the default for **editor** mode.
 
-```{.panel mode="editor" layout="vertical" auto-run="true"}
+```{.panel mode="editor" layout="vertical"}
 import panel as pn
 pn.panel("**Vertical layout** — code above, output below.").servable()
 ```
@@ -15,7 +15,7 @@ pn.panel("**Vertical layout** — code above, output below.").servable()
 
 Code and output side by side. This is the default for **playground** mode.
 
-```{.panel mode="playground" layout="horizontal" auto-run="true"}
+```{.panel mode="playground" layout="horizontal"}
 import panel as pn
 pn.panel("**Horizontal layout** — code left, output right.").servable()
 ```
@@ -24,7 +24,7 @@ pn.panel("**Horizontal layout** — code left, output right.").servable()
 
 `layout="auto"` switches between horizontal on wide viewports and vertical on narrow viewports (≤768px). This is the default for **playground** mode.
 
-```{.panel mode="playground" layout="auto" auto-run="true"}
+```{.panel mode="playground" layout="auto"}
 import panel as pn
 pn.panel("**Auto layout** — resize the browser to see it switch.").servable()
 ```
@@ -35,7 +35,7 @@ Try resizing your browser window below 768px to see the layout switch from side-
 
 You can override the default layout for any mode:
 
-```{.panel mode="editor" layout="horizontal" auto-run="true"}
+```{.panel mode="editor" layout="horizontal"}
 import panel as pn
 pn.panel("Editor mode with **horizontal** layout override.").servable()
 ```

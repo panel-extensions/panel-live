@@ -272,6 +272,8 @@ def test_inject_assets_for_directive_page():
     assert "panel-live.js" in metatags
     assert "panel-live.css" in metatags
     assert "PANEL_LIVE_CONFIG" in metatags
+    assert "panel-live-controls" in metatags
+    assert "panel-live-config" in metatags
 
 
 def test_no_inject_for_non_directive_page():
@@ -318,7 +320,7 @@ def test_inject_mini_coi_default():
 
     metatags = context["metatags"]
     assert "mini-coi.js" in metatags
-    assert 'type="module"' in metatags
+    assert 'type="module"' not in metatags
 
 
 def test_inject_mini_coi_disabled():

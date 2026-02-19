@@ -6,7 +6,7 @@ Control how `panel-live` presents your code and output using the `mode` attribut
 
 Renders the output only — no editor, no controls. Use for embedded demos.
 
-```{.panel mode="app" auto-run="true"}
+```{.panel mode="app"}
 import panel as pn
 pn.panel("This is **app mode** — output only, no editor visible.").servable()
 ```
@@ -15,7 +15,7 @@ pn.panel("This is **app mode** — output only, no editor visible.").servable()
 
 Shows code and output stacked vertically with a Run button. Users can edit and re-run.
 
-```{.panel mode="editor" auto-run="true"}
+```{.panel mode="editor"}
 import panel as pn
 pn.panel("This is **editor mode** — edit the code and press Run.").servable()
 ```
@@ -24,7 +24,7 @@ pn.panel("This is **editor mode** — edit the code and press Run.").servable()
 
 Side-by-side editor and live preview. Best for exploration and experimentation.
 
-```{.panel mode="playground" auto-run="true"}
+```{.panel mode="playground"}
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=42)
 pn.Column(slider, pn.bind(lambda v: f"**Value:** {v}", slider)).servable()

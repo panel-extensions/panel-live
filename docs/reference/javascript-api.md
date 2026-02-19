@@ -16,6 +16,7 @@ Set global defaults for version pinning and CDN configuration. Must be called **
 | `pyodideCdn` | `string` | `'https://cdn.jsdelivr.net/pyodide/'` | Pyodide CDN base URL |
 | `panelCdn` | `string` | `'https://cdn.holoviz.org/panel/'` | Panel CDN base URL |
 | `bokehCdn` | `string` | `'https://cdn.bokeh.org/bokeh/release/'` | Bokeh CDN base URL |
+| `playgroundUrl` | `string` | `''` | URL for playground links (empty = auto-detect from script URL) |
 
 **Returns:** `void`
 
@@ -37,6 +38,26 @@ PanelLive.configure({
   panelCdn: 'https://internal-cdn.example.com/panel/',
   bokehCdn: 'https://internal-cdn.example.com/bokeh/',
 });
+```
+
+## `PanelLive.runAll() -> Promise<{total, errors}>`
+
+Run (or re-run) all registered `<panel-live>` elements serially in document order. Errors on individual elements don't stop the sequence.
+
+**Returns:** `Promise<{total: number, errors: number}>`
+
+**Events dispatched on `document`:**
+
+| Event | `detail` | When |
+|-------|----------|------|
+| `pl-run-all-start` | `{count: number}` | Before the first element runs |
+| `pl-run-all-end` | `{total: number, errors: number}` | After all elements finish |
+
+**Example:**
+
+```javascript
+const result = await PanelLive.runAll();
+console.log(`Ran ${result.total} elements, errors: ${result.errors}`);
 ```
 
 ## `PanelLive.init(options?) -> Promise<void>`

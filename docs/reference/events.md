@@ -4,6 +4,8 @@
 
 ## Event Summary
 
+### Element Events (dispatched on `<panel-live>`)
+
 | Event | `detail` | Description |
 |-------|----------|-------------|
 | `pl-status` | `{status: string, message: string}` | Status change during lifecycle |
@@ -11,6 +13,13 @@
 | `pl-error` | `{error: string, traceback: string}` | Python execution error |
 | `pl-run-start` | — | Code execution started (including re-runs) |
 | `pl-run-end` | — | Code execution finished |
+
+### Page Events (dispatched on `document`)
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `pl-run-all-start` | `{count: number}` | `PanelLive.runAll()` started; `count` is the number of registered elements |
+| `pl-run-all-end` | `{total: number, errors: number}` | `PanelLive.runAll()` finished |
 
 ## Event Details
 
@@ -124,4 +133,19 @@ const ctrl = await PanelLive.mount({ mode: 'editor', ... }, '#container');
 ctrl.element.addEventListener('pl-ready', () => {
   console.log('Mounted app is ready');
 });
+```
+
+### Page-level events
+
+```javascript
+document.addEventListener('pl-run-all-start', (e) => {
+  console.log(`Running ${e.detail.count} elements...`);
+});
+
+document.addEventListener('pl-run-all-end', (e) => {
+  console.log(`Done: ${e.detail.total} total, ${e.detail.errors} errors`);
+});
+
+// Trigger via button or programmatically
+await PanelLive.runAll();
 ```
