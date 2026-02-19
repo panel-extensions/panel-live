@@ -31,4 +31,6 @@ panel_live_conf = {
     "pre_render": True,
     # Default mode for all directives
     "default_mode": "editor",
+    # Don't auto-run Pyodide — show pre-rendered preview instead
+    "default_auto_run": False,
 }

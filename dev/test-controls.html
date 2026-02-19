@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Live — Controls Test</title>
+  <link rel="stylesheet" href="../dist/panel-live.css">
+  <script src="../dist/panel-live.js"></script>
+  <style>
+    body { font-family: system-ui; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    h2 { margin-top: 2em; }
+    .test-section { border: 1px dashed #ccc; padding: 12px; margin: 12px 0; border-radius: 6px; }
+    #log { font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 12px; max-height: 200px; overflow-y: auto; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Controls Test Page</h1>
+  <p>Manual test page for <code>&lt;panel-live-config&gt;</code>, <code>&lt;panel-live-controls&gt;</code>, and <code>PanelLive.runAll()</code>.</p>
+
+  <h2>Test 1: Config + Controls</h2>
+  <p>The config element reads localStorage and the controls toolbar provides Run All + auto-run toggle.</p>
+
+  <div class="test-section">
+    <!-- Config: sets playground URL and reads localStorage auto-run preference -->
+    <panel-live-config playground-url="/playground.html"></panel-live-config>
+
+    <!-- Controls: Run All button + auto-run toggle -->
+    <panel-live-controls></panel-live-controls>
+  </div>
+
+  <h2>Test 2: Three panel-live elements (auto-run disabled by default)</h2>
+  <p>These should NOT auto-run on page load (unless auto-run toggle is ON in localStorage). Click "Run All" above to execute them.</p>
+
+  <div class="test-section">
+    <h3>Example 1: Simple text</h3>
+    <panel-live mode="editor" auto-run="false">
+import panel as pn
+pn.panel("Hello from Example 1!").servable()
+    </panel-live>
+  </div>
+
+  <div class="test-section">
+    <h3>Example 2: Slider</h3>
+    <panel-live mode="editor" auto-run="false">
+import panel as pn
+slider = pn.widgets.FloatSlider(start=0, end=10, name='Value')
+pn.Row(slider, pn.bind(lambda v: f'Value: {v:.1f}', slider)).servable()
+    </panel-live>
+  </div>
+
+  <div class="test-section">
+    <h3>Example 3: Markdown</h3>
+    <panel-live mode="editor" auto-run="false">
+import panel as pn
+pn.panel("## Example 3\n\nThis is **Markdown** content.").servable()
+    </panel-live>
+  </div>
+
+  <h2>Event Log</h2>
+  <div id="log"></div>
+
+  <h2>Manual Checks</h2>
+  <ul>
+    <li>Page loads without triggering Pyodide download (check Network tab)</li>
+    <li>"Run All" button runs all 3 elements serially (top to bottom)</li>
+    <li>"Run All" shows "Running..." while active and re-enables after</li>
+    <li>Auto-run toggle persists across page reloads (check localStorage)</li>
+    <li>Toggling auto-run ON immediately runs all elements</li>
+    <li>Toggling auto-run OFF and reloading: elements don't auto-run</li>
+    <li>Playground links point to <code>/playground.html</code> (from config)</li>
+    <li><code>PanelLive.runAll()</code> works from the browser console</li>
+    <li>Events appear in the log below</li>
+    <li>Clearing localStorage: <code>localStorage.removeItem('panel-live:auto-run')</code></li>
+  </ul>
+
+  <script>
+    const log = document.getElementById('log');
+    function addLog(msg) {
+      const line = document.createElement('div');
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Listen for page-level events
+    document.addEventListener('pl-run-all-start', (e) => {
+      addLog(`pl-run-all-start: count=${e.detail.count}`);
+    });
+    document.addEventListener('pl-run-all-end', (e) => {
+      addLog(`pl-run-all-end: total=${e.detail.total}, skipped=${e.detail.skipped}, errors=${e.detail.errors}`);
+    });
+
+    // Listen for element-level events on each panel-live
+    document.querySelectorAll('panel-live').forEach((el, i) => {
+      el.addEventListener('pl-status', (e) => {
+        addLog(`Element ${i+1} pl-status: ${e.detail.status} — ${e.detail.message}`);
+      });
+      el.addEventListener('pl-ready', () => {
+        addLog(`Element ${i+1} pl-ready`);
+      });
+    });
+
+    addLog('Page loaded. Auto-run localStorage: ' + localStorage.getItem('panel-live:auto-run'));
+  </script>
+</body>
+</html>

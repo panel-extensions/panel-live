@@ -1,5 +1,7 @@
 ---
 title: "panel-live Quarto Test"
+panel-live:
+  default-auto-run: false
 ---
 
 This site tests the `panel-live` Quarto extension.
@@ -11,6 +13,31 @@ This site tests the `panel-live` Quarto extension.
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
 pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
+```
+
+## Expression Mode (Matplotlib)
+
+Not just Panel — any Python expression works. Here matplotlib renders without
+any Panel imports.
+
+```{.panel-live}
+#| mode: editor
+#| label: Python
+#| code-visibility: collapsed
+#| code-position: last
+import matplotlib
+matplotlib.use("agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 2 * np.pi, 200)
+fig, ax = plt.subplots(figsize=(6, 3))
+for n in range(1, 5):
+    ax.plot(x, np.sin(n * x) / n, label=f"sin({n}x)/{n}")
+ax.set_title("Harmonic Series")
+ax.legend(loc="upper right")
+ax.grid(True, alpha=0.3)
+fig
 ```
 
 ## App Mode

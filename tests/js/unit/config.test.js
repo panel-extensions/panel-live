@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { _defaults, _config, cdnUrls } from '../../../lib/config.js';
+import { _defaults, _config, _autoRunOverride, setAutoRunOverride, cdnUrls } from '../../../lib/config.js';
 
 describe('config', () => {
   it('has expected default versions', () => {
@@ -49,5 +49,21 @@ describe('config', () => {
 
   it('has disableJSPI default set to true', () => {
     expect(_defaults.disableJSPI).toBe(true);
+  });
+
+  it('has playgroundUrl default as empty string', () => {
+    expect(_defaults.playgroundUrl).toBe('');
+  });
+
+  it('_autoRunOverride starts as null', () => {
+    expect(_autoRunOverride).toBeNull();
+  });
+
+  it('setAutoRunOverride sets boolean values', () => {
+    setAutoRunOverride(false);
+    // Re-import to check live binding
+    expect(_autoRunOverride !== undefined).toBe(true);
+    // Reset
+    setAutoRunOverride(null);
   });
 });

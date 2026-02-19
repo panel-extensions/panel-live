@@ -33,7 +33,7 @@ Benefits:
 
 ### Transition to Interactive
 
-- When `auto-run="true"` (the default), the element automatically re-executes the code once Pyodide is ready and replaces the static output with the live version.
+- When `auto-run="true"`, the element automatically re-executes the code once Pyodide is ready and replaces the static output with the live version.
 - When `auto-run="false"`, the static output persists until the user clicks "Run". This is recommended for documentation pages with many examples.
 
 ## Caching

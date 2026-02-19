@@ -148,7 +148,7 @@ local function ensure_base_setup(meta)
       serviceworkers = { "mini-coi.js" },
     })
     table.insert(head_parts,
-      '<script src="mini-coi.js" type="module"></script>')
+      '<script src="mini-coi.js"></script>')
   end
 
   if #config_parts > 0 then
@@ -196,6 +196,19 @@ local function CodeBlock(el)
     local value = directives[key] or el.attributes[key]
     if value and value ~= "" then
       table.insert(attrs, string.format(' %s="%s"', key, escape_html(value)))
+    end
+  end
+
+  -- Apply default-auto-run from metadata (if auto-run not set per-block)
+  local conf = get_config(doc_meta)
+  if not directives["auto-run"] and not el.attributes["auto-run"] then
+    local default_auto_run = conf["default-auto-run"]
+    if default_auto_run ~= nil then
+      local val = "false"
+      if default_auto_run == true or default_auto_run == "true" then
+        val = "true"
+      end
+      table.insert(attrs, string.format(' auto-run="%s"', val))
     end
   end
 

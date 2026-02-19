@@ -5,6 +5,7 @@
 (({ document: d, navigator: { serviceWorker: s } }) => {
   if (d && s) {
     const { currentScript: c } = d;
+    if (!c) { console.warn('mini-coi: document.currentScript is null — service worker registration skipped (was the script loaded as type="module"?)'); return; }
     s.register(c.src, { scope: c.getAttribute('scope') || '.' }).then(r => {
       r.addEventListener('updatefound', () => {
         if (!sessionStorage.getItem('_minicoi')) {

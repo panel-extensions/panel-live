@@ -6,7 +6,7 @@ Customize the language pill text displayed in the editor header using the `label
 
 The default label is "Python":
 
-```{.panel mode="editor" auto-run="true"}
+```{.panel mode="editor"}
 import panel as pn
 pn.panel("Default label: **Python**").servable()
 ```
@@ -15,7 +15,7 @@ pn.panel("Default label: **Python**").servable()
 
 Set a custom label to describe your code:
 
-```{.panel mode="editor" label="Panel App" auto-run="true"}
+```{.panel mode="editor" label="Panel App"}
 import panel as pn
 pn.panel("Custom label: **Panel App**").servable()
 ```

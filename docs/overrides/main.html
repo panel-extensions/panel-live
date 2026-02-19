@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extrahead %}
-<script src="{{ base_url }}/mini-coi.js" type="module"></script>
+<script src="{{ base_url }}/mini-coi.js"></script>
 <style>
   .md-banner { background-color: #f57c00; }
   .md-banner a { color: #fff; text-decoration: underline; }
@@ -10,4 +10,10 @@
 
 {% block announce %}
 This project has not been released yet. Some Chrome/Edge users may experience crashes — <a href="https://www.mozilla.org/firefox/">Firefox</a> is a known workaround. Issue tracked <a href="https://github.com/holoviz/panel/issues/8416#issuecomment-3882057737">here</a>.
+{% endblock %}
+
+{% block content %}
+<panel-live-config></panel-live-config>
+<panel-live-controls></panel-live-controls>
+{{ super() }}
 {% endblock %}

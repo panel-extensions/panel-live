@@ -2,9 +2,9 @@
 
 Control whether `panel-live` editors execute code automatically on page load using the `auto-run` attribute.
 
-## Auto-run enabled (default)
+## Auto-run enabled
 
-Set `auto-run="true"` (or omit it — `true` is the default) to run code as soon as the editor loads:
+Set `auto-run="true"` to run code as soon as the editor loads (the fence default is `auto-run="false"`):
 
 ```{.panel mode="editor" auto-run="true"}
 import panel as pn

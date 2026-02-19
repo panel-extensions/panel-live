@@ -6,7 +6,7 @@ Control the color scheme of `panel-live` using the `theme` attribute.
 
 Follows the user's operating system preference via `prefers-color-scheme`. This is the default when no `theme` is specified.
 
-```{.panel mode="editor" theme="auto" auto-run="true"}
+```{.panel mode="editor" theme="auto"}
 import panel as pn
 pn.panel("**Auto theme** — follows your OS light/dark preference.").servable()
 ```
@@ -15,7 +15,7 @@ pn.panel("**Auto theme** — follows your OS light/dark preference.").servable()
 
 Forces a light color scheme regardless of system preference.
 
-```{.panel mode="editor" theme="light" auto-run="true"}
+```{.panel mode="editor" theme="light"}
 import panel as pn
 pn.panel("**Light theme** — always light.").servable()
 ```
@@ -24,7 +24,7 @@ pn.panel("**Light theme** — always light.").servable()
 
 Forces a dark color scheme regardless of system preference.
 
-```{.panel mode="editor" theme="dark" auto-run="true"}
+```{.panel mode="editor" theme="dark"}
 import panel as pn
 pn.panel("**Dark theme** — always dark.").servable()
 ```

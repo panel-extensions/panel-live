@@ -6,7 +6,7 @@ Control the height of `panel-live` elements using the `height` attribute.
 
 When no `height` is specified, the element sizes to fit its content.
 
-```{.panel mode="editor" auto-run="true"}
+```{.panel mode="editor"}
 import panel as pn
 pn.panel("**Auto height** — sizes to fit content.").servable()
 ```
@@ -15,7 +15,7 @@ pn.panel("**Auto height** — sizes to fit content.").servable()
 
 Set an explicit height using any CSS length value:
 
-```{.panel mode="editor" height="500px" auto-run="true"}
+```{.panel mode="editor" height="500px"}
 import panel as pn
 
 items = pn.Column(*[

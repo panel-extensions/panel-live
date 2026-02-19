@@ -81,6 +81,7 @@ _DEFAULTS: dict[str, Any] = {
     "setup_code": "",
     "pre_render": True,
     "default_mode": "editor",
+    "default_auto_run": None,
 }
 
 # Path to the bundled static assets directory
@@ -163,6 +164,10 @@ class PanelLiveDirective(Directive):
         # Apply default mode
         if "mode" not in attrs and conf.get("default_mode"):
             attrs["mode"] = conf["default_mode"]
+
+        # Apply default auto-run (None = leave unset, let JS default)
+        if "auto-run" not in attrs and conf.get("default_auto_run") is not None:
+            attrs["auto-run"] = "true" if conf["default_auto_run"] else "false"
 
         # Handle requirements
         requirements = self.options.get("requirements", "")
@@ -277,11 +282,24 @@ def _inject_page_assets(
         # service worker scope covers the entire site
         depth = pagename.count("/")
         mini_coi_url = ("../" * depth) + "mini-coi.js"
-        mini_coi_html = f'<script src="{mini_coi_url}" type="module"></script>\n'
+        mini_coi_html = f'<script src="{mini_coi_url}"></script>\n'
+
+    # Inline script to inject <panel-live-config> and <panel-live-controls>
+    # into the body after the page loads (works with any Sphinx theme).
+    controls_script = (
+        "<script>"
+        "document.addEventListener('DOMContentLoaded',function(){"
+        "if(!document.querySelector('panel-live-config')){"
+        "document.body.prepend(document.createElement('panel-live-controls'));"
+        "document.body.prepend(document.createElement('panel-live-config'));"
+        "}"
+        "});"
+        "</script>\n"
+    )
 
     # Inject into page via metatags (Sphinx mechanism for adding to <head>)
     metatags = context.get("metatags", "")
-    injection = f"{mini_coi_html}" f"{config_script}" f'<link rel="stylesheet" href="{css_url}">\n' f'<script src="{js_url}"></script>\n'
+    injection = f"{mini_coi_html}" f"{config_script}" f'<link rel="stylesheet" href="{css_url}">\n' f'<script src="{js_url}"></script>\n' f"{controls_script}"
     context["metatags"] = metatags + injection
 
 
