@@ -48,6 +48,8 @@ pixi run -e build check-wheel        # validate with twine
 pixi run postinstall                 # pip install -e . (editable install)
 pixi run serve                       # local HTTP server with COOP/COEP headers (for Pyodide)
 pixi run sync-assets                 # build JS and copy dist/ to docs/assets/
+pixi run sync-static                 # build JS and copy dist/ to src/panel_live/static/ (for wheel)
+pixi run serve-showcase              # build JS and serve the showcase app (always latest assets)
 ```
 
 Run a single test file or test function:

@@ -82,7 +82,7 @@ function _mirrorStylesInto(shadowRoot) {
 // ---------- Mode helpers ----------
 
 // Modes that map to <panel-live mode="app"> with code-visibility="hidden"
-const _HEADLESS_MODES = new Set(["headless", "compact", "debug"]);
+const _HEADLESS_MODES = new Set(["headless", "progress", "debug"]);
 
 function _resolveHtmlMode(mode) {
   return _HEADLESS_MODES.has(mode) ? "app" : mode;
@@ -118,6 +118,104 @@ function _applyContainerStyle(container, model) {
   }
 }
 
+// ---------- Progress mode helpers ----------
+
+/* eslint-disable max-len */
+const _PYTHON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#3776AB" d="M11.914 0C5.82 0 6.2 2.656 6.2 2.656l.007 2.752h5.814v.826H3.9S0 5.789 0 11.969c0 6.18 3.403 5.96 3.403 5.96h2.03v-2.867s-.109-3.42 3.35-3.42h5.766s3.24.052 3.24-3.148V3.202S18.28 0 11.914 0zM8.708 1.85a1.06 1.06 0 110 2.12 1.06 1.06 0 010-2.12z"/><path fill="#FFD43B" d="M12.086 24c6.094 0 5.714-2.656 5.714-2.656l-.007-2.752h-5.814v-.826h8.121s3.9.445 3.9-5.735c0-6.18-3.403-5.96-3.403-5.96h-2.03v2.867s.109 3.42-3.35 3.42H9.451s-3.24-.052-3.24 3.148v5.292S5.72 24 12.086 24zm3.206-1.85a1.06 1.06 0 110-2.12 1.06 1.06 0 010 2.12z"/></svg>`;
+/* eslint-enable max-len */
+
+function _createProgressIcon() {
+  const wrapper = document.createElement("div");
+  wrapper.className = "pl-progress-icon";
+  // Inline styles ensure correct sizing even before external CSS loads
+  wrapper.style.display = "inline-flex";
+  wrapper.style.alignItems = "center";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.width = "40px";
+  wrapper.style.height = "40px";
+  wrapper.style.padding = "4px";
+  wrapper.style.cursor = "default";
+  wrapper.style.position = "relative";
+  wrapper.innerHTML = _PYTHON_SVG;
+  const svg = wrapper.querySelector("svg");
+  if (svg) {
+    svg.style.width = "24px";
+    svg.style.height = "24px";
+  }
+
+  // CSS tooltip — shown instantly on hover, stays visible during text updates
+  const tooltip = document.createElement("span");
+  tooltip.className = "pl-progress-tooltip";
+  tooltip.textContent = "Ready";
+  wrapper.appendChild(tooltip);
+
+  // Inject tooltip styles (idempotent — only once per document)
+  _injectTooltipStyles(wrapper);
+
+  return wrapper;
+}
+
+const _tooltipStyleRoots = new WeakSet();
+function _injectTooltipStyles(container) {
+  const root = container.getRootNode();
+  if (_tooltipStyleRoots.has(root)) return;
+  _tooltipStyleRoots.add(root);
+  const style = document.createElement("style");
+  style.textContent = `
+    .pl-progress-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #f0f0f0;
+      font-size: 12px;
+      line-height: 1.3;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    @media (prefers-color-scheme: dark) {
+      .pl-progress-tooltip {
+        background: #e0e0e0;
+        color: #1a1a1a;
+      }
+    }
+    .pl-progress-icon:hover .pl-progress-tooltip {
+      display: block;
+    }
+  `;
+  // Insert into the closest root (shadow or document)
+  if (root instanceof ShadowRoot) {
+    root.appendChild(style);
+  } else {
+    document.head.appendChild(style);
+  }
+}
+
+function _setProgressTooltip(icon, text) {
+  const tip = icon.querySelector(".pl-progress-tooltip");
+  if (tip) tip.textContent = text;
+}
+
+function _updateProgressIcon(icon, inFlight) {
+  if (inFlight > 0) {
+    icon.classList.add("active");
+    _setProgressTooltip(
+      icon,
+      inFlight === 1
+        ? "Evaluating\u2026"
+        : `Evaluating\u2026 (${inFlight} in queue)`,
+    );
+  } else {
+    icon.classList.remove("active");
+    _setProgressTooltip(icon, "Ready");
+  }
+}
+
 // ---------- render ----------
 
 export function render({ model, view }) {
@@ -132,6 +230,8 @@ export function render({ model, view }) {
 
   const container = document.createElement("div");
   container.classList.add("panel-live-component");
+  // Vertically center in flex layouts (e.g. pn.Row alongside Button widgets)
+  container.style.alignSelf = "center";
 
   // Create the <panel-live> element
   const plEl = document.createElement("panel-live");
@@ -146,6 +246,16 @@ export function render({ model, view }) {
   }
 
   container.appendChild(plEl);
+
+  // Progress mode: visible spinning Python icon, hidden <panel-live>
+  let _progressIcon = null;
+  let _evalInFlight = 0;
+
+  if (model.mode === "progress") {
+    plEl.style.display = "none";
+    _progressIcon = _createProgressIcon();
+    container.appendChild(_progressIcon);
+  }
 
   // Apply container styling for headless mode
   _applyContainerStyle(container, model);
@@ -163,7 +273,7 @@ export function render({ model, view }) {
   // Watch for code changes — update the editor and internal code state
   model.on("code", () => {
     plEl.setCode(model.code);
-    // Also update internal _code for modes without an editor (app/headless/compact/debug)
+    // Also update internal _code for modes without an editor (app/headless/progress/debug)
     plEl._code = model.code;
   });
 
@@ -171,6 +281,23 @@ export function render({ model, view }) {
   plEl.addEventListener("pl-status", (event) => {
     if (event.detail && event.detail.status) {
       model.status = event.detail.status;
+      // Update progress icon for lifecycle events (only when no evals in flight)
+      if (_progressIcon && _evalInFlight === 0) {
+        const s = event.detail.status;
+        if (s === "loading" || s === "running") {
+          _progressIcon.classList.add("active");
+          _setProgressTooltip(
+            _progressIcon,
+            s === "loading" ? "Loading Pyodide\u2026" : "Running\u2026",
+          );
+        } else {
+          _progressIcon.classList.remove("active");
+          _setProgressTooltip(
+            _progressIcon,
+            s === "error" ? "Error" : "Ready",
+          );
+        }
+      }
     }
   });
 
@@ -201,7 +328,16 @@ export function render({ model, view }) {
       }
     } else if (msg.type === "evaluate") {
       // Forward evaluate request to the worker via eval()
-      _evaluateInWorker(plEl, msg, model);
+      if (_progressIcon) {
+        _evalInFlight++;
+        _updateProgressIcon(_progressIcon, _evalInFlight);
+      }
+      _evaluateInWorker(plEl, msg, model).finally(() => {
+        if (_progressIcon) {
+          _evalInFlight--;
+          _updateProgressIcon(_progressIcon, _evalInFlight);
+        }
+      });
     } else if (msg.type === "run") {
       // Trigger the full render pipeline programmatically
       _triggerRun(plEl, msg, model);
@@ -219,6 +355,63 @@ export function render({ model, view }) {
 }
 
 // ---------- evaluate helper ----------
+
+/**
+ * Strip internal Pyodide frames from an error string.
+ * Keeps only the exception line and user-code frames
+ * (from <exec>, <module>, <string>).
+ *
+ * Single-expression evals produce a sole "line 1, in <module>" frame
+ * which is noise — skip it.  Multi-line code with deeper call chains
+ * keeps all user frames so the caller sees line numbers and function names.
+ */
+function _cleanEvalError(raw) {
+  const lines = raw.split("\n");
+
+  // Extract exception line (last non-empty line)
+  let excLine = raw;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const l = lines[i].trim();
+    if (l) {
+      excLine = l;
+      break;
+    }
+  }
+
+  // Collect user-code frames (file is <exec>, <string>, etc.)
+  const userPatterns = ["<exec>", "<string>", "<ast>"];
+  const userFrames = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(
+      /^\s*File "(.+)", line (\d+)(?:, in (.+))?/,
+    );
+    if (m && userPatterns.some((p) => m[1].includes(p))) {
+      let text = lines[i].trimStart();
+      const lineNo = parseInt(m[2], 10);
+      const func = (m[3] || "").trim();
+      // Include the next line if it's indented code context
+      if (i + 1 < lines.length && lines[i + 1].match(/^\s{4,}/)) {
+        text += "\n    " + lines[i + 1].trim();
+        i++;
+      }
+      userFrames.push({ text, lineNo, func });
+    }
+  }
+
+  // Skip the sole top-level frame when it adds no context
+  // (single-expression eval always shows "line 1, in <module>")
+  const showFrames =
+    userFrames.length === 1 &&
+    userFrames[0].lineNo === 1 &&
+    userFrames[0].func === "<module>"
+      ? []
+      : userFrames;
+
+  if (showFrames.length > 0) {
+    return excLine + "\n" + showFrames.map((f) => f.text).join("\n");
+  }
+  return excLine;
+}
 
 async function _evaluateInWorker(plEl, msg, model) {
   const { code, kwargs, request_id } = msg;
@@ -245,7 +438,7 @@ async function _evaluateInWorker(plEl, msg, model) {
     model.send_msg({
       type: "evaluate_error",
       request_id: request_id,
-      error: String(err),
+      error: _cleanEvalError(String(err)),
     });
   }
 }

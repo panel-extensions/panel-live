@@ -336,7 +336,7 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 - `PanelLive` class with `code`, `requirements`, `mode`, `theme`, `layout`, `auto_run`, `code_visibility`, `value`, `run`, `status`, `error`, `stdout` params
 - ESM module with Shadow DOM workarounds (getElementById patch, CSS mirroring)
 - `configure()` classmethod for local asset overriding (JS and CSS)
-- Modes: `app`, `editor`, `playground`, `headless`, `compact`, `debug`
+- Modes: `app`, `editor`, `playground`, `headless`, `progress`, `debug`
 - `output` param for client-to-server data
 - `send()` method for server-to-client push
 - `evaluate()` async method for remote code execution
@@ -344,22 +344,55 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 - Unit tests and POC test app
 - CLI `serve` command for showcase example
 - `__css__` class variable for explicit CSS loading (fixes missing CSS in CDN mode)
+- `_CDN_BASE` points to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`); showcase falls back to CDN when no local assets found
+- Showcase app with branded logo bar (Panel, Pyodide logos) and documentation links
+- Playwright smoke test for showcase (`tests/ui/test_showcase.py`)
+- `issue_jscomponent_shadow.md` documenting Shadow DOM limitation for filing against Panel
+- **In-package JS/CSS assets** — `panel-live.js`, `panel-live-worker.js`, `panel-live.css` bundled in `src/panel_live/static/`. CLI `serve` discovers them as final fallback (`quarto/_extensions/` → `dist/` → `static/`). `pip install panel-live` → `panel-live serve` works out of the box. `pixi run sync-static` copies fresh assets from `dist/`.
+- **`pixi run serve-showcase`** task chains `postinstall` + `build-js` → `panel-live serve` for always-fresh dev workflow
+- **Progress mode CSS tooltip** — replaced native `title` attribute with a CSS `::hover` tooltip (`<span class="pl-progress-tooltip">`). Shows instantly on hover, stays visible during text updates (queue depth changes no longer reset the browser tooltip timer). Dark/light theme via `prefers-color-scheme` media query. Icon enlarged to 40x40px + 4px padding for easier hover target.
+- **Vertical alignment fix** — `align-self: center` on `.panel-live-component` container ensures PanelLive aligns with sibling widgets (e.g. Button) in `pn.Row` layouts
 
 **CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because the npm package is not yet published. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once published to npm, update `_CDN_BASE` in `component.py` to `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist`.
 
 **Investigate**
 
-- Shadow root. For example many anywidgets use methods that don't work with shadow root. Can we disable or enable users to disable shadow root?
+- Shadow root. For example many anywidgets use methods that don't work with shadow root. Can we disable or enable users to disable shadow root? See `issue_jscomponent_shadow.md` for a detailed write-up. Reported here https://github.com/holoviz/panel/issues/8429.
 
 **Remaining:**
 
-- Switch `_CDN_BASE` from GitHub Pages to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist` once published to npm
+- Switch `_CDN_BASE` to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist` once published to npm
 - Full bidirectional sync (live param updates without re-run)
 - DataFrame/bytes serialization via Arrow IPC
 - Worker bridge API for state injection
 - Adoption testing with real-world use cases
+- Browser verification of all modes and bidirectional data exchange
 
 **Acceptance:** PanelLive component works end-to-end with bidirectional data exchange, all modes functional, documented with tutorials and how-to guides.
+
+---
+
+## P2 — COOP/COEP Headers for Panel Server Apps
+
+When running `panel-live serve` (or `panel serve` with a PanelLive component), the browser console shows:
+
+> `[panel-live] Cross-origin isolation not enabled. Add COOP/COEP headers or use mini-coi.js for best performance.`
+
+**Context:**
+
+- `serve.py` (for static sites) already adds COOP/COEP headers — no issue there.
+- Sphinx and Quarto builds use `mini-coi.js` — no issue there.
+- `panel serve` uses Tornado, which does not expose easy middleware-level header injection. Adding `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` requires either a custom Tornado `RequestHandler` wrapper or a reverse proxy (nginx/Caddy) in front.
+
+**Impact:** Non-blocking. Pyodide works without `SharedArrayBuffer` — it falls back to non-shared memory, which is slightly slower but fully functional. The warning is informational, not an error.
+
+**Possible solutions:**
+
+- Inject COOP/COEP headers via a Panel server lifecycle hook or Tornado `prepare()` override
+- Bundle `mini-coi.js` as a service worker for Panel server apps (same pattern as Sphinx/Quarto)
+- Document the reverse proxy approach (nginx: `add_header Cross-Origin-Opener-Policy same-origin`)
+
+**Acceptance:** Panel server apps either set COOP/COEP headers automatically or document the recommended approach for enabling cross-origin isolation.
 
 ---
 

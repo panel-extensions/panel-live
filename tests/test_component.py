@@ -97,10 +97,10 @@ def test_mode_accepts_headless():
     assert comp.mode == "headless"
 
 
-def test_mode_accepts_compact():
-    """mode='compact' is accepted."""
-    comp = PanelLive(mode="compact")
-    assert comp.mode == "compact"
+def test_mode_accepts_progress():
+    """mode='progress' is accepted."""
+    comp = PanelLive(mode="progress")
+    assert comp.mode == "progress"
 
 
 def test_mode_accepts_debug():
@@ -548,9 +548,9 @@ def test_headless_mode_works(document):
     assert model is not None
 
 
-def test_compact_mode_works(document):
-    """Compact mode produces a valid Bokeh model."""
-    comp = PanelLive(mode="compact", code="x = 1")
+def test_progress_mode_works(document):
+    """Progress mode produces a valid Bokeh model."""
+    comp = PanelLive(mode="progress", code="x = 1")
     model = comp.get_root(document)
     assert model is not None
 
@@ -594,6 +594,11 @@ def test_showcase_uses_server_io():
     # Server code should use .input param (not .send())
     assert "reactive_target.input =" in showcase
     assert "periodic_target.input =" in showcase
+
+
+def test_cdn_base_uses_github_pages():
+    """_CDN_BASE points to GitHub Pages."""
+    assert "panel-extensions.github.io" in _CDN_BASE
 
 
 def test_css_url_matches_cdn_base():

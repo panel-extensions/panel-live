@@ -15,7 +15,7 @@ from typing import ClassVar
 import param
 from panel.custom import JSComponent
 
-_CDN_BASE = "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist"
+_CDN_BASE = "https://panel-extensions.github.io/panel-live/assets"
 
 
 class PanelLive(JSComponent):
@@ -45,7 +45,7 @@ class PanelLive(JSComponent):
         - ``"app"`` — output only
         - ``"playground"`` — editor + examples selector
         - ``"headless"`` — invisible (0px), pure background compute
-        - ``"compact"`` — status line only, no visible output
+        - ``"progress"`` — spinning Python icon, evaluate queue on hover
         - ``"debug"`` — stdout/stderr visible, for development
     theme : str
         Color theme: ``"auto"`` (OS preference), ``"light"``, or ``"dark"``.
@@ -74,8 +74,8 @@ class PanelLive(JSComponent):
     """
 
     # --- Asset URLs (auto-loaded by Panel) ---
-    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.js"]
-    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.css"]
+    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/js/panel-live.js"]
+    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/css/panel-live.css"]
 
     @classmethod
     def configure(cls, *, js_url: str | None = None, css_url: str | None = None) -> None:
@@ -114,11 +114,12 @@ class PanelLive(JSComponent):
     # --- Display ---
     mode = param.Selector(
         default="editor",
-        objects=["app", "editor", "playground", "headless", "compact", "debug"],
+        objects=["app", "editor", "playground", "headless", "progress", "debug"],
         doc=(
             "Display mode: 'editor' (code + output), 'app' (output only), "
             "'playground' (editor + examples), 'headless' (invisible 0px), "
-            "'compact' (status line only), 'debug' (stdout/stderr visible)."
+            "'progress' (spinning Python icon, evaluate queue on hover), "
+            "'debug' (stdout/stderr visible)."
         ),
     )
     theme = param.Selector(default="auto", objects=["auto", "light", "dark"])

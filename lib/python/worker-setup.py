@@ -80,9 +80,20 @@ __ns__["send_output"] = _make_send_output(target_id)
 
 # Inject reactive server object for server→client data
 # Per-element: reuse existing if send() was called before first run()
-if target_id not in __server_data_objs__:  # noqa: F821
-    __server_data_objs__[target_id] = __ServerData__()  # noqa: F821
-__ns__["server"] = __server_data_objs__[target_id]  # noqa: F821
+try:
+    if target_id not in __server_data_objs__:  # noqa: F821
+        __server_data_objs__[target_id] = __ServerData__()  # noqa: F821
+    _server_obj = __server_data_objs__[target_id]  # noqa: F821
+except Exception:
+    # Fallback: create a fresh server object if globals aren't available
+    import param as _param_fallback
+
+    class _FallbackServerData(_param_fallback.Parameterized):
+        input = _param_fallback.Parameter(default=None)
+        output = _param_fallback.Parameter(default=None)
+
+    _server_obj = _FallbackServerData()
+__ns__["server"] = _server_obj
 
 
 # Wire output param → server: setting server.output sends data back
@@ -93,7 +104,7 @@ def _on_output_change(event, _tid=target_id):
         __send_output_raw__(_j.dumps(event.new), _tid)  # noqa: F821
 
 
-__server_data_objs__[target_id].param.watch(_on_output_change, ["output"])  # noqa: F821
+_server_obj.param.watch(_on_output_change, ["output"])
 
 try:
     if is_expression:

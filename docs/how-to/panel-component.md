@@ -9,7 +9,7 @@ Common patterns and recipes for using the `PanelLive` component in Panel server 
 | `editor` | You want users to see and edit the code | Code editor + output |
 | `app` | You want output only, no code editing | Output only |
 | `playground` | You want a full playground with example selector | Editor + examples |
-| `compact` | You need background compute with minimal status feedback | Status line only |
+| `progress` | You need background compute with minimal status feedback | Spinning Python icon |
 | `debug` | You're developing and need to see stdout/stderr | stdout/stderr |
 | `headless` | You need invisible background compute | Nothing (0px) |
 
@@ -19,7 +19,7 @@ from panel_live import PanelLive
 # Switch modes dynamically
 live = PanelLive(code="...", mode="editor")
 live.mode = "app"  # hide the editor
-live.mode = "compact"  # minimal status line
+live.mode = "progress"  # spinning Python icon
 ```
 
 ## Sending Data Server → Client
@@ -28,7 +28,7 @@ Set the `input` param to push JSON-serializable data to the client.
 On the client side, the data is available as `server.input`:
 
 ```python
-live = PanelLive(code="...", mode="compact")
+live = PanelLive(code="...", mode="progress")
 
 # Send any JSON-serializable data
 live.input = {"action": "update", "data": [1, 2, 3]}
@@ -60,7 +60,7 @@ On the client side, set `server.output` to send data back.
 On the server side, watch the `output` param:
 
 ```python
-live = PanelLive(code="...", mode="compact")
+live = PanelLive(code="...", mode="progress")
 
 def on_output(event):
     print(f"Received from client: {live.output}")

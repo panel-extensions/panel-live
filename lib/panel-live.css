@@ -683,3 +683,23 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .cm-editor {
 .pl-error-copy-btn:hover {
   opacity: 1;
 }
+
+/* ---- Progress mode (spinning Python icon) ---- */
+.pl-progress-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  cursor: default;
+}
+.pl-progress-icon svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.4;
+  transition: opacity 0.3s;
+}
+.pl-progress-icon.active svg {
+  opacity: 1;
+  animation: pl-spin 1.5s linear infinite;
+}

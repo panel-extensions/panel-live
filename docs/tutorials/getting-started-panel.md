@@ -61,8 +61,8 @@ PanelLive(code="...", mode="app")
 # Editor + examples selector
 PanelLive(code="...", mode="playground")
 
-# Status line only — minimal footprint
-PanelLive(code="...", mode="compact")
+# Spinning Python icon — evaluate() queue on hover
+PanelLive(code="...", mode="progress")
 
 # stdout/stderr visible — for development
 PanelLive(code="...", mode="debug")
@@ -156,7 +156,7 @@ from panel_live import PanelLive
 
 pn.extension()
 
-live = PanelLive(mode="compact", auto_run=True, code="pass")
+live = PanelLive(mode="progress", auto_run=True, code="pass")
 
 async def compute():
     result = await live.evaluate(
@@ -208,7 +208,7 @@ panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
 !!! note "CDN assets"
 
     By default, `PanelLive` loads JS/CSS from GitHub Pages (`panel-extensions.github.io/panel-live/assets/`).
-    Once published to npm, this will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
+    Once published to npm, the default CDN will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
     Use `PanelLive.configure()` to override with local assets for offline development.
 
 ## Next Steps

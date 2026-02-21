@@ -43,7 +43,7 @@ Server Python                  Browser JS                     Pyodide Worker
 
 The original design proposed three classes (`PanelLiveState`, `PanelLive`, `PanelLiveExecutor`) with ~25 parameters. The simplified design uses a single `PanelLive` class with ~15 parameters.
 
-`PanelLiveExecutor` is eliminated — `PanelLive(mode="headless")` (or `"compact"` / `"debug"`) provides the same functionality via mode selection.
+`PanelLiveExecutor` is eliminated — `PanelLive(mode="headless")` (or `"progress"` / `"debug"`) provides the same functionality via mode selection.
 
 ### Six modes in one parameter
 
@@ -53,13 +53,13 @@ The original design proposed three classes (`PanelLiveState`, `PanelLive`, `Pane
 | `app` | Output only | `mode="app"` |
 | `playground` | Editor + examples | `mode="playground"` |
 | `headless` | Nothing (0px) | `mode="app"` + `code-visibility="hidden"` + 0px container |
-| `compact` | Status line only | `mode="app"` + `code-visibility="hidden"` |
+| `progress` | Spinning Python icon | `mode="app"` + `code-visibility="hidden"` |
 | `debug` | stdout/stderr | `mode="app"` + `code-visibility="hidden"` |
 
-The `headless`, `compact`, and `debug` modes all map to `<panel-live mode="app" code-visibility="hidden">` at the HTML level. The distinction is in the container styling applied by the ESM:
+The `headless`, `progress`, and `debug` modes all map to `<panel-live mode="app" code-visibility="hidden">` at the HTML level. The distinction is in the container styling applied by the ESM:
 
 - **headless**: Container is 0px (invisible). Pure background compute.
-- **compact**: Container is visible but minimal. Shows only a status line.
+- **progress**: Container shows a spinning Python icon. Hover for evaluate() queue details.
 - **debug**: Container shows stdout/stderr output. Useful during development.
 
 ### ONE `value` param (for JSON types)
