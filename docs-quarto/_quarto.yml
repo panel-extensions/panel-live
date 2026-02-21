@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    - playground.html
+    - api-explorer.html
 
 website:
   title: "panel-live Quarto Test"
@@ -14,6 +17,10 @@ website:
         text: Pre-Rendering
       - href: versions.qmd
         text: Versions
+      - href: playground.html
+        text: Playground
+      - href: api-explorer.html
+        text: API Explorer
 
 format:
   html:
@@ -26,3 +33,5 @@ panel-live:
   pyodide-version: "v0.28.2"
   panel-version: "1.8.7"
   bokeh-version: "3.8.2"
+  pre-render: true
+  default-auto-run: false

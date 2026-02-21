@@ -15,7 +15,7 @@ from typing import ClassVar
 import param
 from panel.custom import JSComponent
 
-_CDN_BASE = "https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist"
+_CDN_BASE = "https://panel-extensions.github.io/panel-live/assets"
 
 
 class PanelLive(JSComponent):
@@ -45,7 +45,7 @@ class PanelLive(JSComponent):
         - ``"app"`` — output only
         - ``"playground"`` — editor + examples selector
         - ``"headless"`` — invisible (0px), pure background compute
-        - ``"compact"`` — status line only, no visible output
+        - ``"progress"`` — spinning Python icon, evaluate queue on hover
         - ``"debug"`` — stdout/stderr visible, for development
     theme : str
         Color theme: ``"auto"`` (OS preference), ``"light"``, or ``"dark"``.
@@ -59,11 +59,12 @@ class PanelLive(JSComponent):
         Bidirectional value for server→client and client→server data.
         Supports JSON-serializable types (``str``, ``int``, ``float``,
         ``dict``, ``list``, ``bool``, ``None``).
+    input : object
+        Server→client data channel. Setting ``input`` pushes data to
+        the client's ``server.input`` param (reactive, no re-run).
     output : object
         Client→server data channel (read-only from server perspective).
-        Updated when client-side code sends data back.
-    run : Event
-        Trigger code execution manually.
+        Updated when client-side code sets ``server.output``.
     status : str
         Current execution status (read-only from user perspective).
     error : str
@@ -73,8 +74,8 @@ class PanelLive(JSComponent):
     """
 
     # --- Asset URLs (auto-loaded by Panel) ---
-    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.js"]
-    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/panel-live.css"]
+    __javascript__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/js/panel-live.js"]
+    __css__: ClassVar[list[str] | None] = [f"{_CDN_BASE}/css/panel-live.css"]
 
     @classmethod
     def configure(cls, *, js_url: str | None = None, css_url: str | None = None) -> None:
@@ -113,11 +114,12 @@ class PanelLive(JSComponent):
     # --- Display ---
     mode = param.Selector(
         default="editor",
-        objects=["app", "editor", "playground", "headless", "compact", "debug"],
+        objects=["app", "editor", "playground", "headless", "progress", "debug"],
         doc=(
             "Display mode: 'editor' (code + output), 'app' (output only), "
             "'playground' (editor + examples), 'headless' (invisible 0px), "
-            "'compact' (status line only), 'debug' (stdout/stderr visible)."
+            "'progress' (spinning Python icon, evaluate queue on hover), "
+            "'debug' (stdout/stderr visible)."
         ),
     )
     theme = param.Selector(default="auto", objects=["auto", "light", "dark"])
@@ -132,12 +134,12 @@ class PanelLive(JSComponent):
     value = param.Parameter(
         doc="Bidirectional value. JSON-serializable types: str, int, float, dict, list, None.",
     )
-    output = param.Parameter(
-        doc="Client-to-server data. Updated when Pyodide code sends data back via postMessage.",
+    input = param.Parameter(
+        doc="Server-to-client data. Setting this pushes data to the client's server.input param.",
     )
-
-    # --- Execution ---
-    run = param.Event(doc="Trigger code execution manually")
+    output = param.Parameter(
+        doc="Client-to-server data. Updated when Pyodide code sets server.output.",
+    )
 
     # --- Status (read-only from user perspective) ---
     status = param.Selector(
@@ -152,6 +154,11 @@ class PanelLive(JSComponent):
     def __init__(self, **params: Any) -> None:
         super().__init__(**params)
         self._pending_requests: dict[str, asyncio.Future] = {}
+        self.param.watch(self._on_input_change, ["input"])
+
+    def _on_input_change(self, event: param.parameterized.Event) -> None:
+        """Push data to client when ``input`` param is set."""
+        self.send(event.new)
 
     def send(self, data: Any) -> None:
         """Send data from server to client-side Pyodide code.
@@ -167,16 +174,17 @@ class PanelLive(JSComponent):
         """
         self._send_msg({"type": "server_data", "data": data})
 
-    async def run_python(self, code: str, timeout: float = 30.0, **kwargs: Any) -> Any:
-        """Execute Python code in the client-side Pyodide worker.
+    async def evaluate(self, code: str, timeout: float = 30.0, **kwargs: Any) -> Any:
+        """Evaluate Python code in the browser and return the result.
 
-        Sends the code to the browser for execution and waits for the
-        result asynchronously.
+        Executes code in the client-side Pyodide worker without rendering
+        any UI.  Returns the value of the last expression, like Python's
+        built-in :func:`eval`.
 
         Parameters
         ----------
         code : str
-            Python code to execute in Pyodide.
+            Python code to evaluate in Pyodide.
         timeout : float
             Maximum seconds to wait for a result (default 30).
         **kwargs : Any
@@ -186,13 +194,12 @@ class PanelLive(JSComponent):
         Returns
         -------
         Any
-            The result returned by the executed code (must be
-            JSON-serializable).
+            The result of the last expression (must be JSON-serializable).
 
         Raises
         ------
         TimeoutError
-            If the execution does not complete within ``timeout`` seconds.
+            If the evaluation does not complete within ``timeout`` seconds.
         RuntimeError
             If the client-side execution raises an error.
         """
@@ -202,7 +209,7 @@ class PanelLive(JSComponent):
 
         self._send_msg(
             {
-                "type": "run_python",
+                "type": "evaluate",
                 "code": code,
                 "kwargs": kwargs,
                 "request_id": request_id,
@@ -214,14 +221,56 @@ class PanelLive(JSComponent):
         finally:
             self._pending_requests.pop(request_id, None)
 
+    async def run(self, code: str | None = None, timeout: float = 60.0) -> None:
+        """Trigger the full render pipeline (same as clicking "Run").
+
+        Parameters
+        ----------
+        code : str or None
+            If provided, updates ``self.code`` and syncs to the client
+            editor before running.  If ``None``, runs the editor's current
+            content (which may differ from ``self.code`` if the user edited
+            it in the browser).
+        timeout : float
+            Maximum seconds to wait for the render to complete.
+
+        Raises
+        ------
+        TimeoutError
+            If rendering does not complete within ``timeout`` seconds.
+        RuntimeError
+            If client-side execution raises an error.
+        """
+        request_id = str(uuid.uuid4())
+        future: asyncio.Future = asyncio.get_event_loop().create_future()
+        self._pending_requests[request_id] = future
+
+        if code is not None:
+            self.code = code  # syncs to client via model.on("code")
+
+        self._send_msg(
+            {
+                "type": "run",
+                "request_id": request_id,
+                "code": code,  # None means "use editor content"
+            }
+        )
+
+        try:
+            await asyncio.wait_for(future, timeout=timeout)
+        finally:
+            self._pending_requests.pop(request_id, None)
+
     def _handle_msg(self, data: Any) -> None:
         """Handle incoming messages from the client-side ESM.
 
         Routes messages by ``type``:
 
         - ``"output"`` — updates the ``output`` param
-        - ``"run_python_result"`` — resolves a pending ``run_python`` future
-        - ``"run_python_error"`` — rejects a pending ``run_python`` future
+        - ``"evaluate_result"`` — resolves a pending ``evaluate`` future
+        - ``"evaluate_error"`` — rejects a pending ``evaluate`` future
+        - ``"run_result"`` — resolves a pending ``run`` future
+        - ``"run_error"`` — rejects a pending ``run`` future
         """
         if not isinstance(data, dict):
             return
@@ -231,13 +280,25 @@ class PanelLive(JSComponent):
         if msg_type == "output":
             self.output = data.get("data")
 
-        elif msg_type == "run_python_result":
+        elif msg_type == "evaluate_result":
             request_id = data.get("request_id", "")
             future = self._pending_requests.get(str(request_id))
             if future and not future.done():
                 future.set_result(data.get("result"))
 
-        elif msg_type == "run_python_error":
+        elif msg_type == "evaluate_error":
+            request_id = data.get("request_id", "")
+            future = self._pending_requests.get(str(request_id))
+            if future and not future.done():
+                future.set_exception(RuntimeError(data.get("error", "Unknown error")))
+
+        elif msg_type == "run_result":
+            request_id = data.get("request_id", "")
+            future = self._pending_requests.get(str(request_id))
+            if future and not future.done():
+                future.set_result(None)
+
+        elif msg_type == "run_error":
             request_id = data.get("request_id", "")
             future = self._pending_requests.get(str(request_id))
             if future and not future.done():

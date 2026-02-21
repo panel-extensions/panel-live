@@ -95,6 +95,8 @@ jobs:
     name: Run pre-commit
     needs: [setup]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: holoviz-dev/holoviz_tasks/pre-commit@v0
       - uses: pre-commit/action@v3.0.1

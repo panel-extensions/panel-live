@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Live Playground</title>
+  <link rel="stylesheet" href="site_libs/quarto-contrib/panel-live-0.0.1/panel-live.css">
+  <script src="site_libs/quarto-contrib/panel-live-0.0.1/panel-live.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+  <panel-live mode="playground" layout="horizontal" theme="dark" fullscreen>
+
+    <panel-example name="Welcome">
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+greeting = pn.widgets.RadioButtonGroup(
+    name="Greeting", options=["Hello", "Hi", "Hey", "Howdy"], value="Hello",
+    button_type="success", button_style="outline",
+    margin=(23,5,10,5)
+)
+name = pn.widgets.TextInput(name="Your Name", value="World", placeholder="Type your name...",)
+
+def greet(greeting, name):
+    content = f"""\
+# {greeting}, {name}!
+
+Welcome to the **panel-live** playground.
+Edit this code and press **Run** to see your changes.
+
+[Documentation](https://panel-extensions.github.io/panel-live/) |
+[Examples](https://panel-extensions.github.io/panel-live/examples/) |
+[Github](https://github.com/panel-extensions/panel-live)
+"""
+    return pn.pane.Markdown(content, styles={"font-size": "24px"})
+
+pn.Column(pn.Row(greeting, name), pn.bind(greet, greeting, name)).servable()
+    </panel-example>
+
+    <panel-example name="Slider">
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+slider = pn.widgets.FloatSlider(start=0, end=10, name='Amplitude')
+
+def callback(new):
+    return f'Amplitude is: {new}'
+
+pn.Row(slider, pn.bind(callback, slider)).servable()
+    </panel-example>
+
+    <panel-example name="Select Widget">
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+items = [f"Item {i}" for i in range(1, 6)]
+select = pn.widgets.Select(name="Choose", options=items, value=items[0])
+
+def show_selection(value):
+    return pn.pane.Markdown(f"Selected: **{value}**")
+
+pn.Column("# Select Demo", select, pn.bind(show_selection, select)).servable()
+    </panel-example>
+
+    <panel-example name="Reactive Greeting">
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+name_input = pn.widgets.TextInput(name="Your Name", value="World")
+size = pn.widgets.IntSlider(name="Font Size", start=12, end=72, value=32)
+
+def greeting(name, sz):
+    return pn.pane.Markdown(f"# Hello, {name}!", styles={"font-size": f"{sz}px"})
+
+pn.Column(name_input, size, pn.bind(greeting, name_input, size)).servable()
+    </panel-example>
+
+    <panel-example name="Checkbox + Toggle">
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+checkbox = pn.widgets.Checkbox(name="Enable feature", value=False)
+toggle = pn.widgets.Toggle(name="Dark mode", value=False)
+
+def status(feature, dark):
+    feat = "On" if feature else "Off"
+    mode = "On" if dark else "Off"
+    return pn.pane.Markdown(f"Feature: **{feat}** | Dark mode: **{mode}**")
+
+pn.Column("# Settings", checkbox, toggle, pn.bind(status, checkbox, toggle)).servable()
+    </panel-example>
+
+    <panel-example name="DataFrame">
+import panel as pn
+pn.extension("tabulator", sizing_mode="stretch_width")
+
+import pandas as pd
+
+df = pd.DataFrame({
+    "Name": ["Alice", "Bob", "Charlie", "Diana"],
+    "Score": [92, 87, 95, 78],
+    "Grade": ["A", "B+", "A", "C+"],
+})
+
+table = pn.widgets.Tabulator(df, page_size=10)
+pn.Column("# Student Grades", table).servable()
+    </panel-example>
+
+import panel as pn
+pn.extension(sizing_mode="stretch_width")
+
+greeting = pn.widgets.RadioButtonGroup(
+    name="Greeting", options=["Hello", "Hi", "Hey", "Howdy"], value="Hello",
+    button_type="success", button_style="outline",
+    margin=(23,5,10,5)
+)
+name = pn.widgets.TextInput(name="Your Name", value="World", placeholder="Type your name...",)
+
+def greet(greeting, name):
+    content = f"""\
+# {greeting}, {name}!
+
+Welcome to the **panel-live** playground.
+Edit this code and press **Run** to see your changes.
+
+[Documentation](https://panel-extensions.github.io/panel-live/) |
+[Examples](https://panel-extensions.github.io/panel-live/examples/) |
+[Github](https://github.com/panel-extensions/panel-live)
+"""
+    return pn.pane.Markdown(content, styles={"font-size": "24px"})
+
+pn.Column(pn.Row(greeting, name), pn.bind(greet, greeting, name)).servable()
+  </panel-live>
+
+</body>
+</html>

@@ -12,6 +12,8 @@ build-js-dev = { cmd = "node build.mjs --dev", depends-on = ["npm-install"] }
 test-js = { cmd = "npx vitest run", depends-on = ["npm-install"] }
 test-js-coverage = { cmd = "npx vitest run --coverage", depends-on = ["npm-install"] }
 sync-assets = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js docs/assets/js/ && cp dist/panel-live.css docs/assets/css/", depends-on = ["build-js"] }
+sync-static = { cmd = "cp dist/panel-live.js dist/panel-live-worker.js dist/panel-live.css src/panel_live/static/", depends-on = ["build-js"] }
+serve-showcase = { cmd = "panel-live serve", depends-on = ["postinstall", "build-js"] }
 
 [dependencies]
 python = ">=3.12"
@@ -110,6 +112,10 @@ depends-on = ["_postinstall", "_sync-assets"]
 cmd = "zensical build"
 depends-on = ["_postinstall", "_sync-assets"]
 
+[feature.docs.tasks.rebuild]
+cmd = "rm -rf .cache .panel-live site && zensical build"
+depends-on = ["_postinstall", "_sync-assets"]
+
 [feature.sphinx.dependencies]
 sphinx = ">=4.0"
 pydata-sphinx-theme = "*"
@@ -147,6 +153,11 @@ depends-on = ["build"]
 [feature.quarto.dependencies]
 quarto = "*"
 jupyter = "*"
+panel = ">=1.5.0"
+bokeh = "*"
+matplotlib = "*"
+holoviews = "*"
+hvplot = "*"
 pip = "*"
 hatchling = "*"
 hatch-vcs = "*"

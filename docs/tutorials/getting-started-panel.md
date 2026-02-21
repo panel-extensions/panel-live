@@ -61,8 +61,8 @@ PanelLive(code="...", mode="app")
 # Editor + examples selector
 PanelLive(code="...", mode="playground")
 
-# Status line only — minimal footprint
-PanelLive(code="...", mode="compact")
+# Spinning Python icon — evaluate() queue on hover
+PanelLive(code="...", mode="progress")
 
 # stdout/stderr visible — for development
 PanelLive(code="...", mode="debug")
@@ -73,7 +73,8 @@ PanelLive(code="...", mode="headless")
 
 ## Sending Data to the Client
 
-Use `send()` to push data from the server to client-side code:
+Set the `input` param to push data from the server to client-side code.
+On the client side, the data is available as `server.input` (a reactive Param parameter):
 
 ```python
 import panel as pn
@@ -84,7 +85,12 @@ pn.extension()
 live = PanelLive(
     code="""\
 import panel as pn
-pn.panel("Waiting for server data...").servable()
+
+@pn.depends(server.param.input)
+def show(value):
+    return value or "Waiting for server data..."
+
+pn.pane.JSON(show, depth=2).servable()
 """,
     mode="editor",
     auto_run=True,
@@ -93,7 +99,7 @@ pn.panel("Waiting for server data...").servable()
 button = pn.widgets.Button(name="Send Data", button_type="primary")
 
 def on_click(event):
-    live.send({"message": "Hello from the server!", "timestamp": 42})
+    live.input = {"message": "Hello from the server!", "timestamp": 42}
 
 button.on_click(on_click)
 
@@ -102,7 +108,8 @@ pn.Column(button, live).servable()
 
 ## Receiving Data from the Client
 
-Watch the `output` parameter to receive data sent back from client-side code:
+On the client side, set `server.output` to send data back.
+On the server side, watch the `output` param:
 
 ```python
 import panel as pn
@@ -113,9 +120,17 @@ pn.extension()
 live = PanelLive(
     code="""\
 import panel as pn
-# Client-side code can dispatch output events
-# (integration with the worker bridge is in progress)
-pn.panel("Running in the browser").servable()
+
+btn = pn.widgets.Button(name="Send to Server", button_type="primary")
+count = 0
+
+def on_click(event):
+    global count
+    count += 1
+    server.output = {"count": count, "source": "browser"}
+
+btn.on_click(on_click)
+pn.Column(btn, "Click to send data to the server").servable()
 """,
     mode="editor",
     auto_run=True,
@@ -133,7 +148,7 @@ pn.Column(live, result).servable()
 
 ## Remote Code Execution
 
-Use `run_python()` to execute arbitrary Python code in the browser and get results back:
+Use `evaluate()` to execute arbitrary Python code in the browser and get results back:
 
 ```python
 import panel as pn
@@ -141,10 +156,10 @@ from panel_live import PanelLive
 
 pn.extension()
 
-live = PanelLive(mode="compact", auto_run=True, code="pass")
+live = PanelLive(mode="progress", auto_run=True, code="pass")
 
 async def compute():
-    result = await live.run_python(
+    result = await live.evaluate(
         "result = sum(range(n))",
         n=100,
     )
@@ -193,7 +208,7 @@ panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
 !!! note "CDN assets"
 
     By default, `PanelLive` loads JS/CSS from GitHub Pages (`panel-extensions.github.io/panel-live/assets/`).
-    Once published to npm, this will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
+    Once published to npm, the default CDN will change to `cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/`.
     Use `PanelLive.configure()` to override with local assets for offline development.
 
 ## Next Steps

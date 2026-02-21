@@ -174,6 +174,12 @@ def test_directive_empty_source():
     assert "</panel-live>" in html
 
 
+def test_directive_preview_attribute():
+    """Test that :preview: option generates HTML attribute."""
+    html = _run_directive("x = 1", options={"preview": "demo.png"}, conf_overrides={"pre_render": False})
+    assert 'preview="demo.png"' in html
+
+
 def test_directive_marks_page():
     """Test that the directive adds the docname to panel_live_pages."""
     directive = PanelLiveDirective.__new__(PanelLiveDirective)
@@ -272,7 +278,6 @@ def test_inject_assets_for_directive_page():
     assert "panel-live.js" in metatags
     assert "panel-live.css" in metatags
     assert "PANEL_LIVE_CONFIG" in metatags
-    assert "panel-live-controls" in metatags
     assert "panel-live-config" in metatags
 
 

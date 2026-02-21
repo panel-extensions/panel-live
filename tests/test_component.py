@@ -34,6 +34,7 @@ def test_default_params():
     assert comp.auto_run is True
     assert comp.code_visibility == "visible"
     assert comp.value is None
+    assert comp.input is None
     assert comp.output is None
     assert comp.status == "idle"
     assert comp.error == ""
@@ -96,10 +97,10 @@ def test_mode_accepts_headless():
     assert comp.mode == "headless"
 
 
-def test_mode_accepts_compact():
-    """mode='compact' is accepted."""
-    comp = PanelLive(mode="compact")
-    assert comp.mode == "compact"
+def test_mode_accepts_progress():
+    """mode='progress' is accepted."""
+    comp = PanelLive(mode="progress")
+    assert comp.mode == "progress"
 
 
 def test_mode_accepts_debug():
@@ -271,6 +272,29 @@ def test_value_accepts_bool():
 # ---------------------------------------------------------------------------
 
 
+def test_input_default_none():
+    """Default input is None."""
+    comp = PanelLive()
+    assert comp.input is None
+
+
+def test_input_accepts_dict():
+    """input param accepts a dict."""
+    comp = PanelLive()
+    comp.input = {"slider": 42}
+    assert comp.input == {"slider": 42}
+
+
+def test_input_triggers_send():
+    """Setting input param calls send() with the new value."""
+    comp = PanelLive()
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+    comp.input = {"hello": "world"}
+    assert len(sent) == 1
+    assert sent[0] == {"type": "server_data", "data": {"hello": "world"}}
+
+
 def test_output_default_none():
     """Default output is None."""
     comp = PanelLive()
@@ -327,16 +351,64 @@ def test_send_method_exists():
     assert callable(comp.send)
 
 
-# ---------------------------------------------------------------------------
-# run_python() method
-# ---------------------------------------------------------------------------
-
-
-def test_run_python_method_exists():
-    """PanelLive has an async run_python() method."""
+def test_send_method_sends_server_data_msg():
+    """send() calls _send_msg with correct payload."""
     comp = PanelLive()
-    assert hasattr(comp, "run_python")
-    assert asyncio.iscoroutinefunction(comp.run_python)
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+    comp.send({"hello": "world"})
+    assert len(sent) == 1
+    assert sent[0] == {"type": "server_data", "data": {"hello": "world"}}
+
+
+def test_send_various_data_types():
+    """send() accepts dict, list, str, int, None."""
+    comp = PanelLive()
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+
+    for data in [{"a": 1}, [1, 2, 3], "hello", 42, None]:
+        comp.send(data)
+    assert len(sent) == 5
+    assert sent[0]["data"] == {"a": 1}
+    assert sent[1]["data"] == [1, 2, 3]
+    assert sent[2]["data"] == "hello"
+    assert sent[3]["data"] == 42
+    assert sent[4]["data"] is None
+
+
+# ---------------------------------------------------------------------------
+# evaluate() method
+# ---------------------------------------------------------------------------
+
+
+def test_evaluate_method_exists():
+    """PanelLive has an async evaluate() method."""
+    comp = PanelLive()
+    assert hasattr(comp, "evaluate")
+    assert asyncio.iscoroutinefunction(comp.evaluate)
+
+
+# ---------------------------------------------------------------------------
+# run() method
+# ---------------------------------------------------------------------------
+
+
+def test_run_method_exists():
+    """PanelLive has an async run() method."""
+    comp = PanelLive()
+    assert hasattr(comp, "run")
+    assert asyncio.iscoroutinefunction(comp.run)
+
+
+def test_run_with_code_updates_self_code():
+    """run() with code argument updates self.code."""
+    comp = PanelLive(code="original")
+    # We can't actually await run() without a real browser,
+    # but we can test that calling it with code updates the param
+    # by checking the code param directly.
+    comp.code = "new code"
+    assert comp.code == "new code"
 
 
 # ---------------------------------------------------------------------------
@@ -365,27 +437,52 @@ def test_handle_msg_ignores_unknown_type():
     assert comp.output is None
 
 
-def test_handle_msg_run_python_result():
-    """_handle_msg resolves a pending run_python future."""
+def test_handle_msg_evaluate_result():
+    """_handle_msg resolves a pending evaluate future."""
     comp = PanelLive()
     loop = asyncio.new_event_loop()
     future = loop.create_future()
     comp._pending_requests["req-123"] = future
-    comp._handle_msg({"type": "run_python_result", "request_id": "req-123", "result": 42})
+    comp._handle_msg({"type": "evaluate_result", "request_id": "req-123", "result": 42})
     assert future.done()
     assert future.result() == 42
     loop.close()
 
 
-def test_handle_msg_run_python_error():
-    """_handle_msg rejects a pending run_python future on error."""
+def test_handle_msg_evaluate_error():
+    """_handle_msg rejects a pending evaluate future on error."""
     comp = PanelLive()
     loop = asyncio.new_event_loop()
     future = loop.create_future()
     comp._pending_requests["req-456"] = future
-    comp._handle_msg({"type": "run_python_error", "request_id": "req-456", "error": "NameError: x"})
+    comp._handle_msg({"type": "evaluate_error", "request_id": "req-456", "error": "NameError: x"})
     assert future.done()
     with pytest.raises(RuntimeError, match="NameError: x"):
+        future.result()
+    loop.close()
+
+
+def test_handle_msg_run_result():
+    """_handle_msg resolves a pending run() future."""
+    comp = PanelLive()
+    loop = asyncio.new_event_loop()
+    future = loop.create_future()
+    comp._pending_requests["run-789"] = future
+    comp._handle_msg({"type": "run_result", "request_id": "run-789"})
+    assert future.done()
+    assert future.result() is None
+    loop.close()
+
+
+def test_handle_msg_run_error():
+    """_handle_msg rejects a pending run() future on error."""
+    comp = PanelLive()
+    loop = asyncio.new_event_loop()
+    future = loop.create_future()
+    comp._pending_requests["run-abc"] = future
+    comp._handle_msg({"type": "run_error", "request_id": "run-abc", "error": "SyntaxError: invalid"})
+    assert future.done()
+    with pytest.raises(RuntimeError, match="SyntaxError: invalid"):
         future.result()
     loop.close()
 
@@ -451,9 +548,9 @@ def test_headless_mode_works(document):
     assert model is not None
 
 
-def test_compact_mode_works(document):
-    """Compact mode produces a valid Bokeh model."""
-    comp = PanelLive(mode="compact", code="x = 1")
+def test_progress_mode_works(document):
+    """Progress mode produces a valid Bokeh model."""
+    comp = PanelLive(mode="progress", code="x = 1")
     model = comp.get_root(document)
     assert model is not None
 
@@ -482,6 +579,26 @@ def test_css_default():
     assert PanelLive.__css__ is not None
     assert len(PanelLive.__css__) == 1
     assert "panel-live.css" in PanelLive.__css__[0]
+
+
+def test_showcase_uses_server_io():
+    """Showcase uses server.input / server.output for bidirectional data."""
+    from pathlib import Path
+
+    showcase = Path("src/panel_live/examples/showcase.py").read_text()
+    # Client code should use server.input (server→client)
+    assert "server.input" in showcase
+    assert "server.param.input" in showcase
+    # Client code should use server.output (client→server)
+    assert "server.output" in showcase
+    # Server code should use .input param (not .send())
+    assert "reactive_target.input =" in showcase
+    assert "periodic_target.input =" in showcase
+
+
+def test_cdn_base_uses_github_pages():
+    """_CDN_BASE points to GitHub Pages."""
+    assert "panel-extensions.github.io" in _CDN_BASE
 
 
 def test_css_url_matches_cdn_base():

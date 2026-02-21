@@ -200,6 +200,27 @@ def test_formatter_prerender_attr_not_in_html():
     assert "pre-render=" not in result
 
 
+def test_preview_attribute_passes_through():
+    """Test that preview attribute passes through to HTML as an attribute."""
+    options = {}
+    inputs = {"preview": "demo.png"}
+    validator("panel", inputs, options, {}, None)
+
+    result = formatter("x = 1", "panel", "panel-live", options, None)
+    assert 'preview="demo.png"' in result
+    assert "<panel-live" in result
+
+
+def test_preview_attribute_with_gif():
+    """Test that preview works with GIF paths."""
+    options = {}
+    inputs = {"preview": "../assets/gif/streaming-chart.gif"}
+    validator("panel", inputs, options, {}, None)
+
+    result = formatter("x = 1", "panel", "panel-live", options, None)
+    assert 'preview="../assets/gif/streaming-chart.gif"' in result
+
+
 def test_formatter_prerender_false_overrides_global(tmp_path):
     """pre-render='false' overrides global pre_render=True."""
     from panel_live.prerender import content_hash

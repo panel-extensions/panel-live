@@ -29,7 +29,8 @@ pixi run lint                        # run pre-commit on all files
 
 # Docs — MkDocs (automatically builds JS and syncs assets before serving/building)
 pixi run -e docs serve               # live dev server (zensical/mkdocs)
-pixi run -e docs build               # build static site to site/
+pixi run -e docs build               # build static site to site/ (incremental, uses caches)
+pixi run -e docs rebuild             # clean build: clears .cache, .panel-live, site/ first
 
 # Docs — Sphinx
 pixi run -e sphinx build             # build Sphinx test site to docs-sphinx/_build
@@ -47,6 +48,8 @@ pixi run -e build check-wheel        # validate with twine
 pixi run postinstall                 # pip install -e . (editable install)
 pixi run serve                       # local HTTP server with COOP/COEP headers (for Pyodide)
 pixi run sync-assets                 # build JS and copy dist/ to docs/assets/
+pixi run sync-static                 # build JS and copy dist/ to src/panel_live/static/ (for wheel)
+pixi run serve-showcase              # build JS and serve the showcase app (always latest assets)
 ```
 
 Run a single test file or test function:

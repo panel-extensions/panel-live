@@ -69,25 +69,33 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         return 1
 
     # Find the panel-live JS/CSS assets to serve as static files.
-    # Look for quarto/_extensions/panel-live/ relative to the package root,
-    # or fall back to dist/ in the repo root.
-    package_root = pathlib.Path(__file__).parent.parent.parent
-    static_dir = package_root / "quarto" / "_extensions" / "panel-live"
-    if not static_dir.exists():
-        static_dir = package_root / "dist"
-    if not static_dir.exists():
-        print(
-            "Warning: Could not find panel-live JS assets locally. " "The showcase will use CDN assets instead.",
-            file=sys.stderr,
-        )
-        static_dir = None
+    # Fallback order: dist/ (repo dev) → in-package static/ (pip install) → CDN
+    # Each candidate must contain panel-live.js to be accepted.
+    pkg_dir = pathlib.Path(__file__).parent
+    static_dir = None
+    for candidate in [
+        pkg_dir.parent.parent / "dist",
+        pkg_dir / "static",
+    ]:
+        if (candidate / "panel-live.js").exists():
+            static_dir = candidate
+            break
 
-    static_dirs = {"pl": str(static_dir)} if static_dir else {}
+    # Serve docs/ folder for local assets (logo, etc.)
+    docs_dir = pkg_dir.parent.parent / "docs"
+
+    static_dirs = {}
+    if static_dir:
+        static_dirs["pl"] = str(static_dir)
+    if docs_dir.exists():
+        static_dirs["docs"] = str(docs_dir)
 
     print(f"Serving PanelLive showcase on http://localhost:{args.port}")
     print(f"  App: {showcase_path}")
     if static_dir:
         print(f"  Assets: {static_dir}")
+    else:
+        print("  Assets: CDN (no local JS found)")
     print()
 
     pn.serve(

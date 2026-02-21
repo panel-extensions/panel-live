@@ -17,6 +17,7 @@ Complete reference for the `<panel-live>` custom element's declarative HTML API.
 | `examples-src` | — | URL | JSON file defining examples for playground |
 | `code-visibility` | `"visible"` | `visible`, `hidden`, `collapsed` | Editor pane state (editor mode) |
 | `code-position` | `"first"` | `first`, `last` | Whether code appears before or after output (editor/playground) |
+| `preview` | — | URL | Static image/GIF shown in output area before first run |
 
 ### Reserved Attributes (future)
 
@@ -185,47 +186,6 @@ Invisible configuration element that sets page-level defaults for all `<panel-li
 |-----------|---------|-------------|
 | `playground-url` | — | URL for playground links (overrides automatic script-URL detection) |
 
-The element also reads `localStorage('panel-live:auto-run')` on connect. If the key is present, it overrides the `auto-run` attribute on all `<panel-live>` elements on the page.
-
 ```html
 <panel-live-config playground-url="/playground.html"></panel-live-config>
-```
-
-### `<panel-live-controls>`
-
-Visible toolbar with a "Run All" button and an auto-run toggle. Designed for documentation pages where you want users to opt-in to running examples rather than auto-executing on page load.
-
-The toolbar provides:
-
-- **Run All** button: runs all `<panel-live>` elements on the page serially in document order (calls `PanelLive.runAll()`). Shows "Running..." while active.
-- **Auto-run** toggle: persists to `localStorage('panel-live:auto-run')`. When toggled ON, immediately runs all elements. When toggled OFF, prevents auto-execution on next page load.
-
-```html
-<panel-live-controls></panel-live-controls>
-```
-
-#### Usage with `<panel-live-config>`
-
-The two elements work independently or together:
-
-```html
-<!-- Config reads localStorage and sets auto-run override before elements render -->
-<panel-live-config playground-url="/playground.html"></panel-live-config>
-
-<!-- Controls provides the UI for users to toggle auto-run and run all -->
-<panel-live-controls></panel-live-controls>
-
-<!-- These elements respect the auto-run override -->
-<panel-live mode="editor">
-import panel as pn
-pn.panel("Example 1").servable()
-</panel-live>
-```
-
-#### Clearing auto-run preference
-
-To reset the auto-run preference (e.g. for debugging), clear the localStorage key:
-
-```javascript
-localStorage.removeItem('panel-live:auto-run');
 ```

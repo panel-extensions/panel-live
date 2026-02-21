@@ -14,7 +14,7 @@ repos:
       - id: end-of-file-fixer
         exclude: \.min\.js$
       - id: trailing-whitespace
-        exclude: docs-sphinx/_static/
+        exclude: (docs-sphinx/_static/|docs/assets/(js|css)/|quarto/_extensions/panel-live/panel-live|dist/|src/panel_live/static/)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.0
     hooks:
@@ -36,13 +36,14 @@ repos:
       - id: codespell
         additional_dependencies:
           - tomli
+        exclude: (\.map$|src/panel_live/static/)
   - repo: https://github.com/hoxbro/prettier-pre-commit
     rev: v3.3.3
     hooks:
       - id: prettier
         entry: prettier --write --ignore-unknown --no-error-on-unmatched-pattern
         types_or: [css]
-        exclude: docs-sphinx/_static/
+        exclude: (docs-sphinx/_static/|docs/assets/(js|css)/|quarto/_extensions/panel-live/panel-live|dist/|src/panel_live/static/)
   - repo: https://github.com/shssoichiro/oxipng
     rev: v9.1.3
     hooks:

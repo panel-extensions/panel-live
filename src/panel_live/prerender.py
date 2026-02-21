@@ -73,23 +73,18 @@ def model_json(obj) -> str | None:
 
     # Detect extension resources (JS/CSS) needed by models actually in the
     # document (not all registered models — that would pull in ReactiveESM etc.
-    # for every example).  Relative paths are resolved to absolute CDN URLs.
-    from panel.io.resources import CDN_DIST
-
-    cdn_base = CDN_DIST.rstrip("/")
-
+    # for every example).  Use __javascript_raw__ / __css_raw__ to get the
+    # original CDN URLs (typically cdn.jsdelivr.net/npm/...).  The non-raw
+    # __javascript__ / __css__ attributes contain local server paths
+    # (static/extensions/panel/bundled/...) that don't exist on the CDN.
     js_urls: list[str] = []
     css_urls: list[str] = []
     doc_model_classes = {type(m) for m in doc.models}
     for cls in doc_model_classes:
-        for url in getattr(cls, "__javascript__", []) or []:
-            if not url.startswith(("http://", "https://", "//")):
-                url = f"{cdn_base}/{url}"
+        for url in getattr(cls, "__javascript_raw__", []) or []:
             if url not in js_urls:
                 js_urls.append(url)
-        for url in getattr(cls, "__css__", []) or []:
-            if not url.startswith(("http://", "https://", "//")):
-                url = f"{cdn_base}/{url}"
+        for url in getattr(cls, "__css_raw__", []) or []:
             if url not in css_urls:
                 css_urls.append(url)
 
@@ -114,11 +109,20 @@ def execution_process(code: str, conn) -> None:
         keys is sent before the connection is closed.
     """
     try:
+        import io
+
         from panel.io.mime_render import exec_with_return
 
-        result = exec_with_return(code)
+        stderr_buf = io.StringIO()
+        result = exec_with_return(code, stderr=stderr_buf)
         if result is None:
-            conn.send({"error": None, "output": None})
+            # exec_with_return catches exceptions and prints tracebacks to
+            # stderr.  If stderr captured output, treat it as an error.
+            captured = stderr_buf.getvalue()
+            if captured:
+                conn.send({"error": captured, "traceback": captured, "output": None})
+            else:
+                conn.send({"error": None, "output": None})
             return
 
         output = model_json(result)
@@ -180,15 +184,16 @@ def pre_render(code: str, cache_dir: Path | str, *, setup_code: str = "", timeou
     result = parent_conn.recv()
     if result.get("error"):
         tb = result.get("traceback", "")
-        log.warning("pre-render error for: %s\n  %s", code_preview, result["error"])
+        log.info("pre-render error (will embed) for: %s\n  %s", code_preview, result["error"])
         if tb:
             log.debug("pre-render traceback:\n%s", tb)
-        return None
-    if not result.get("output"):
+        # Return error as embeddable JSON so the front-end can display it
+        output = json.dumps({"error": tb or result["error"]})
+    elif not result.get("output"):
         log.warning("pre-render produced no output for: %s", code_preview)
         return None
-
-    output = result["output"]
+    else:
+        output = result["output"]
 
     cache_dir.mkdir(parents=True, exist_ok=True)
     try:

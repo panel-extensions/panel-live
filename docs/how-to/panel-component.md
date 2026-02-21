@@ -9,7 +9,7 @@ Common patterns and recipes for using the `PanelLive` component in Panel server 
 | `editor` | You want users to see and edit the code | Code editor + output |
 | `app` | You want output only, no code editing | Output only |
 | `playground` | You want a full playground with example selector | Editor + examples |
-| `compact` | You need background compute with minimal status feedback | Status line only |
+| `progress` | You need background compute with minimal status feedback | Spinning Python icon |
 | `debug` | You're developing and need to see stdout/stderr | stdout/stderr |
 | `headless` | You need invisible background compute | Nothing (0px) |
 
@@ -19,20 +19,21 @@ from panel_live import PanelLive
 # Switch modes dynamically
 live = PanelLive(code="...", mode="editor")
 live.mode = "app"  # hide the editor
-live.mode = "compact"  # minimal status line
+live.mode = "progress"  # spinning Python icon
 ```
 
 ## Sending Data Server → Client
 
-Use `send()` to push JSON-serializable data to the client:
+Set the `input` param to push JSON-serializable data to the client.
+On the client side, the data is available as `server.input`:
 
 ```python
-live = PanelLive(code="...", mode="compact")
+live = PanelLive(code="...", mode="progress")
 
 # Send any JSON-serializable data
-live.send({"action": "update", "data": [1, 2, 3]})
-live.send("simple string")
-live.send(42)
+live.input = {"action": "update", "data": [1, 2, 3]}
+live.input = "simple string"
+live.input = 42
 ```
 
 For DataFrames, convert to dict first:
@@ -41,7 +42,7 @@ For DataFrames, convert to dict first:
 import pandas as pd
 
 df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
-live.send(df.to_dict(orient="records"))
+live.input = df.to_dict(orient="records")
 ```
 
 For bytes, use base64:
@@ -50,15 +51,16 @@ For bytes, use base64:
 import base64
 
 raw_bytes = b"binary data"
-live.send({"data": base64.b64encode(raw_bytes).decode()})
+live.input = {"data": base64.b64encode(raw_bytes).decode()}
 ```
 
 ## Receiving Data Client → Server
 
-Watch the `output` param:
+On the client side, set `server.output` to send data back.
+On the server side, watch the `output` param:
 
 ```python
-live = PanelLive(code="...", mode="compact")
+live = PanelLive(code="...", mode="progress")
 
 def on_output(event):
     print(f"Received from client: {live.output}")
@@ -71,11 +73,11 @@ live.param.watch(on_output, "output")
 Execute code in the browser and get results back:
 
 ```python
-# Simple execution
-result = await live.run_python("sum(range(100))")
+# Simple evaluation
+result = await live.evaluate("sum(range(100))")
 
 # With keyword arguments injected as globals
-result = await live.run_python(
+result = await live.evaluate(
     "result = x * y",
     x=10,
     y=20,
@@ -83,7 +85,7 @@ result = await live.run_python(
 
 # With timeout
 try:
-    result = await live.run_python("import time; time.sleep(60)", timeout=5.0)
+    result = await live.evaluate("import time; time.sleep(60)", timeout=5.0)
 except TimeoutError:
     print("Execution timed out")
 ```
@@ -102,11 +104,11 @@ def on_status(event):
 live.param.watch(on_status, "status")
 ```
 
-For `run_python()`, errors raise `RuntimeError`:
+For `evaluate()`, errors raise `RuntimeError`:
 
 ```python
 try:
-    result = await live.run_python("1/0")
+    result = await live.evaluate("1/0")
 except RuntimeError as e:
     print(f"Execution error: {e}")
 ```

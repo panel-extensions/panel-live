@@ -9,24 +9,20 @@ directly into the page. When the page loads, the pre-rendered output appears
 instantly. Once Pyodide finishes loading, the output transitions to a fully
 interactive app.
 
-This page shows all four combinations of pre-render and auto-run so you can
-compare the page-load experience.
-
-:::{.callout-note}
-Pre-rendering is currently a Sphinx-only feature (build-time execution via
-`sphinx-build`). The `pre-render` attribute is passed through as an HTML
-attribute in Quarto but does not execute at build time. This page serves as
-documentation and a test case for when pre-rendering support is added to the
-Quarto extension.
+:::{.callout-tip}
+Pre-rendering is enabled globally via `pre-render: true` in `_quarto.yml` under
+the `panel-live` key. Individual blocks can override with `#| pre-render: false`.
 :::
 
-## Pre-render + auto-run (recommended)
+## Pre-render + auto-run
 
 Default behavior. The output appears instantly from the pre-rendered HTML.
 Pyodide loads in the background and replaces the static output with the
 interactive app. Best for most use cases.
 
 ```{.panel-live}
+#| mode: editor
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=100, value=42)
 pn.Column(
@@ -42,6 +38,7 @@ clicks Run. Best for documentation pages with many examples — avoids
 loading Pyodide until the user explicitly requests interactivity.
 
 ```{.panel-live}
+#| mode: editor
 #| auto-run: false
 import panel as pn
 slider = pn.widgets.IntSlider(name="Brightness", start=0, end=100, value=75)
@@ -51,13 +48,15 @@ pn.Column(
 ).servable()
 ```
 
-## No pre-render + auto-run
+## Auto-run without pre-render
 
 No build-time output. The page shows a loading state, then renders the
 output once Pyodide has loaded and executed the code.
 
 ```{.panel-live}
+#| mode: editor
 #| pre-render: false
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Speed", start=1, end=10, value=5)
 pn.Column(
@@ -72,6 +71,7 @@ No build-time output and no automatic execution. The output area is blank
 until the user clicks Run. Lightest possible page load.
 
 ```{.panel-live}
+#| mode: editor
 #| pre-render: false
 #| auto-run: false
 import panel as pn

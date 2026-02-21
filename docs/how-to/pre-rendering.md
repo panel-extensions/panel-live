@@ -37,7 +37,7 @@ Best when pre-rendering is not available in the build environment.
 
 ## No pre-render + no auto-run
 
-Omit `pre-render` with `auto-run="false"` — blank until the user clicks Run:
+Omit `pre-render` with `auto-run="false"` — a "Click Run to execute this example" placeholder appears in the output area until the user clicks Run:
 
 ```{.panel mode="editor" auto-run="false"}
 import panel as pn
@@ -45,6 +45,8 @@ pn.panel("**On-demand output.** You clicked Run to see this.").servable()
 ```
 
 Best for **tutorials and exercises** where the user should read the code first.
+
+For examples that can't be pre-rendered (e.g. streaming or periodic callbacks), use the `preview` attribute to show a static screenshot instead. See [Preview Image](preview.md).
 
 ## Fence syntax
 
@@ -87,4 +89,5 @@ pn.panel("Hello").servable()
 | `pre-render="true"` + `auto-run="true"` | Instant | Auto | Showcases, demos |
 | `pre-render="true"` + `auto-run="false"` | Instant (static) | On click | Docs with many examples |
 | `auto-run="true"` (no pre-render) | After Pyodide loads | Auto | No build-time Panel |
-| `auto-run="false"` (no pre-render) | Blank | On click | Tutorials, exercises |
+| `auto-run="false"` (no pre-render) | Placeholder text | On click | Tutorials, exercises |
+| `preview` + `auto-run="false"` | Preview image | On click | Streaming, periodic callbacks |

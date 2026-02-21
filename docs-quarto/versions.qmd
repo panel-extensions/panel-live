@@ -12,6 +12,7 @@ This page demonstrates per-document version configuration via YAML metadata.
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 import panel as pn
 pn.panel(f"Panel version: {pn.__version__}").servable()
 ```

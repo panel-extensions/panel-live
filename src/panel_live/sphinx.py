@@ -99,6 +99,7 @@ _KNOWN_ATTRS = frozenset(
         "code-visibility",
         "code-position",
         "src",
+        "preview",
     }
 )
 
@@ -147,6 +148,7 @@ class PanelLiveDirective(Directive):
         "code-position": directives.unchanged,
         "requirements": directives.unchanged,
         "pre-render": directives.unchanged,
+        "preview": directives.unchanged,
     }
 
     def run(self):
@@ -284,13 +286,12 @@ def _inject_page_assets(
         mini_coi_url = ("../" * depth) + "mini-coi.js"
         mini_coi_html = f'<script src="{mini_coi_url}"></script>\n'
 
-    # Inline script to inject <panel-live-config> and <panel-live-controls>
-    # into the body after the page loads (works with any Sphinx theme).
-    controls_script = (
+    # Inline script to inject <panel-live-config> into the body after
+    # the page loads (works with any Sphinx theme).
+    config_script_inject = (
         "<script>"
         "document.addEventListener('DOMContentLoaded',function(){"
         "if(!document.querySelector('panel-live-config')){"
-        "document.body.prepend(document.createElement('panel-live-controls'));"
         "document.body.prepend(document.createElement('panel-live-config'));"
         "}"
         "});"
@@ -299,7 +300,7 @@ def _inject_page_assets(
 
     # Inject into page via metatags (Sphinx mechanism for adding to <head>)
     metatags = context.get("metatags", "")
-    injection = f"{mini_coi_html}" f"{config_script}" f'<link rel="stylesheet" href="{css_url}">\n' f'<script src="{js_url}"></script>\n' f"{controls_script}"
+    injection = f"{mini_coi_html}" f"{config_script}" f'<link rel="stylesheet" href="{css_url}">\n' f'<script src="{js_url}"></script>\n' f"{config_script_inject}"
     context["metatags"] = metatags + injection
 
 
