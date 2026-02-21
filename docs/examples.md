@@ -208,7 +208,7 @@ Dynamic data exploration with column selection and aggregation. Demonstrates bui
 
 Real-time data streaming with `pn.state.add_periodic_callback()`. Demonstrates live-updating chart and table with rollover buffer.
 
-```{.panel mode="editor" src="../assets/examples/streaming-demo.py" code-visibility="collapsed" code-position="last"}
+```{.panel mode="editor" src="../assets/examples/streaming-demo.py" code-visibility="collapsed" code-position="last" pre-render="false" preview="../assets/png/streaming-chart.png"}
 ```
 
 ## Tools

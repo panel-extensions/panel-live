@@ -1,5 +1,6 @@
 """Tests for the shared pre-rendering module."""
 
+import json
 import logging
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -160,8 +161,8 @@ def test_pre_render_subprocess_failure_returns_none(tmp_path):
     assert result is None
 
 
-def test_pre_render_error_in_result_returns_none(tmp_path):
-    """Error in subprocess result returns None."""
+def test_pre_render_error_in_result_returns_error_json(tmp_path):
+    """Error in subprocess result returns embeddable error JSON."""
     cache_dir = tmp_path / ".panel-live"
 
     mock_proc = MagicMock()
@@ -178,7 +179,10 @@ def test_pre_render_error_in_result_returns_none(tmp_path):
     with patch("panel_live.prerender.get_context", return_value=mock_ctx):
         result = pre_render("x = 1", cache_dir)
 
-    assert result is None
+    assert result is not None
+    data = json.loads(result)
+    assert "error" in data
+    assert data["error"] == "boom"
 
 
 def test_pre_render_timeout_forwarded(tmp_path):
@@ -239,8 +243,8 @@ def test_pre_render_warns_on_subprocess_failure(tmp_path, caplog):
     assert "exit code 1" in caplog.text
 
 
-def test_pre_render_warns_on_error_result(tmp_path, caplog):
-    """Error from subprocess is logged as a warning with exception class."""
+def test_pre_render_error_result_prefers_traceback(tmp_path, caplog):
+    """Error with traceback embeds the full traceback string."""
     cache_dir = tmp_path / ".panel-live"
 
     mock_proc = MagicMock()
@@ -258,12 +262,15 @@ def test_pre_render_warns_on_error_result(tmp_path, caplog):
     mock_ctx.Pipe.return_value = (mock_parent, MagicMock())
     mock_ctx.Process.return_value = mock_proc
 
-    with patch("panel_live.prerender.get_context", return_value=mock_ctx), caplog.at_level(logging.WARNING, logger="panel-live"):
+    with patch("panel_live.prerender.get_context", return_value=mock_ctx), caplog.at_level(logging.INFO, logger="panel-live"):
         result = pre_render("import matplotlib", cache_dir)
 
-    assert result is None
+    assert result is not None
+    data = json.loads(result)
+    assert "error" in data
+    assert "ModuleNotFoundError" in data["error"]
+    assert "Traceback" in data["error"]
     assert "pre-render error" in caplog.text
-    assert "ModuleNotFoundError" in caplog.text
 
 
 def test_pre_render_warns_on_no_output(tmp_path, caplog):
@@ -288,14 +295,43 @@ def test_pre_render_warns_on_no_output(tmp_path, caplog):
     assert "pre-render produced no output" in caplog.text
 
 
+def test_model_json_ext_resources_uses_raw_urls():
+    """model_json() uses __javascript_raw__ / __css_raw__ (CDN URLs), not the
+    local-server __javascript__ / __css__ paths that 404 on the CDN."""
+    import json
+
+    import panel as pn
+
+    from panel_live.prerender import model_json
+
+    obj = pn.pane.LaTeX("x^2")
+    result = model_json(obj)
+    assert result is not None
+
+    data = json.loads(result)
+    ext = data.get("ext_resources", {})
+    js_urls = ext.get("js", [])
+    css_urls = ext.get("css", [])
+
+    # Should have KaTeX JS and CSS resources
+    assert any("katex" in u for u in js_urls)
+    assert any("katex" in u for u in css_urls)
+
+    # All URLs should be absolute (no relative static/extensions/ paths)
+    for url in js_urls + css_urls:
+        assert url.startswith(("http://", "https://", "//")), f"Expected absolute URL, got: {url}"
+        assert "static/extensions/" not in url, f"Local server path leaked: {url}"
+
+
 def test_pre_render_missing_module_integration(tmp_path, caplog):
-    """Integration test: real subprocess with a missing module logs a clear warning."""
+    """Integration test: real subprocess with a missing module returns embeddable error."""
     cache_dir = tmp_path / ".panel-live"
 
-    with caplog.at_level(logging.WARNING, logger="panel-live"):
+    with caplog.at_level(logging.INFO, logger="panel-live"):
         result = pre_render("import nonexistent_module_xyz_12345", cache_dir, timeout=30)
 
-    assert result is None
-    assert "pre-render" in caplog.text
-    # The error message should mention the module name
-    assert "nonexistent_module_xyz_12345" in caplog.text
+    assert result is not None
+    data = json.loads(result)
+    assert "error" in data
+    assert "nonexistent_module_xyz_12345" in data["error"]
+    assert "pre-render error" in caplog.text

@@ -555,12 +555,9 @@ Optional `auto-run="debounce"` attribute on `<panel-live>` that re-executes code
 
 ---
 
-## P3 — Static Preview Image or GIF
+## P3 — Static Preview Image or GIF `DONE`
 
-Support a static image or GIF as a preview placeholder for `<panel-live>` elements. Instead of
-immediately rendering the live element, show a screenshot or animated GIF of the expected output.
-Clicking the preview activates the live Pyodide runtime. This reduces page load impact and provides
-a visual preview on platforms where Pyodide cannot run (e.g., PDF exports, email embeds).
+**Done:** `preview` attribute implemented on `<panel-live>`. Clickable image with "Run" badge overlay. When `auto-run="false"` with no preview and no pre-render, a "Click Run to execute this example" placeholder text is shown. Supported in MkDocs fences, Sphinx directive, and Quarto Lua filter. Used in the streaming demo example.
 
 **Acceptance:** `<panel-live>` supports a `preview` attribute (image URL or path) that displays
 a static image until the user clicks to activate.

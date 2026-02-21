@@ -24,6 +24,7 @@ nav = [
       {"Height" = "how-to/height.md"},
       {"Auto-Run" = "how-to/auto-run.md"},
       {"Pre-Rendering" = "how-to/pre-rendering.md"},
+      {"Preview Image" = "how-to/preview.md"},
       {"Labels" = "how-to/label.md"},
       {"External Source" = "how-to/src.md"},
       {"Fullscreen" = "how-to/fullscreen.md"},

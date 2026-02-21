@@ -32,132 +32,6 @@ panel-live-config {
   display: none;
 }
 
-/* ---- <panel-live-controls> — page-level toolbar ---- */
-panel-live-controls {
-  display: block;
-  margin: 8px 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
-}
-panel-live-controls:not(:defined) {
-  display: none;
-}
-.pl-controls-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 12px;
-  background: var(--pl-header-bg, #f5f5f5);
-  border: 1px solid var(--pl-border, #e0e0e0);
-  border-radius: var(--pl-radius, 6px);
-  font-size: 13px;
-}
-panel-live-controls[data-resolved-theme="dark"] .pl-controls-bar {
-  background: #1e1e2e;
-  border-color: #44475a;
-  color: #cdd6f4;
-}
-.pl-controls-run-all {
-  background: var(--pl-btn-bg, #4caf50);
-  color: var(--pl-btn-color, #ffffff);
-  border: none;
-  padding: 6px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
-}
-.pl-controls-run-all:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-.pl-controls-run-all:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.pl-controls-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-}
-.pl-controls-checkbox {
-  cursor: pointer;
-  margin: 0;
-}
-.pl-controls-toggle-label {
-  font-size: 13px;
-  line-height: 1;
-  color: var(--pl-header-color, #333333);
-}
-panel-live-controls[data-resolved-theme="dark"] .pl-controls-toggle-label {
-  color: #cdd6f4;
-}
-
-/* ---- <panel-live-controls> in MkDocs Material header ---- */
-panel-live-controls[data-location="header"] {
-  display: flex;
-  align-items: center;
-  margin: 0 0.2rem;
-}
-panel-live-controls[data-location="header"] .pl-controls-bar {
-  background: none;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  gap: 0.6rem;
-  font-size: 0.7rem;
-}
-panel-live-controls[data-location="header"] .pl-controls-run-all {
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.2rem;
-  font-size: 0.7rem;
-}
-panel-live-controls[data-location="header"] .pl-controls-toggle-label {
-  color: currentColor;
-  font-size: 0.7rem;
-}
-panel-live-controls[data-location="header"] .pl-controls-checkbox {
-  accent-color: currentColor;
-}
-.pl-controls-divider {
-  width: 1px;
-  align-self: stretch;
-  background: var(--pl-border, #e0e0e0);
-  opacity: 0.5;
-}
-panel-live-controls[data-resolved-theme="dark"] .pl-controls-divider {
-  background: #cdd6f4;
-}
-panel-live-controls[data-location="header"] .pl-controls-divider {
-  background: currentColor;
-  min-height: 1rem;
-}
-.pl-controls-link {
-  color: var(--pl-header-color, #333333);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0.85;
-}
-.pl-controls-link::after {
-  content: "\2009\2197";
-  font-size: 0.75em;
-}
-.pl-controls-link:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-panel-live-controls[data-resolved-theme="dark"] .pl-controls-link {
-  color: #cdd6f4;
-}
-panel-live-controls[data-location="header"] .pl-controls-link {
-  color: currentColor;
-  font-size: 0.7rem;
-}
-
 /* ---- Theme presets via data-resolved-theme ---- */
 panel-live[data-resolved-theme="light"] {
   --pl-border: #e0e0e0;
@@ -175,6 +49,7 @@ panel-live[data-resolved-theme="light"] {
   --pl-btn-bg: #4caf50;
   --pl-btn-color: #ffffff;
   --pl-output-bg: #ffffff;
+  --pl-output-color: #1a1a2e;
   --pl-output-min-height: 100px;
   --pl-status-color: #555555;
   --pl-status-spinner: #1976d2;
@@ -199,6 +74,7 @@ panel-live[data-resolved-theme="dark"] {
   --pl-btn-bg: #a6e3a1;
   --pl-btn-color: #1e1e2e;
   --pl-output-bg: #ffffff;
+  --pl-output-color: #1a1a2e;
   --pl-output-min-height: 100px;
   --pl-status-color: #a0a0a0;
   --pl-status-spinner: #64b5f6;
@@ -235,8 +111,7 @@ panel-live[data-resolved-theme="dark"] {
   padding: 12px 16px;
   font-size: 14px;
   color: var(--pl-status-color, #555);
-  background: var(--pl-output-bg, #ffffff);
-  opacity: 0.92;
+  background: var(--pl-bg, #ffffff);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -266,6 +141,27 @@ panel-live[data-resolved-theme="dark"] {
 .pl-status.pl-preview-badge:hover {
   opacity: 1;
 }
+/* Preview image — static image/GIF shown before first run */
+.pl-preview-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+/* Run placeholder — shown when auto-run is false and no preview/prerender */
+.pl-run-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--pl-output-min-height, 100px);
+  color: var(--pl-status-color, #555);
+  font-size: 14px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+.pl-run-placeholder:hover {
+  opacity: 1;
+}
 .pl-spinner {
   width: 16px;
   height: 16px;
@@ -284,8 +180,26 @@ panel-live[data-resolved-theme="dark"] {
 .pl-output {
   min-height: var(--pl-output-min-height, 100px);
   background: var(--pl-output-bg, #ffffff);
+  color: var(--pl-output-color, #1a1a2e);
+  color-scheme: light;
   padding: 0;
   overflow: hidden;
+  /* Override dark-theme CSS custom properties that cascade through shadow DOM
+     boundaries. pydata-sphinx-theme sets --pst-color-text-base: #ced6dd in dark
+     mode, which leaks into Bokeh's nested shadow DOMs and turns text light on a
+     white background. CSS custom properties inherit through all shadow boundaries,
+     so we reset them here to ensure Panel/Bokeh output always renders with dark
+     text on a light background regardless of the host page's theme. */
+  --pst-color-text-base: var(--pl-output-color, #1a1a2e);
+  --pst-color-text-muted: var(--pl-output-color, #1a1a2e);
+}
+/* Prevent page dark-theme CSS from leaking into Panel/Bokeh output.
+   Bokeh shadow hosts don't set color themselves — they inherit from the light DOM.
+   Without this, Sphinx/pydata-sphinx-theme dark mode turns text light on white bg. */
+panel-live .pl-output div,
+panel-live .pl-output p,
+panel-live .pl-output span {
+  color: inherit;
 }
 .pl-output img,
 .pl-output canvas,
@@ -409,7 +323,7 @@ panel-live[data-resolved-theme="dark"] {
   flex: 1;
   min-width: 0;
   border-left: 1px solid var(--pl-border, #e0e0e0);
-  background: var(--pl-output-bg, #ffffff);
+  background: var(--pl-bg, #ffffff);
   display: flex;
   flex-direction: column;
 }

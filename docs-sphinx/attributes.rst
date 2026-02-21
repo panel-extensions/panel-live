@@ -44,6 +44,9 @@ Defaults
    * - ``pre-render``
      - from conf (``true``)
      - Per-directive override: ``true`` to force, ``false`` to skip
+   * - ``preview``
+     - unset
+     - URL of a static image shown in output before first run
 
 mode: app
 ---------
@@ -210,6 +213,19 @@ Explicit per-directive pre-render override. This example is **not** pre-rendered
    import panel as pn
    slider = pn.widgets.IntSlider(name="Pick a number", start=1, end=20, value=7)
    pn.Column(
-       "Explicitly pre-rendered via ``:pre-render: true``.",
+       "Not pre-rendered — ``:pre-render: false`` overrides the default.",
        pn.Row(slider, pn.bind(lambda v: f"### You picked {v}", slider)),
    ).servable()
+
+preview
+-------
+
+Shows a static preview image in the output area instead of a blank space. The user clicks the image or Run to activate.
+
+.. panel-live::
+   :auto-run: false
+   :pre-render: false
+   :preview: https://panel-extensions.github.io/panel-live/assets/png/streaming-chart.png
+
+   import panel as pn
+   pn.panel("Preview replaced with live output after clicking Run.").servable()

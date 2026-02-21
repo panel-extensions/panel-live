@@ -389,3 +389,4 @@ docs-quarto/_site/*
 notes.md
 dev/screenshots/
 .panel-live/*
+docs-quarto/.panel-live/

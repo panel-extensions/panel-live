@@ -10,6 +10,7 @@ This page tests various directive options via `#|` directives.
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 #| theme: dark
 import holoviews as hv
 import panel as pn
@@ -30,6 +31,8 @@ plot
 ## Custom Height
 
 ```{.panel-live}
+#| mode: editor
+#| auto-run: true
 #| height: 400px
 import holoviews as hv
 import panel as pn
@@ -51,6 +54,7 @@ plot
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 #| layout: horizontal
 import holoviews as hv
 import panel as pn
@@ -72,6 +76,7 @@ plot
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 #| code-visibility: hidden
 import holoviews as hv
 import panel as pn
@@ -92,6 +97,7 @@ plot
 ## Skip Pre-render
 
 ```{.panel-live}
+#| auto-run: true
 #| pre-render: false
 import holoviews as hv
 import panel as pn
@@ -132,10 +138,23 @@ plot = df.hvplot.box(by="group", y="value", responsive=True, height=300)
 plot
 ```
 
+## Preview Image
+
+Shows a static image in the output area before the user clicks Run.
+
+```{.panel-live}
+#| mode: editor
+#| auto-run: false
+#| preview: https://panel-extensions.github.io/panel-live/assets/png/streaming-chart.png
+import panel as pn
+pn.panel("Preview replaced with live output.").servable()
+```
+
 ## Expression Mode
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 #| label: Python
 1 + 1
 ```

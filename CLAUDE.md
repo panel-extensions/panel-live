@@ -29,7 +29,8 @@ pixi run lint                        # run pre-commit on all files
 
 # Docs — MkDocs (automatically builds JS and syncs assets before serving/building)
 pixi run -e docs serve               # live dev server (zensical/mkdocs)
-pixi run -e docs build               # build static site to site/
+pixi run -e docs build               # build static site to site/ (incremental, uses caches)
+pixi run -e docs rebuild             # clean build: clears .cache, .panel-live, site/ first
 
 # Docs — Sphinx
 pixi run -e sphinx build             # build Sphinx test site to docs-sphinx/_build

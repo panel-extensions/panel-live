@@ -1,6 +1,6 @@
 import panel as pn
 
-pn.extension("echarts", sizing_mode="stretch_width")
+pn.extension("echarts", sizing_mode="stretch_width", theme="dark")
 
 GRADIENT = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
 CARD_BG = "rgba(255,255,255,0.07)"
@@ -51,7 +51,7 @@ dashboard = pn.Column(
         pn.Column("### Monthly Growth", trend, sizing_mode="stretch_width",
                    styles={"color": "#f1f5f9"}),
     ),
-    styles={"background": GRADIENT, "padding": "24px", "border-radius": "16px"},
 )
 
-pn.Column("# KPI Dashboard", dashboard).servable()
+pn.Column("# KPI Dashboard", dashboard, styles={"background": GRADIENT, "color": "white",
+                                                "padding": "24px", "border-radius": "16px"},).servable()

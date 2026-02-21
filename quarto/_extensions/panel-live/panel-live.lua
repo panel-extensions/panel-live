@@ -11,7 +11,10 @@
       pyodide-version: "v0.28.2"
       panel-version: "1.8.7"
       bokeh-version: "3.8.2"
-      mini-coi: true  # inject mini-coi.js service worker (default: true)
+      mini-coi: true    # inject mini-coi.js service worker (default: true)
+      pre-render: true   # pre-render code at build time (default: false)
+      setup-code: ""     # Python code prepended before each block
+      cache-dir: ".panel-live"  # cache directory for pre-rendered output
 ]]
 
 -- Track whether base JS/CSS has been injected
@@ -21,6 +24,8 @@ local base_setup_done = false
 local doc_meta = nil
 
 -- Known attributes that map to HTML attributes on <panel-live>
+-- NOTE: "pre-render" is NOT included here because it is a build-time
+-- directive, not an HTML attribute.
 local known_attrs = {
   ["mode"] = true,
   ["theme"] = true,
@@ -31,7 +36,7 @@ local known_attrs = {
   ["code-visibility"] = true,
   ["code-position"] = true,
   ["src"] = true,
-  ["pre-render"] = true,
+  ["preview"] = true,
 }
 
 --- Escape HTML special characters.
@@ -81,6 +86,41 @@ local function get_config(meta)
     end
   end
   return conf
+end
+
+--- Pre-render Panel code by calling the panel-live CLI.
+-- Returns the JSON string on success, or nil on failure.
+local function pre_render_code(code, conf)
+  local cache_dir = conf["cache-dir"] or ".panel-live"
+  local setup_code = conf["setup-code"] or ""
+
+  -- Build the CLI arguments
+  local args = { "-m", "panel_live", "pre-render",
+                 "--cache-dir", cache_dir }
+  if setup_code ~= "" then
+    table.insert(args, "--setup-code")
+    table.insert(args, setup_code)
+  end
+
+  -- pandoc.pipe(command, args, input) sends input on stdin and returns stdout.
+  -- The CLI reads code from the positional argument, so we pass it as the last arg.
+  table.insert(args, code)
+
+  local ok, result = pcall(pandoc.pipe, "python", args, "")
+  if ok and result and result ~= "" then
+    -- Trim trailing whitespace/newlines
+    result = result:match("^(.-)%s*$")
+    if result ~= "" then
+      return result
+    end
+  else
+    if not ok then
+      io.stderr:write("[panel-live] pre-render failed: " .. tostring(result) .. "\n")
+    else
+      io.stderr:write("[panel-live] pre-render produced no output\n")
+    end
+  end
+  return nil
 end
 
 --- Inject panel-live JS/CSS and config into the document.
@@ -220,15 +260,39 @@ local function CodeBlock(el)
 
   local attr_str = table.concat(attrs)
 
+  -- Pre-render if enabled (per-block directive overrides global config)
+  local pre_rendered_html = ""
+  local pre_render_opt = directives["pre-render"]
+  local should_prerender
+  if pre_render_opt == "true" then
+    should_prerender = true
+  elseif pre_render_opt == "false" then
+    should_prerender = false
+  else
+    -- Fall back to global config (default: false)
+    local global_pr = conf["pre-render"]
+    should_prerender = (global_pr == true or global_pr == "true")
+  end
+
+  if should_prerender and clean_code and clean_code ~= "" then
+    local json_output = pre_render_code(clean_code, conf)
+    if json_output then
+      pre_rendered_html = "\n" .. string.format(
+        '<script type="application/json" class="panel-live-prerender">%s</script>',
+        json_output
+      )
+    end
+  end
+
   -- Build the <panel-live> element
   local html
   if clean_code and clean_code ~= "" then
     html = string.format(
-      "<panel-live%s>\n%s\n</panel-live>",
-      attr_str, escape_html(clean_code)
+      "<panel-live%s>\n%s%s\n</panel-live>",
+      attr_str, escape_html(clean_code), pre_rendered_html
     )
   else
-    html = string.format("<panel-live%s></panel-live>", attr_str)
+    html = string.format("<panel-live%s>%s</panel-live>", attr_str, pre_rendered_html)
   end
 
   return pandoc.RawBlock("html", html)

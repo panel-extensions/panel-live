@@ -49,6 +49,7 @@ _KNOWN_ATTRS = frozenset(
         "code-position",
         "src",
         "pre-render",
+        "preview",
     }
 )
 

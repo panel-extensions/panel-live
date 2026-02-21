@@ -1,5 +1,4 @@
 import panel as pn
-import pydeck as pdk
 pn.extension('deckgl')
 
 MAPBOX_KEY = ""

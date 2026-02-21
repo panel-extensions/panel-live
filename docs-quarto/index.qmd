@@ -1,7 +1,5 @@
 ---
 title: "panel-live Quarto Test"
-panel-live:
-  default-auto-run: false
 ---
 
 This site tests the `panel-live` Quarto extension.
@@ -10,6 +8,7 @@ This site tests the `panel-live` Quarto extension.
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
 pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
@@ -22,6 +21,7 @@ any Panel imports.
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 #| label: Python
 #| code-visibility: collapsed
 #| code-position: last
@@ -44,6 +44,7 @@ fig
 
 ```{.panel-live}
 #| mode: app
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
 pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
@@ -53,6 +54,7 @@ pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
 
 ```{.panel-live}
 #| mode: app
+#| auto-run: true
 #| requirements: numpy
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
@@ -63,6 +65,7 @@ pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
 
 ```{.panel-live}
 #| mode: editor
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
 pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
@@ -72,6 +75,7 @@ pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
 
 ```{.panel-live}
 #| mode: playground
+#| auto-run: true
 import panel as pn
 slider = pn.widgets.IntSlider(name="Value", start=0, end=10, value=5)
 pn.Row(slider, pn.bind(lambda v: f"## {v}", slider)).servable()
