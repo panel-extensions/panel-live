@@ -24,15 +24,16 @@ live.mode = "compact"  # minimal status line
 
 ## Sending Data Server → Client
 
-Use `send()` to push JSON-serializable data to the client:
+Set the `input` param to push JSON-serializable data to the client.
+On the client side, the data is available as `server.input`:
 
 ```python
 live = PanelLive(code="...", mode="compact")
 
 # Send any JSON-serializable data
-live.send({"action": "update", "data": [1, 2, 3]})
-live.send("simple string")
-live.send(42)
+live.input = {"action": "update", "data": [1, 2, 3]}
+live.input = "simple string"
+live.input = 42
 ```
 
 For DataFrames, convert to dict first:
@@ -41,7 +42,7 @@ For DataFrames, convert to dict first:
 import pandas as pd
 
 df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
-live.send(df.to_dict(orient="records"))
+live.input = df.to_dict(orient="records")
 ```
 
 For bytes, use base64:
@@ -50,12 +51,13 @@ For bytes, use base64:
 import base64
 
 raw_bytes = b"binary data"
-live.send({"data": base64.b64encode(raw_bytes).decode()})
+live.input = {"data": base64.b64encode(raw_bytes).decode()}
 ```
 
 ## Receiving Data Client → Server
 
-Watch the `output` param:
+On the client side, set `server.output` to send data back.
+On the server side, watch the `output` param:
 
 ```python
 live = PanelLive(code="...", mode="compact")

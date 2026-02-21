@@ -142,7 +142,7 @@ export function render({ model, view }) {
 
   // Set requirements as data attribute
   if (model.requirements && model.requirements.length > 0) {
-    plEl.setAttribute("data-requirements", model.requirements.join(","));
+    plEl.setAttribute("data-requirements", model.requirements.join("\n"));
   }
 
   container.appendChild(plEl);
@@ -188,13 +188,17 @@ export function render({ model, view }) {
     if (!msg || !msg.type) return;
 
     if (msg.type === "server_data") {
-      // Dispatch server data to the <panel-live> element
+      // Dispatch event (web component API contract)
       plEl.dispatchEvent(
         new CustomEvent("pl-server-data", {
           detail: { data: msg.data },
           bubbles: false,
         }),
       );
+      // Also forward directly to element for worker delivery
+      if (plEl.receiveServerData) {
+        plEl.receiveServerData(msg.data);
+      }
     } else if (msg.type === "evaluate") {
       // Forward evaluate request to the worker via eval()
       _evaluateInWorker(plEl, msg, model);

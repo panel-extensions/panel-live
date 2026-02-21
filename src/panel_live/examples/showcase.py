@@ -18,6 +18,8 @@ from panel_live.component import PanelLive
 PanelLive.configure(js_url="./pl/panel-live.js")
 pn.extension()
 
+SIZING = {"sizing_mode": "stretch_width"}
+
 # ---------------------------------------------------------------------------
 # 1. Editor mode — interactive code editing + Pyodide execution
 # ---------------------------------------------------------------------------
@@ -34,6 +36,7 @@ pn.Column(
 """,
     mode="editor",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -46,6 +49,7 @@ pn.pane.Markdown("## App Mode\\n\\nNo editor visible — output only.").servable
 """,
     mode="app",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -55,6 +59,7 @@ compact = PanelLive(
     code='print("compact mode: execution complete")',
     mode="compact",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -69,6 +74,7 @@ print(f"Python version: {__import__('sys').version}")
 """,
     mode="debug",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -87,6 +93,7 @@ pn.Column(
 """,
     mode="playground",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -96,6 +103,7 @@ headless = PanelLive(
     code='print("headless: invisible execution")',
     mode="headless",
     auto_run=True,
+    **SIZING,
 )
 
 # ---------------------------------------------------------------------------
@@ -105,6 +113,7 @@ rpc_target = PanelLive(
     code='import panel as pn\npn.pane.Markdown("Waiting for server command...").servable()',
     mode="editor",
     auto_run=True,
+    **SIZING,
 )
 
 rpc_status = pn.widgets.TextInput(name="Status", value="Ready", disabled=True)
@@ -144,42 +153,164 @@ btn_evaluate.on_click(_test_evaluate)
 btn_run.on_click(_test_run)
 
 # ---------------------------------------------------------------------------
-# Layout
+# 8. Server→Client reactive data push (input param + @pn.depends)
 # ---------------------------------------------------------------------------
+reactive_target = PanelLive(
+    code="""\
+import panel as pn
+
+@pn.depends(server.param.input)
+def message(value):
+    return value or {"message": "No data received yet"}
+
+pn.pane.JSON(message, name="Server Data", depth=2).servable()
+""",
+    mode="editor",
+    auto_run=True,
+    **SIZING,
+)
+
+reactive_counter = 0
+
+
+def _test_reactive_send(event):
+    global reactive_counter
+    reactive_counter += 1
+    reactive_status.value = f"[send #{reactive_counter}] Sending data..."
+    reactive_target.input = {"count": reactive_counter, "message": f"Hello from server #{reactive_counter}"}
+    reactive_status.value = f"[send #{reactive_counter}] Done — client updates reactively"
+
+
+btn_reactive_send = pn.widgets.Button(name="Send Data to Client", button_type="primary")
+reactive_status = pn.widgets.TextInput(name="Status", value="Ready", disabled=True)
+btn_reactive_send.on_click(_test_reactive_send)
+
+# ---------------------------------------------------------------------------
+# 9. Server→Client periodic push (input param + periodic callback)
+# ---------------------------------------------------------------------------
+periodic_target = PanelLive(
+    code="""\
+import panel as pn
+import datetime
+
+time_pane = pn.pane.Str("Waiting...")
+data_pane = pn.pane.Str("No server data yet")
+
+def update():
+    time_pane.object = f"Time: {datetime.datetime.now().strftime('%H:%M:%S.%f')[:-3]}"
+    data_pane.object = f"Server data: {server.input}"
+
+pn.state.add_periodic_callback(update, period=200)
+pn.Column(time_pane, data_pane).servable()
+""",
+    mode="editor",
+    auto_run=True,
+    **SIZING,
+)
+
+slider = pn.widgets.IntSlider(name="Server value", start=0, end=100, value=42)
+
+
+def _on_slider(event):
+    periodic_target.input = {"slider": event.new}
+
+
+slider.param.watch(_on_slider, "value")
+
+# ---------------------------------------------------------------------------
+# 10. Client→Server data (server.output → output param)
+# ---------------------------------------------------------------------------
+output_target = PanelLive(
+    code="""\
+import panel as pn
+
+btn = pn.widgets.Button(name="Send to Server", button_type="primary")
+count = 0
+
+def on_click(event):
+    global count
+    count += 1
+    server.output = {"count": count, "source": "browser"}
+
+btn.on_click(on_click)
+pn.Column(btn, "Click to send data to the server's `output` param").servable()
+""",
+    mode="editor",
+    auto_run=True,
+    **SIZING,
+)
+
+output_display = pn.pane.JSON({}, name="Received Output", depth=2)
+
+
+def _on_output(event):
+    output_display.object = output_target.output
+
+
+output_target.param.watch(_on_output, "output")
+
+# ---------------------------------------------------------------------------
+# Layout — centered Accordion with fixed width
+# ---------------------------------------------------------------------------
+WIDTH = 800
+
+accordion = pn.Accordion(
+    ("1. Editor Mode", pn.Column(
+        "Interactive code editor with live Pyodide output.",
+        editor,
+    )),
+    ("2. App Mode", pn.Column(
+        "Output only — no code editor visible.",
+        app_mode,
+    )),
+    ("3. Compact Mode", pn.Column(
+        "Status line only — minimal footprint for background tasks.",
+        compact,
+    )),
+    ("4. Debug Mode", pn.Column(
+        "Shows stdout/stderr — useful during development.",
+        debug,
+    )),
+    ("5. Playground Mode", pn.Column(
+        "Editor with examples selector — ideal for interactive exploration.",
+        playground,
+    )),
+    ("6. Headless Mode", pn.Column(
+        "Invisible (0px) — pure background compute. The element below is present but hidden:",
+        headless,
+    )),
+    ("7. Server RPC", pn.Column(
+        "Test `evaluate()` and `run()` — server-side methods that execute code in the client Pyodide worker.",
+        pn.Row(btn_evaluate, btn_run),
+        rpc_status,
+        rpc_target,
+    )),
+    ("8. Server→Client Reactive Push", pn.Column(
+        "Server sets `input` param — client reacts via `@pn.depends(server.param.input)`, no re-run needed.",
+        pn.Row(btn_reactive_send),
+        reactive_status,
+        reactive_target,
+    )),
+    ("9. Server→Client Periodic Push", pn.Column(
+        "Server pushes slider value via `input` param. Client displays datetime + `server.input` every 200ms.",
+        slider,
+        periodic_target,
+    )),
+    ("10. Client→Server Data", pn.Column(
+        "Client sets `server.output` to push data back to the server's `output` param.",
+        output_target,
+        output_display,
+    )),
+    width=WIDTH,
+    active=[0],
+)
+
 pn.Column(
     pn.pane.Markdown(
         "# PanelLive Showcase\n\n"
-        "Demonstrates all six display modes and server-side RPC.\n\n"
-        "---"
+        "Demonstrates all six display modes, server-side RPC, and bidirectional data exchange."
     ),
-    "## 1. Editor Mode",
-    "Interactive code editor with live Pyodide output.",
-    editor,
-    "---",
-    "## 2. App Mode",
-    "Output only — no code editor visible.",
-    app_mode,
-    "---",
-    "## 3. Compact Mode",
-    "Status line only — minimal footprint for background tasks.",
-    compact,
-    "---",
-    "## 4. Debug Mode",
-    "Shows stdout/stderr — useful during development.",
-    debug,
-    "---",
-    "## 5. Playground Mode",
-    "Editor with examples selector — ideal for interactive exploration.",
-    playground,
-    "---",
-    "## 6. Headless Mode",
-    "Invisible (0px) — pure background compute. The element below is present but hidden:",
-    headless,
-    "---",
-    "## 7. Server RPC",
-    "Test `evaluate()` and `run()` — server-side methods that execute code in the client Pyodide worker.",
-    pn.Row(btn_evaluate, btn_run),
-    rpc_status,
-    rpc_target,
+    accordion,
+    align="center",
     sizing_mode="stretch_width",
 ).servable()

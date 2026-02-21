@@ -73,7 +73,8 @@ PanelLive(code="...", mode="headless")
 
 ## Sending Data to the Client
 
-Use `send()` to push data from the server to client-side code:
+Set the `input` param to push data from the server to client-side code.
+On the client side, the data is available as `server.input` (a reactive Param parameter):
 
 ```python
 import panel as pn
@@ -84,7 +85,12 @@ pn.extension()
 live = PanelLive(
     code="""\
 import panel as pn
-pn.panel("Waiting for server data...").servable()
+
+@pn.depends(server.param.input)
+def show(value):
+    return value or "Waiting for server data..."
+
+pn.pane.JSON(show, depth=2).servable()
 """,
     mode="editor",
     auto_run=True,
@@ -93,7 +99,7 @@ pn.panel("Waiting for server data...").servable()
 button = pn.widgets.Button(name="Send Data", button_type="primary")
 
 def on_click(event):
-    live.send({"message": "Hello from the server!", "timestamp": 42})
+    live.input = {"message": "Hello from the server!", "timestamp": 42}
 
 button.on_click(on_click)
 
@@ -102,7 +108,8 @@ pn.Column(button, live).servable()
 
 ## Receiving Data from the Client
 
-Watch the `output` parameter to receive data sent back from client-side code:
+On the client side, set `server.output` to send data back.
+On the server side, watch the `output` param:
 
 ```python
 import panel as pn
@@ -113,9 +120,17 @@ pn.extension()
 live = PanelLive(
     code="""\
 import panel as pn
-# Client-side code can dispatch output events
-# (integration with the worker bridge is in progress)
-pn.panel("Running in the browser").servable()
+
+btn = pn.widgets.Button(name="Send to Server", button_type="primary")
+count = 0
+
+def on_click(event):
+    global count
+    count += 1
+    server.output = {"count": count, "source": "browser"}
+
+btn.on_click(on_click)
+pn.Column(btn, "Click to send data to the server").servable()
 """,
     mode="editor",
     auto_run=True,

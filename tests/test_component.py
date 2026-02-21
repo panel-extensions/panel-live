@@ -34,6 +34,7 @@ def test_default_params():
     assert comp.auto_run is True
     assert comp.code_visibility == "visible"
     assert comp.value is None
+    assert comp.input is None
     assert comp.output is None
     assert comp.status == "idle"
     assert comp.error == ""
@@ -271,6 +272,29 @@ def test_value_accepts_bool():
 # ---------------------------------------------------------------------------
 
 
+def test_input_default_none():
+    """Default input is None."""
+    comp = PanelLive()
+    assert comp.input is None
+
+
+def test_input_accepts_dict():
+    """input param accepts a dict."""
+    comp = PanelLive()
+    comp.input = {"slider": 42}
+    assert comp.input == {"slider": 42}
+
+
+def test_input_triggers_send():
+    """Setting input param calls send() with the new value."""
+    comp = PanelLive()
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+    comp.input = {"hello": "world"}
+    assert len(sent) == 1
+    assert sent[0] == {"type": "server_data", "data": {"hello": "world"}}
+
+
 def test_output_default_none():
     """Default output is None."""
     comp = PanelLive()
@@ -325,6 +349,32 @@ def test_send_method_exists():
     comp = PanelLive()
     assert hasattr(comp, "send")
     assert callable(comp.send)
+
+
+def test_send_method_sends_server_data_msg():
+    """send() calls _send_msg with correct payload."""
+    comp = PanelLive()
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+    comp.send({"hello": "world"})
+    assert len(sent) == 1
+    assert sent[0] == {"type": "server_data", "data": {"hello": "world"}}
+
+
+def test_send_various_data_types():
+    """send() accepts dict, list, str, int, None."""
+    comp = PanelLive()
+    sent = []
+    comp._send_msg = lambda msg: sent.append(msg)
+
+    for data in [{"a": 1}, [1, 2, 3], "hello", 42, None]:
+        comp.send(data)
+    assert len(sent) == 5
+    assert sent[0]["data"] == {"a": 1}
+    assert sent[1]["data"] == [1, 2, 3]
+    assert sent[2]["data"] == "hello"
+    assert sent[3]["data"] == 42
+    assert sent[4]["data"] is None
 
 
 # ---------------------------------------------------------------------------
@@ -529,6 +579,21 @@ def test_css_default():
     assert PanelLive.__css__ is not None
     assert len(PanelLive.__css__) == 1
     assert "panel-live.css" in PanelLive.__css__[0]
+
+
+def test_showcase_uses_server_io():
+    """Showcase uses server.input / server.output for bidirectional data."""
+    from pathlib import Path
+
+    showcase = Path("src/panel_live/examples/showcase.py").read_text()
+    # Client code should use server.input (server→client)
+    assert "server.input" in showcase
+    assert "server.param.input" in showcase
+    # Client code should use server.output (client→server)
+    assert "server.output" in showcase
+    # Server code should use .input param (not .send())
+    assert "reactive_target.input =" in showcase
+    assert "periodic_target.input =" in showcase
 
 
 def test_css_url_matches_cdn_base():

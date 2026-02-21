@@ -31,9 +31,9 @@ Server Python                  Browser JS                     Pyodide Worker
          │    send_msg)           │                          │
 ```
 
-**Server → Client:** `send(data)` → `_send_msg()` → Bokeh websocket → ESM `msg:custom` handler → dispatches `pl-server-data` event on `<panel-live>`.
+**Server → Client:** Setting `widget.input = data` calls `send()` → `_send_msg()` → Bokeh websocket → ESM `msg:custom` handler → dispatches `pl-server-data` event on `<panel-live>` → updates `server.input` in Pyodide.
 
-**Client → Server:** Pyodide code dispatches `pl-output` event → ESM listener → `model.send_msg()` → Bokeh websocket → `_handle_msg()` → updates `output` param.
+**Client → Server:** Client code sets `server.output = data` → param watcher calls `__send_output_raw__` → dispatches `pl-output` event → ESM listener → `model.send_msg()` → Bokeh websocket → `_handle_msg()` → updates `output` param.
 
 **Remote execution:** `evaluate(code)` → `_send_msg()` → ESM forwards to worker → worker executes → result/error sent back via `model.send_msg()` → `_handle_msg()` resolves the asyncio Future.
 

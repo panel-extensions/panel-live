@@ -59,9 +59,12 @@ class PanelLive(JSComponent):
         Bidirectional value for server→client and client→server data.
         Supports JSON-serializable types (``str``, ``int``, ``float``,
         ``dict``, ``list``, ``bool``, ``None``).
+    input : object
+        Server→client data channel. Setting ``input`` pushes data to
+        the client's ``server.input`` param (reactive, no re-run).
     output : object
         Client→server data channel (read-only from server perspective).
-        Updated when client-side code sends data back.
+        Updated when client-side code sets ``server.output``.
     status : str
         Current execution status (read-only from user perspective).
     error : str
@@ -130,8 +133,11 @@ class PanelLive(JSComponent):
     value = param.Parameter(
         doc="Bidirectional value. JSON-serializable types: str, int, float, dict, list, None.",
     )
+    input = param.Parameter(
+        doc="Server-to-client data. Setting this pushes data to the client's server.input param.",
+    )
     output = param.Parameter(
-        doc="Client-to-server data. Updated when Pyodide code sends data back via postMessage.",
+        doc="Client-to-server data. Updated when Pyodide code sets server.output.",
     )
 
     # --- Status (read-only from user perspective) ---
@@ -147,6 +153,11 @@ class PanelLive(JSComponent):
     def __init__(self, **params: Any) -> None:
         super().__init__(**params)
         self._pending_requests: dict[str, asyncio.Future] = {}
+        self.param.watch(self._on_input_change, ["input"])
+
+    def _on_input_change(self, event: param.parameterized.Event) -> None:
+        """Push data to client when ``input`` param is set."""
+        self.send(event.new)
 
     def send(self, data: Any) -> None:
         """Send data from server to client-side Pyodide code.

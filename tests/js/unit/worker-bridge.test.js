@@ -770,6 +770,60 @@ describe('getWorkerBridge', () => {
     });
   });
 
+  // --- sendServerData ---
+
+  describe('sendServerData()', () => {
+    it('posts server-data message to worker', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      bridge.sendServerData('el-target', { key: 'value' });
+      const msg = mockWorkerInstance._posted.find(m => m.type === 'server-data');
+      expect(msg).toBeDefined();
+      expect(msg.targetId).toBe('el-target');
+      expect(msg.data).toEqual({ key: 'value' });
+    });
+  });
+
+  // --- output handling ---
+
+  describe('output handling', () => {
+    it('_validateWorkerMessage accepts output message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'output', targetId: 'el-1',
+      })).toBe(true);
+    });
+
+    it('_validateWorkerMessage rejects output without targetId', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'output',
+      })).toBe(false);
+    });
+
+    it('_handleOutput dispatches pl-output on target element', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const el = document.createElement('div');
+      el.id = 'output-target-1';
+      document.body.appendChild(el);
+
+      const handler = vi.fn();
+      el.addEventListener('pl-output', handler);
+
+      mockWorkerInstance._simulateMessage({
+        type: 'output', targetId: 'output-target-1', data: { result: 42 },
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].detail.data).toEqual({ result: 42 });
+
+      document.body.removeChild(el);
+    });
+  });
+
   // --- Message validation ---
 
   describe('_validateWorkerMessage', () => {

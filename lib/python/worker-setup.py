@@ -64,6 +64,37 @@ stderr_writer = StreamingWriter(stderr_cb, sys.__stderr__)
 sys.stdout = stdout_writer
 sys.stderr = stderr_writer
 
+
+# Inject send_output() for client→server data
+# Closure captures target_id so callbacks fire with the correct element ID
+def _make_send_output(tid):
+    def send_output(data):
+        import json as _j
+
+        __send_output_raw__(_j.dumps(data), tid)  # noqa: F821
+
+    return send_output
+
+
+__ns__["send_output"] = _make_send_output(target_id)
+
+# Inject reactive server object for server→client data
+# Per-element: reuse existing if send() was called before first run()
+if target_id not in __server_data_objs__:  # noqa: F821
+    __server_data_objs__[target_id] = __ServerData__()  # noqa: F821
+__ns__["server"] = __server_data_objs__[target_id]  # noqa: F821
+
+
+# Wire output param → server: setting server.output sends data back
+def _on_output_change(event, _tid=target_id):
+    if event.new is not None:
+        import json as _j
+
+        __send_output_raw__(_j.dumps(event.new), _tid)  # noqa: F821
+
+
+__server_data_objs__[target_id].param.watch(_on_output_change, ["output"])  # noqa: F821
+
 try:
     if is_expression:
         from panel.io.mime_render import exec_with_return
