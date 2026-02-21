@@ -5,20 +5,13 @@ This tutorial shows you how to use the `PanelLive` component in a Panel server a
 ## Installation
 
 ```bash
-pip install git+https://github.com/panel-extensions/panel-live.git
+uv pip install git+https://github.com/panel-extensions/panel-live.git
 ```
 
 !!! warning "Pre-release"
     panel-live has not been published to npm or PyPI yet. The install command above uses a GitHub source install, which works now. Once released, it will change to:
 
-    - **Python:** `pip install panel-live`
-
-Or with pixi (for development):
-
-```bash
-pixi install
-pixi run postinstall
-```
+    - **Python:** `uv pip install panel-live`
 
 ## Quick Start
 
@@ -176,14 +169,13 @@ pn.Column(
 Run the built-in showcase that demonstrates all modes:
 
 ```bash
-panel-live serve --port 5008
+uvx --from git+https://github.com/panel-extensions/panel-live panel-live serve --port 5008
 ```
 
-Or with uvx (no installation needed):
+![PanelLive Showcase](../assets/gif/PanelLive-showcase.gif)
 
-```bash
-uvx panel-live serve --port 5009
-```
+!!! note "Future: shorter command"
+    Once panel-live is published to PyPI, this simplifies to `uvx panel-live serve`.
 
 ## Local Assets
 
@@ -202,7 +194,7 @@ PanelLive.configure(
 Then serve with `--static-dirs`:
 
 ```bash
-panel serve app.py --static-dirs pl=quarto/_extensions/panel-live
+panel serve app.py --static-dirs pl=dist
 ```
 
 !!! note "CDN assets"
