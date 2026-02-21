@@ -445,3 +445,34 @@ Resolved and rejected issues from the panel-live project.
 **Confirmed:** 4 targeted experiments confirmed JSPI as the cause. Stress test (26 diverse examples including matplotlib, seaborn, altair, plotly, hvplot, holoviews, xarray, colorcet) passed 26/26 in 6.0s on the crash-prone machine. Docs site verified working.
 
 **Note:** Enterprise antivirus (Sophos StackPivot detection, [pyodide#5768](https://github.com/pyodide/pyodide/issues/5768)) is a separate trigger that cannot be mitigated in JavaScript — requires endpoint config or user workaround.
+
+---
+
+## ~~P1 — Don't Auto-Run Pyodide on Home Page~~
+
+**Resolved.** Multiple complementary mechanisms prevent Pyodide from auto-loading on page visit:
+
+1. **`auto-run="false"` default** — MkDocs fence formatter (`fences.py`) now defaults to `auto-run="false"`. All examples require an explicit click to activate Pyodide.
+2. **`PanelLive.runAll()` API** — Sequential execution of all `<panel-live>` elements on a page, enabling page-level "Run All" buttons. Dispatches `pl-run-all-start` and `pl-run-all-end` events.
+3. **Preview badge** — Pre-rendered output shows a small "Run" badge overlay instead of static text. Clicking the badge or the output activates Pyodide.
+4. **`preview` attribute** — Static image placeholder for examples that can't be pre-rendered (streaming, periodic callbacks). Clicking the image activates Pyodide.
+5. **Run placeholder** — "Click Run to execute this example" text shown when no preview and no pre-render are available.
+6. **Element registry** — `registerElement()`/`unregisterElement()` tracks connected elements in document order for `runAll()`.
+
+---
+
+## ~~P2 — Analyze mkdocs-jupyterlite~~
+
+**Resolved.** Full analysis in `dev/research/mkdocs-jupyterlite-analysis.md`. Reviewed NickCrews/mkdocs-jupyterlite (plugin + iframe approach) and DerThorsten fork (superfences + REPL approach), plus upstream JupyterLite issues. Key findings informed panel-live's Light DOM architecture, CDN-first approach, and editor state persistence strategy.
+
+---
+
+## ~~P2 — Analyze jupyterlite-sphinx~~
+
+**Resolved.** Full analysis in `dev/research/jupyterlite-sphinx-analysis.md`. Reviewed 20+ issues/PRs, codebase architecture, and adopter experiences (NumPy, SciPy). Findings informed the Sphinx extension design: CDN assets (no build overhead), click-to-run default, parallel build safety, versioned CDN URLs, and version config in `conf.py`.
+
+---
+
+## ~~P3 — Static Preview Image or GIF~~
+
+**Resolved.** `preview` attribute implemented on `<panel-live>`. Displays a static image (PNG/GIF) in the output area before the user clicks Run. Clickable image with "Run" badge overlay. When `auto-run="false"` with no preview and no pre-render, a "Click Run to execute this example" placeholder text is shown. Supported in MkDocs fences, Sphinx directive (`:preview:` option), and Quarto Lua filter (`#| preview:` directive). Documented in `docs/how-to/preview.md`.

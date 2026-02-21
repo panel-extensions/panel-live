@@ -72,7 +72,25 @@ print(f"Python version: {__import__('sys').version}")
 )
 
 # ---------------------------------------------------------------------------
-# 5. Headless mode — invisible (0px), pure background compute
+# 5. Playground mode — editor + examples selector
+# ---------------------------------------------------------------------------
+playground = PanelLive(
+    code="""\
+import panel as pn
+
+name = pn.widgets.TextInput(name="Your name", value="World")
+
+pn.Column(
+    name,
+    pn.bind(lambda n: f"### Hello, **{n}**!", name),
+).servable()
+""",
+    mode="playground",
+    auto_run=True,
+)
+
+# ---------------------------------------------------------------------------
+# 6. Headless mode — invisible (0px), pure background compute
 # ---------------------------------------------------------------------------
 headless = PanelLive(
     code='print("headless: invisible execution")',
@@ -81,12 +99,57 @@ headless = PanelLive(
 )
 
 # ---------------------------------------------------------------------------
+# 7. Server RPC — evaluate() and run() from server side
+# ---------------------------------------------------------------------------
+rpc_target = PanelLive(
+    code='import panel as pn\npn.pane.Markdown("Waiting for server command...").servable()',
+    mode="editor",
+    auto_run=True,
+)
+
+rpc_status = pn.widgets.TextInput(name="Status", value="Ready", disabled=True)
+eval_counter = 0
+run_counter = 0
+
+
+async def _test_evaluate(event):
+    global eval_counter
+    eval_counter += 1
+    n = eval_counter
+    rpc_status.value = f"[eval #{n}] Calling evaluate('{n} * {n}')..."
+    try:
+        result = await rpc_target.evaluate(f"{n} * {n}")
+        rpc_status.value = f"[eval #{n}] evaluate returned: {result}"
+    except Exception as e:
+        rpc_status.value = f"[eval #{n}] Error: {e}"
+
+
+async def _test_run(event):
+    global run_counter
+    run_counter += 1
+    n = run_counter
+    rpc_status.value = f"[run #{n}] Calling run()..."
+    try:
+        await rpc_target.run(
+            code=f'import panel as pn\npn.pane.Markdown("## Run **#{n}** completed").servable()'
+        )
+        rpc_status.value = f"[run #{n}] run() completed — output updated above"
+    except Exception as e:
+        rpc_status.value = f"[run #{n}] Error: {e}"
+
+
+btn_evaluate = pn.widgets.Button(name="Test evaluate()", button_type="primary")
+btn_run = pn.widgets.Button(name="Test run()", button_type="success")
+btn_evaluate.on_click(_test_evaluate)
+btn_run.on_click(_test_run)
+
+# ---------------------------------------------------------------------------
 # Layout
 # ---------------------------------------------------------------------------
 pn.Column(
     pn.pane.Markdown(
         "# PanelLive Showcase\n\n"
-        "Demonstrates all six display modes of the `PanelLive` component.\n\n"
+        "Demonstrates all six display modes and server-side RPC.\n\n"
         "---"
     ),
     "## 1. Editor Mode",
@@ -105,8 +168,18 @@ pn.Column(
     "Shows stdout/stderr — useful during development.",
     debug,
     "---",
-    "## 5. Headless Mode",
+    "## 5. Playground Mode",
+    "Editor with examples selector — ideal for interactive exploration.",
+    playground,
+    "---",
+    "## 6. Headless Mode",
     "Invisible (0px) — pure background compute. The element below is present but hidden:",
     headless,
+    "---",
+    "## 7. Server RPC",
+    "Test `evaluate()` and `run()` — server-side methods that execute code in the client Pyodide worker.",
+    pn.Row(btn_evaluate, btn_run),
+    rpc_status,
+    rpc_target,
     sizing_mode="stretch_width",
 ).servable()

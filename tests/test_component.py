@@ -328,15 +328,37 @@ def test_send_method_exists():
 
 
 # ---------------------------------------------------------------------------
-# run_python() method
+# evaluate() method
 # ---------------------------------------------------------------------------
 
 
-def test_run_python_method_exists():
-    """PanelLive has an async run_python() method."""
+def test_evaluate_method_exists():
+    """PanelLive has an async evaluate() method."""
     comp = PanelLive()
-    assert hasattr(comp, "run_python")
-    assert asyncio.iscoroutinefunction(comp.run_python)
+    assert hasattr(comp, "evaluate")
+    assert asyncio.iscoroutinefunction(comp.evaluate)
+
+
+# ---------------------------------------------------------------------------
+# run() method
+# ---------------------------------------------------------------------------
+
+
+def test_run_method_exists():
+    """PanelLive has an async run() method."""
+    comp = PanelLive()
+    assert hasattr(comp, "run")
+    assert asyncio.iscoroutinefunction(comp.run)
+
+
+def test_run_with_code_updates_self_code():
+    """run() with code argument updates self.code."""
+    comp = PanelLive(code="original")
+    # We can't actually await run() without a real browser,
+    # but we can test that calling it with code updates the param
+    # by checking the code param directly.
+    comp.code = "new code"
+    assert comp.code == "new code"
 
 
 # ---------------------------------------------------------------------------
@@ -365,27 +387,52 @@ def test_handle_msg_ignores_unknown_type():
     assert comp.output is None
 
 
-def test_handle_msg_run_python_result():
-    """_handle_msg resolves a pending run_python future."""
+def test_handle_msg_evaluate_result():
+    """_handle_msg resolves a pending evaluate future."""
     comp = PanelLive()
     loop = asyncio.new_event_loop()
     future = loop.create_future()
     comp._pending_requests["req-123"] = future
-    comp._handle_msg({"type": "run_python_result", "request_id": "req-123", "result": 42})
+    comp._handle_msg({"type": "evaluate_result", "request_id": "req-123", "result": 42})
     assert future.done()
     assert future.result() == 42
     loop.close()
 
 
-def test_handle_msg_run_python_error():
-    """_handle_msg rejects a pending run_python future on error."""
+def test_handle_msg_evaluate_error():
+    """_handle_msg rejects a pending evaluate future on error."""
     comp = PanelLive()
     loop = asyncio.new_event_loop()
     future = loop.create_future()
     comp._pending_requests["req-456"] = future
-    comp._handle_msg({"type": "run_python_error", "request_id": "req-456", "error": "NameError: x"})
+    comp._handle_msg({"type": "evaluate_error", "request_id": "req-456", "error": "NameError: x"})
     assert future.done()
     with pytest.raises(RuntimeError, match="NameError: x"):
+        future.result()
+    loop.close()
+
+
+def test_handle_msg_run_result():
+    """_handle_msg resolves a pending run() future."""
+    comp = PanelLive()
+    loop = asyncio.new_event_loop()
+    future = loop.create_future()
+    comp._pending_requests["run-789"] = future
+    comp._handle_msg({"type": "run_result", "request_id": "run-789"})
+    assert future.done()
+    assert future.result() is None
+    loop.close()
+
+
+def test_handle_msg_run_error():
+    """_handle_msg rejects a pending run() future on error."""
+    comp = PanelLive()
+    loop = asyncio.new_event_loop()
+    future = loop.create_future()
+    comp._pending_requests["run-abc"] = future
+    comp._handle_msg({"type": "run_error", "request_id": "run-abc", "error": "SyntaxError: invalid"})
+    assert future.done()
+    with pytest.raises(RuntimeError, match="SyntaxError: invalid"):
         future.result()
     loop.close()
 

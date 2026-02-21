@@ -71,11 +71,11 @@ live.param.watch(on_output, "output")
 Execute code in the browser and get results back:
 
 ```python
-# Simple execution
-result = await live.run_python("sum(range(100))")
+# Simple evaluation
+result = await live.evaluate("sum(range(100))")
 
 # With keyword arguments injected as globals
-result = await live.run_python(
+result = await live.evaluate(
     "result = x * y",
     x=10,
     y=20,
@@ -83,7 +83,7 @@ result = await live.run_python(
 
 # With timeout
 try:
-    result = await live.run_python("import time; time.sleep(60)", timeout=5.0)
+    result = await live.evaluate("import time; time.sleep(60)", timeout=5.0)
 except TimeoutError:
     print("Execution timed out")
 ```
@@ -102,11 +102,11 @@ def on_status(event):
 live.param.watch(on_status, "status")
 ```
 
-For `run_python()`, errors raise `RuntimeError`:
+For `evaluate()`, errors raise `RuntimeError`:
 
 ```python
 try:
-    result = await live.run_python("1/0")
+    result = await live.evaluate("1/0")
 except RuntimeError as e:
     print(f"Execution error: {e}")
 ```

@@ -160,15 +160,11 @@ export function render({ model, view }) {
   model.on("auto_run", () => _applyAttributes(plEl, model));
   model.on("code_visibility", () => _applyAttributes(plEl, model));
 
-  // Watch for code changes — update the element's controller
+  // Watch for code changes — update the editor and internal code state
   model.on("code", () => {
-    // If the <panel-live> element has an updateCode method (from the
-    // web component), use it.  Otherwise fall back to textContent.
-    if (plEl._controller && typeof plEl._controller.updateCode === "function") {
-      plEl._controller.updateCode(model.code);
-    } else {
-      plEl.textContent = model.code;
-    }
+    plEl.setCode(model.code);
+    // Also update internal _code for modes without an editor (app/headless/compact/debug)
+    plEl._code = model.code;
   });
 
   // Listen for <panel-live> status events
@@ -186,7 +182,7 @@ export function render({ model, view }) {
 
   // --- Bidirectional messaging ---
 
-  // Handle custom messages from server (send() and run_python())
+  // Handle custom messages from server (send(), evaluate(), run())
   model.on("msg:custom", (event) => {
     const msg = event.detail ? event.detail[0] : event;
     if (!msg || !msg.type) return;
@@ -199,9 +195,12 @@ export function render({ model, view }) {
           bubbles: false,
         }),
       );
-    } else if (msg.type === "run_python") {
-      // Forward run_python request to the worker via the controller
-      _runPythonInWorker(plEl, msg, model);
+    } else if (msg.type === "evaluate") {
+      // Forward evaluate request to the worker via eval()
+      _evaluateInWorker(plEl, msg, model);
+    } else if (msg.type === "run") {
+      // Trigger the full render pipeline programmatically
+      _triggerRun(plEl, msg, model);
     }
   });
 
@@ -215,9 +214,9 @@ export function render({ model, view }) {
   return container;
 }
 
-// ---------- run_python helper ----------
+// ---------- evaluate helper ----------
 
-async function _runPythonInWorker(plEl, msg, model) {
+async function _evaluateInWorker(plEl, msg, model) {
   const { code, kwargs, request_id } = msg;
 
   // Build the code with kwargs injected as globals
@@ -232,21 +231,32 @@ async function _runPythonInWorker(plEl, msg, model) {
   fullCode += code;
 
   try {
-    // Try to use the controller's run method if available
-    let result = null;
-    if (plEl._controller && typeof plEl._controller.run === "function") {
-      result = await plEl._controller.run(fullCode);
-    }
+    const result = await plEl.eval(fullCode);
     model.send_msg({
-      type: "run_python_result",
+      type: "evaluate_result",
       request_id: request_id,
       result: result,
     });
   } catch (err) {
     model.send_msg({
-      type: "run_python_error",
+      type: "evaluate_error",
       request_id: request_id,
       error: String(err),
     });
+  }
+}
+
+// ---------- run helper ----------
+
+async function _triggerRun(plEl, msg, model) {
+  const { request_id } = msg;
+  try {
+    // If code was provided, it's already synced via model.on("code")
+    // which calls plEl.setCode() + plEl._code = ...
+    // Now trigger the render pipeline
+    await plEl.run();
+    model.send_msg({ type: "run_result", request_id });
+  } catch (err) {
+    model.send_msg({ type: "run_error", request_id, error: String(err) });
   }
 }

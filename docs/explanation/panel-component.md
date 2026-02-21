@@ -35,7 +35,7 @@ Server Python                  Browser JS                     Pyodide Worker
 
 **Client → Server:** Pyodide code dispatches `pl-output` event → ESM listener → `model.send_msg()` → Bokeh websocket → `_handle_msg()` → updates `output` param.
 
-**Remote execution:** `run_python(code)` → `_send_msg()` → ESM forwards to worker → worker executes → result/error sent back via `model.send_msg()` → `_handle_msg()` resolves the asyncio Future.
+**Remote execution:** `evaluate(code)` → `_send_msg()` → ESM forwards to worker → worker executes → result/error sent back via `model.send_msg()` → `_handle_msg()` resolves the asyncio Future.
 
 ## Design Decisions
 
@@ -79,9 +79,9 @@ Rather than overloading `value` for both directions, a separate `output` param r
 
 `send(data)` pushes JSON-serializable data to the client via Bokeh's custom message channel. This is more explicit than watching `value` changes and avoids triggering unnecessary re-renders.
 
-### `run_python()` for remote execution
+### `evaluate()` for remote execution
 
-`await run_python(code, **kwargs)` provides a clean async API for executing arbitrary Python in the browser sandbox and getting results back. Keyword arguments are injected as globals in the Pyodide namespace. The implementation uses request IDs to match responses to pending futures.
+`await evaluate(code, **kwargs)` provides a clean async API for executing arbitrary Python in the browser sandbox and getting results back. Keyword arguments are injected as globals in the Pyodide namespace. The implementation uses request IDs to match responses to pending futures.
 
 ## Shadow DOM Workarounds
 
@@ -101,12 +101,15 @@ Communication uses Bokeh's built-in websocket transport via `_send_msg()` (serve
 
 **Server → Client:**
 - `{"type": "server_data", "data": ...}` — arbitrary data push via `send()`
-- `{"type": "run_python", "code": "...", "kwargs": {...}, "request_id": "..."}` — remote code execution
+- `{"type": "evaluate", "code": "...", "kwargs": {...}, "request_id": "..."}` — headless code evaluation
+- `{"type": "run", "request_id": "...", "code": ...}` — trigger full render pipeline
 
 **Client → Server:**
 - `{"type": "output", "data": ...}` — client sends data back (updates `output` param)
-- `{"type": "run_python_result", "request_id": "...", "result": ...}` — execution result
-- `{"type": "run_python_error", "request_id": "...", "error": "..."}` — execution error
+- `{"type": "evaluate_result", "request_id": "...", "result": ...}` — evaluation result
+- `{"type": "evaluate_error", "request_id": "...", "error": "..."}` — evaluation error
+- `{"type": "run_result", "request_id": "..."}` — render completed
+- `{"type": "run_error", "request_id": "...", "error": "..."}` — render error
 
 ## Future Work
 

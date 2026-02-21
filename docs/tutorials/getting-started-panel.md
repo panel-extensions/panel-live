@@ -133,7 +133,7 @@ pn.Column(live, result).servable()
 
 ## Remote Code Execution
 
-Use `run_python()` to execute arbitrary Python code in the browser and get results back:
+Use `evaluate()` to execute arbitrary Python code in the browser and get results back:
 
 ```python
 import panel as pn
@@ -144,7 +144,7 @@ pn.extension()
 live = PanelLive(mode="compact", auto_run=True, code="pass")
 
 async def compute():
-    result = await live.run_python(
+    result = await live.evaluate(
         "result = sum(range(n))",
         n=100,
     )

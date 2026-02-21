@@ -6,23 +6,6 @@ Outstanding issues and planned improvements for panel-live.
 
 ---
 
----
-
-## P1 — Don't Auto-Run Pyodide on Home Page
-
-The index.md home page currently auto-runs Pyodide, causing visitors to immediately download 300+ MB and potentially experience browser crashes. First-time visitors should not be subjected to this.
-
-**Proposed solutions:**
-
-- **Pre-rendering:** Use `pre-render` to generate static output at build time. Pages load instantly with pre-rendered content; users click "Run" to activate Pyodide.
-- **`auto-run="false"`:** Set `auto-run="false"` on all home page examples. Add a note explaining that Pyodide is not auto-run on this page but is on other pages (which will download 300+ MB and may crash in some browsers).
-- **"Run All" button:** Add a page-level "Run All" button at the top. All examples start as static/pre-rendered. Clicking "Run All" initializes Pyodide and executes all examples. The button disappears after activation.
-- **Embed options:** Investigate Panel's [embedding export](https://panel.holoviz.org/how_to/export/embedding.html) and the [.embed pattern](https://awesome-panel.github.io/holoviz-quarto/) for providing embed options directly in MkDocs/Sphinx/Quarto code blocks.
-
-**Acceptance:** The index.md home page loads without triggering Pyodide download. Users can opt-in to running examples interactively.
-
----
-
 ## P1 — Distribution `PARTIAL`
 
 esbuild bundling is done. **Primary distribution: npm** — publishing to npm enables loading via `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist/panel-live.js`, which works everywhere including Claude.ai artifacts (jsDelivr's `cdn.jsdelivr.net/npm/` is widely allowlisted). CI workflow (`build.yml`) has `cdn_build`, `waiting_room`, `cdn_publish`, and `github_release` jobs triggered on git tags. S3 upload (`scripts/cdn_upload.py`) remains as a secondary/backup channel. **Remaining:** actual npm publish, SRI hashes, bundle size tracking.
@@ -286,42 +269,6 @@ Document how to use the browser developer console to debug panel-live issues. Co
 
 ---
 
-## P2 — Analyze mkdocs-jupyterlite `DONE`
-
-~~Review [mkdocs-jupyterlite](https://github.com/NickCrews/mkdocs-jupyterlite/) code, issues, and PRs for challenges relevant to panel-live. Look for shared patterns around WASM loading, asset management, MkDocs integration, and cross-origin issues that could inform panel-live's roadmap.~~
-
-**Done.** Full analysis in `dev/research/mkdocs-jupyterlite-analysis.md`. Reviewed NickCrews/mkdocs-jupyterlite (plugin + iframe approach) and DerThorsten fork (superfences + REPL approach), plus upstream JupyterLite issues. Key findings:
-
-- iframe embedding causes TOC, height, DOM isolation, and theme sync problems — validates panel-live's Light DOM architecture
-- Subprocess-based `jupyter lite build` is fragile (issue [#5](https://github.com/NickCrews/mkdocs-jupyterlite/issues/5)) — validates panel-live's CDN-first approach
-- Browser storage persistence causes stale state on docs rebuild ([jupyterlite#1706](https://github.com/jupyterlite/jupyterlite/issues/1706)) — panel-live's editor state persistence (P2) needs content-hash cache invalidation
-- SharedArrayBuffer requires explicit fallback; `coincident` crashes without it ([pyodide-kernel#126](https://github.com/jupyterlite/pyodide-kernel/pull/126)) — relevant to P0 Browser Crash and P2 Zero-Install Deployment
-- mkdocs-material 61rem width constraint affects embedded WASM elements — panel-live should test at constrained widths
-- Shell command wheel resolution with `{wheels_dir}` placeholder pattern useful for P1 Export CLI
-
-**Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
-
----
-
-## P2 — Analyze jupyterlite-sphinx `DONE`
-
-~~Review [jupyterlite-sphinx](https://github.com/jupyterlite/jupyterlite-sphinx) code, issues, and PRs for challenges relevant to panel-live. Especially useful for the planned Sphinx extension — patterns for asset injection, configuration, and build-time integration.~~
-
-**Done.** Full analysis in `dev/research/jupyterlite-sphinx-analysis.md`. Reviewed 20+ issues/PRs, codebase architecture, adopter experiences (NumPy, SciPy), and upstream JupyterLite patterns. Key findings:
-
-- iframe embedding causes URL path resolution bugs ([#36](https://github.com/jupyterlite/jupyterlite-sphinx/issues/36), open 3+ years), theme sync fragility ([#69](https://github.com/jupyterlite/jupyterlite-sphinx/issues/69)), and storage conflicts — validates panel-live's Light DOM custom element
-- Build-time `jupyter lite build` subprocess causes excessive noise ([#149](https://github.com/jupyterlite/jupyterlite-sphinx/issues/149)), cryptic failures ([#177](https://github.com/jupyterlite/jupyterlite-sphinx/issues/177)), and 22-63 MiB build bloat — panel-live should use CDN assets with zero build overhead
-- Click-to-run (`:prompt:` option) is essential for doc pages ([#50](https://github.com/jupyterlite/jupyterlite-sphinx/issues/50)) — Sphinx extension should default `auto-run=false`
-- TryExamples `autodoc-process-docstring` hook converts docstring examples to interactive notebooks — pattern applicable for Panel API docs
-- Mixed static/dynamic mode ([#319](https://github.com/jupyterlite/jupyterlite-sphinx/issues/319)) is the most requested pattern — directly maps to panel-live's planned `mode="render"` (P2)
-- Parallel build safety must be declared in `setup()` ([#146](https://github.com/jupyterlite/jupyterlite-sphinx/issues/146))
-- Cache-busting query params waste bandwidth at scale ([#327](https://github.com/jupyterlite/jupyterlite-sphinx/issues/327), SciPy) — versioned CDN URLs are correct
-- Version coupling is a production issue (SciPy [#19729](https://github.com/scipy/scipy/issues/19729)) — extension needs version config in `conf.py`
-
-**Acceptance:** Analysis completed and relevant findings documented as new issues or notes on existing issues.
-
----
-
 ## P2 — Panel Extension Examples
 
 Add examples for known Panel extensions including [panel-graphic-walker](https://github.com/panel-extensions/panel-graphic-walker) and [panel-reactflow](https://github.com/panel-extensions/panel-reactflow). Should be in a separate "Panel Extensions" section or page to keep the main examples page focused.
@@ -392,12 +339,17 @@ A `PanelLive` JSComponent wraps the `<panel-live>` web component for use in Pane
 - Modes: `app`, `editor`, `playground`, `headless`, `compact`, `debug`
 - `output` param for client-to-server data
 - `send()` method for server-to-client push
-- `run_python()` async method for remote code execution
+- `evaluate()` async method for remote code execution
+- `run()` async method for programmatic render pipeline triggering
 - Unit tests and POC test app
 - CLI `serve` command for showcase example
 - `__css__` class variable for explicit CSS loading (fixes missing CSS in CDN mode)
 
 **CSS loading workaround:** The default asset URLs point to GitHub Pages (`panel-extensions.github.io/panel-live/assets/`) because the npm package is not yet published. The ESM previously relied on deriving the CSS URL from the `<script>` tag at runtime (`_injectBundleCSS`), which failed in CDN/default mode because Panel may not preserve the script tag in the DOM. Fixed by adding `__css__` to explicitly load the stylesheet via Panel's standard mechanism. Once published to npm, update `_CDN_BASE` in `component.py` to `https://cdn.jsdelivr.net/npm/@panel-extensions/panel-live@latest/dist`.
+
+**Investigate**
+
+- Shadow root. For example many anywidgets use methods that don't work with shadow root. Can we disable or enable users to disable shadow root?
 
 **Remaining:**
 
@@ -552,15 +504,6 @@ Make query parameters accessible to running Panel code via a Python-side mechani
 Optional `auto-run="debounce"` attribute on `<panel-live>` that re-executes code after a configurable delay (e.g. 1 second) of no typing. Improves the interactive development experience in editor/playground modes. (Source: stlite's sharing editor auto-saves and re-runs on code changes.)
 
 **Acceptance:** `auto-run="debounce"` re-executes code after typing stops.
-
----
-
-## P3 — Static Preview Image or GIF `DONE`
-
-**Done:** `preview` attribute implemented on `<panel-live>`. Clickable image with "Run" badge overlay. When `auto-run="false"` with no preview and no pre-render, a "Click Run to execute this example" placeholder text is shown. Supported in MkDocs fences, Sphinx directive, and Quarto Lua filter. Used in the streaming demo example.
-
-**Acceptance:** `<panel-live>` supports a `preview` attribute (image URL or path) that displays
-a static image until the user clicks to activate.
 
 ---
 

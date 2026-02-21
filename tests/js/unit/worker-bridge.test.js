@@ -342,6 +342,104 @@ describe('getWorkerBridge', () => {
     expect(bridge._elements['el-3'].busy).toBe(false);
   });
 
+  // --- eval() method ---
+
+  describe('eval()', () => {
+    it('posts eval message and resolves on eval-result', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const evalPromise = bridge.eval('1 + 2');
+
+      const evalMsg = mockWorkerInstance._posted.find(m => m.type === 'eval');
+      expect(evalMsg).toBeDefined();
+      expect(evalMsg.code).toBe('1 + 2');
+      expect(evalMsg.evalId).toBeDefined();
+
+      mockWorkerInstance._simulateMessage({
+        type: 'eval-result',
+        evalId: evalMsg.evalId,
+        result: 3,
+      });
+
+      const result = await evalPromise;
+      expect(result).toBe(3);
+    });
+
+    it('rejects on eval-result with error', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const evalPromise = bridge.eval('raise ValueError("bad")');
+
+      const evalMsg = mockWorkerInstance._posted.find(m => m.type === 'eval');
+      mockWorkerInstance._simulateMessage({
+        type: 'eval-result',
+        evalId: evalMsg.evalId,
+        result: null,
+        error: 'ValueError: bad',
+      });
+
+      await expect(evalPromise).rejects.toThrow('ValueError: bad');
+    });
+
+    it('terminate() clears pending evals', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      bridge.eval('x = 1');
+      expect(Object.keys(bridge._evals).length).toBe(1);
+
+      bridge.terminate();
+      expect(Object.keys(bridge._evals).length).toBe(0);
+      bridge = getWorkerBridge();
+    });
+
+    it('resolves with null result', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const evalPromise = bridge.eval('None');
+      const evalMsg = mockWorkerInstance._posted.find(m => m.type === 'eval');
+
+      mockWorkerInstance._simulateMessage({
+        type: 'eval-result',
+        evalId: evalMsg.evalId,
+        result: null,
+      });
+
+      const result = await evalPromise;
+      expect(result).toBeNull();
+    });
+
+    it('handles concurrent evals independently', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const p1 = bridge.eval('1 + 1');
+      const p2 = bridge.eval('2 + 2');
+
+      const evalMsgs = mockWorkerInstance._posted.filter(m => m.type === 'eval');
+      expect(evalMsgs.length).toBe(2);
+
+      // Resolve in reverse order
+      mockWorkerInstance._simulateMessage({
+        type: 'eval-result', evalId: evalMsgs[1].evalId, result: 4,
+      });
+      mockWorkerInstance._simulateMessage({
+        type: 'eval-result', evalId: evalMsgs[0].evalId, result: 2,
+      });
+
+      expect(await p1).toBe(2);
+      expect(await p2).toBe(4);
+    });
+  });
+
   // --- Fix 1: Cross-origin worker creation ---
 
   describe('_createWorker', () => {
@@ -655,6 +753,21 @@ describe('getWorkerBridge', () => {
       await expect(initP).rejects.toThrow('Network error loading the worker script');
       expect(bridge._crashRetries).toBe(0);
     });
+
+    it('rejects pending evals on non-recoverable error', async () => {
+      const initP = bridge.init(vi.fn());
+      mockWorkerInstance._simulateMessage({ type: 'ready' });
+      await initP;
+
+      const evalPromise = bridge.eval('1 + 2');
+      expect(Object.keys(bridge._evals).length).toBe(1);
+
+      // Network errors are non-recoverable and skip _attemptRecovery
+      mockWorkerInstance.onerror({ message: 'NetworkError: Failed to fetch' });
+
+      await expect(evalPromise).rejects.toThrow('Worker error');
+      expect(Object.keys(bridge._evals).length).toBe(0);
+    });
   });
 
   // --- Message validation ---
@@ -704,6 +817,18 @@ describe('getWorkerBridge', () => {
 
     it('accepts valid done message', () => {
       expect(bridge._validateWorkerMessage({ type: 'done' })).toBe(true);
+    });
+
+    it('accepts valid eval-result message', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'eval-result', evalId: 'eval-abc123',
+      })).toBe(true);
+    });
+
+    it('rejects eval-result missing evalId', () => {
+      expect(bridge._validateWorkerMessage({
+        type: 'eval-result',
+      })).toBe(false);
     });
 
     it('rejects null message', () => {
