@@ -2,6 +2,9 @@
 
 This tutorial shows you how to use the `PanelLive` component in a Panel server application. `PanelLive` wraps the `<panel-live>` web component as a Panel `JSComponent`, letting you run Python code client-side via Pyodide with bidirectional data exchange.
 
+!!! tip "Embedding in HTML panes, Markdown panes, or ChatInterface?"
+    If you want to embed `<panel-live>` directly inside `pn.pane.HTML`, `pn.pane.Markdown`, or `pn.chat.ChatInterface` without the JSComponent, see [HTML & Markdown Panes](../how-to/panel-panes.md).
+
 ## Installation
 
 ```bash
