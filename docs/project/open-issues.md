@@ -549,3 +549,21 @@ panel-live does not work in Claude.ai artifacts (canvas) due to Content Security
 **Acceptance:** panel-live loads and runs inside Claude.ai artifacts without CSP violations.
 
 ---
+
+## P3 — File Upload to Editor / Playground (Drag & Drop)
+
+Support drag-and-drop of `.py` and `.ipynb` files onto the editor (in editor and playground modes). Dropping a file replaces the current editor content with the file's Python code.
+
+For `.py` files, insert the content as-is. For `.ipynb` files, strip notebook metadata and cell structure, extract only the Python source from code cells (skipping markdown cells and cell outputs), and concatenate into a single runnable script.
+
+Consider also supporting a file picker button in the toolbar as an alternative to drag-and-drop.
+
+**Acceptance:** Users can drag a `.py` or `.ipynb` file onto the editor to load its code. Notebook files are converted to pure Python, ready to run.
+
+---
+
+## P2 — Add Playground and API Explorer Links to Docs Header
+
+The playground and API explorer are not easily discoverable from the docs site. Add prominent links (buttons or cards) to the header/hero area of `docs/index.md` so users can find them immediately on landing.
+
+**Acceptance:** The docs landing page (`index.md`) includes visible links to the playground and API explorer in the header area.

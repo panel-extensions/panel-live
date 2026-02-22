@@ -68,6 +68,8 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         print(f"Error: showcase app not found at {showcase_path}", file=sys.stderr)
         return 1
 
+    panes_path = pathlib.Path(__file__).parent / "examples" / "panes.py"
+
     # Find the panel-live JS/CSS assets to serve as static files.
     # Fallback order: dist/ (repo dev) → in-package static/ (pip install) → CDN
     # Each candidate must contain panel-live.js to be accepted.
@@ -90,8 +92,14 @@ def _cmd_serve(args: argparse.Namespace) -> int:
     if docs_dir.exists():
         static_dirs["docs"] = str(docs_dir)
 
-    print(f"Serving PanelLive showcase on http://localhost:{args.port}")
-    print(f"  App: {showcase_path}")
+    apps = {"/": str(showcase_path)}
+    if panes_path.exists():
+        apps["/panes"] = str(panes_path)
+
+    print(f"Serving PanelLive on http://localhost:{args.port}")
+    print(f"  http://localhost:{args.port}/       — Showcase (all modes)")
+    if panes_path.exists():
+        print(f"  http://localhost:{args.port}/panes  — HTML, Markdown & ChatInterface panes")
     if static_dir:
         print(f"  Assets: {static_dir}")
     else:
@@ -99,7 +107,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
     print()
 
     pn.serve(
-        {"/": str(showcase_path)},
+        apps,
         port=args.port,
         show=True,
         static_dirs=static_dirs,

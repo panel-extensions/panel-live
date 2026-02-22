@@ -155,3 +155,7 @@ pn.pane.Str(f"Random array: {arr}").servable()
     mode="editor",
 )
 ```
+
+## See also
+
+- [HTML & Markdown Panes](panel-panes.md) — embed `<panel-live>` directly in HTML and Markdown panes without the PanelLive component

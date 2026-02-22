@@ -191,6 +191,7 @@ def test_pre_render_timeout_forwarded(tmp_path):
 
     mock_proc = MagicMock()
     mock_proc.exitcode = 0
+    mock_proc.is_alive.return_value = False  # process finished normally
 
     mock_parent = MagicMock()
     mock_parent.poll.return_value = True
@@ -204,6 +205,26 @@ def test_pre_render_timeout_forwarded(tmp_path):
         pre_render("x = 1", cache_dir, timeout=42)
 
     mock_proc.join.assert_called_once_with(timeout=42)
+
+
+def test_pre_render_timeout_terminates_subprocess(tmp_path):
+    """Subprocess still alive after timeout is terminated to avoid BrokenPipeError."""
+    cache_dir = tmp_path / ".panel-live"
+
+    mock_proc = MagicMock()
+    mock_proc.exitcode = None  # still running after join() returns
+    mock_proc.is_alive.return_value = True
+
+    mock_ctx = MagicMock()
+    mock_ctx.Pipe.return_value = (MagicMock(), MagicMock())
+    mock_ctx.Process.return_value = mock_proc
+
+    with patch("panel_live.prerender.get_context", return_value=mock_ctx):
+        result = pre_render("x = 1", cache_dir, timeout=5)
+
+    assert result is None  # timed-out run returns None
+    mock_proc.terminate.assert_called_once()
+    mock_proc.join.assert_any_call(timeout=5)  # cleanup join after terminate
 
 
 def test_pre_render_string_cache_dir(tmp_path):

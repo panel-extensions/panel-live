@@ -174,7 +174,11 @@ def pre_render(code: str, cache_dir: Path | str, *, setup_code: str = "", timeou
     parent_conn, child_conn = ctx.Pipe()
     proc = ctx.Process(target=execution_process, args=(full_code, child_conn))
     proc.start()
+    child_conn.close()  # parent doesn't use the child end; close it so broken-pipe is detectable
     proc.join(timeout=timeout)
+    if proc.is_alive():
+        proc.terminate()  # kill zombie subprocess so it can't write to a closed pipe
+        proc.join(timeout=5)
 
     code_preview = full_code.strip().split("\n")[0][:80]
     if proc.exitcode != 0 or not parent_conn.poll():

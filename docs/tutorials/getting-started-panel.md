@@ -206,5 +206,6 @@ panel serve app.py --static-dirs pl=dist
 ## Next Steps
 
 - [How-to Guide](../how-to/panel-component.md) — common patterns and recipes
+- [HTML & Markdown Panes](../how-to/panel-panes.md) — lightweight embedding without the PanelLive component
 - [Design Explanation](../explanation/panel-component.md) — architecture and design decisions
 - [API Reference](../reference/python-api.md) — full parameter documentation
