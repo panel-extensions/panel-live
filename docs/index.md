@@ -4,6 +4,10 @@
 
 Turn any web page into an interactive Python playground with the `<panel-live>` web component. Works with matplotlib, pandas, scikit-learn, Panel, and 200+ packages from the Python ecosystem. Visualizations, analyses, dashboards, and interactive tools are fully interactive — users can view, explore, edit code, and re-run, all directly in the browser via [Pyodide](https://pyodide.org/) — no backend, no deployment, no infrastructure.
 
+[Playground](playground.html){ .md-button .md-button--primary }
+[API Explorer](api-explorer.html){ .md-button }
+[Examples](examples.md){ .md-button }
+
 ## Try it
 
 ### App Mode
