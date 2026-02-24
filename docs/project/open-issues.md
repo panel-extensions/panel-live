@@ -50,6 +50,33 @@ Prose descriptions added before every example in `docs/examples.md` for LLM acce
 
 ---
 
+## P2 — Horizontal Layout + Collapsed Code Creates Oversized Empty Panel
+
+When `layout="horizontal"` and `code-visibility="collapsed"`, the editor pane collapses via `flex: 0 0 auto` but its visible content — the `.pl-code-toggle` bar containing "Expand Code", "Copy", and "Playground ↗" buttons plus a `flex: 1` spacer — still occupies ~250–300 px. In a narrow container (chat bubble, sidebar, pane) this steals a significant fraction of the available width from the output, leaving a large empty strip on the left that looks like a broken layout.
+
+Observed in `pn.pane.HTML`, `pn.pane.Markdown`, `pn.chat.ChatInterface`, and `PanelLive` JSComponent when served inside a narrow Panel column.
+
+**Trigger conditions:**
+
+- `layout="horizontal"` (explicit or `"auto"` on `mode="editor"` which resolves to horizontal)
+- `code-visibility="collapsed"`
+
+**Root cause (`lib/panel-live-element.js` + `lib/panel-live.css`):**
+
+`_renderEditorHorizontal` sets `pl-pane-collapsed` on the editor pane (→ CSS `flex: 0 0 auto`) and hides the code section (`display: none`). The remaining visible content is the `.pl-code-toggle` row, whose `.pl-toggle-spacer { flex: 1 }` expands to fill available width, making the collapsed pane as wide as the buttons allow.
+
+**Proposed fix options:**
+
+1. **Auto-switch layout** — when `code-visibility="collapsed"` AND `layout="horizontal"` (or `"auto"`), render as vertical so the collapsed toolbar sits above the full-width output.
+2. **Slim collapsed strip** — give the collapsed editor pane a narrow fixed width (e.g. `max-width: 2.5rem`) and rotate/icon the expand button; all output space is preserved.
+3. **Overlay toolbar** — float the toggle buttons over the top edge of the output pane (absolute positioning) so the collapsed state takes zero layout space.
+
+Option 1 is the lowest-effort fix; options 2/3 give a more polished result for users who want a visible "show code" affordance without losing output space.
+
+**Workaround:** Use `layout="vertical"` when `code-visibility="collapsed"`.
+
+---
+
 ## P2 — Choose and Configure Editor Theme `PARTIAL`
 
 Light/dark switching works via CM6 Compartment with oneDark theme. **Remaining:** additional built-in themes, high-contrast theme, configurable editor theme independent of UI theme.

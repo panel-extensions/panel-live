@@ -83,11 +83,12 @@ html_pane = pn.pane.HTML(
 # ---------------------------------------------------------------------------
 # 2. Markdown Pane
 # ---------------------------------------------------------------------------
+# No blank lines: CommonMark ends an HTML block at the first blank line,
+# which would split the <panel-live> tag and render the rest as plain text.
 _MD_CODE = """\
 import panel as pn
 import numpy as np
 import pandas as pd
-
 x = np.linspace(0, 2 * np.pi, 100)
 df = pd.DataFrame({"x": x, "sin": np.sin(x), "cos": np.cos(x)})
 df.hvplot.line(x="x", y=["sin", "cos"], title="Sine & Cosine").servable()
