@@ -55,6 +55,9 @@ class PanelLive(JSComponent):
         If ``True``, execute code automatically on load.
     code_visibility : str
         Code editor visibility: ``"visible"``, ``"collapsed"``, or ``"hidden"``.
+    code_position : str
+        Code panel position relative to output: ``"first"`` (before) or
+        ``"last"`` (after).
     value : object
         Bidirectional value for server→client and client→server data.
         Supports JSON-serializable types (``str``, ``int``, ``float``,
@@ -128,6 +131,11 @@ class PanelLive(JSComponent):
     code_visibility = param.Selector(
         default="visible",
         objects=["visible", "collapsed", "hidden"],
+    )
+    code_position = param.Selector(
+        default="first",
+        objects=["first", "last"],
+        doc="Code panel position relative to output: 'first' (before) or 'last' (after).",
     )
 
     # --- Data ---

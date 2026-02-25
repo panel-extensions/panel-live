@@ -102,6 +102,8 @@ function _applyAttributes(el, model) {
   } else {
     el.setAttribute("code-visibility", model.code_visibility);
   }
+
+  el.setAttribute("code-position", model.code_position);
 }
 
 function _applyContainerStyle(container, model) {
@@ -269,6 +271,7 @@ export function render({ model, view }) {
   model.on("layout", () => _applyAttributes(plEl, model));
   model.on("auto_run", () => _applyAttributes(plEl, model));
   model.on("code_visibility", () => _applyAttributes(plEl, model));
+  model.on("code_position", () => _applyAttributes(plEl, model));
 
   // Watch for code changes — update the editor and internal code state
   model.on("code", () => {
