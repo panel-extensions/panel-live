@@ -33,6 +33,7 @@ def test_default_params():
     assert comp.layout == "vertical"
     assert comp.auto_run is True
     assert comp.code_visibility == "visible"
+    assert comp.code_position == "first"
     assert comp.value is None
     assert comp.input is None
     assert comp.output is None
@@ -69,6 +70,7 @@ def test_instantiation_with_all_params():
         layout="horizontal",
         auto_run=False,
         code_visibility="collapsed",
+        code_position="last",
         value={"key": "val"},
     )
     assert comp.code == "x = 1"
@@ -77,6 +79,7 @@ def test_instantiation_with_all_params():
     assert comp.layout == "horizontal"
     assert comp.auto_run is False
     assert comp.code_visibility == "collapsed"
+    assert comp.code_position == "last"
     assert comp.value == {"key": "val"}
 
 
@@ -211,6 +214,29 @@ def test_code_visibility_invalid_raises():
     """Invalid code_visibility raises ValueError."""
     with pytest.raises(ValueError):
         PanelLive(code_visibility="minimized")
+
+
+# ---------------------------------------------------------------------------
+# code_position
+# ---------------------------------------------------------------------------
+
+
+def test_code_position_default_first():
+    """Default code_position is 'first'."""
+    comp = PanelLive()
+    assert comp.code_position == "first"
+
+
+def test_code_position_last():
+    """code_position='last' is accepted."""
+    comp = PanelLive(code_position="last")
+    assert comp.code_position == "last"
+
+
+def test_code_position_invalid_raises():
+    """Invalid code_position raises ValueError."""
+    with pytest.raises(ValueError):
+        PanelLive(code_position="middle")
 
 
 # ---------------------------------------------------------------------------
