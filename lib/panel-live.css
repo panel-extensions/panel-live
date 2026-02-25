@@ -631,6 +631,13 @@ panel-live[fullscreen] .pl-playground > .pl-editor-pane .cm-editor {
   font-size: 13px;
   margin: 0;
 }
+/* Restore error color — overrides the broad `panel-live .pl-output div { color: inherit }`
+   rule above (specificity 0,1,2). Two classes beat one class: (0,2,2) > (0,1,2). */
+panel-live .pl-output .pl-error-panel,
+panel-live .pl-output .pl-error-panel div,
+panel-live .pl-output .pl-error-panel span {
+  color: var(--pl-error-color, #b71c1c);
+}
 .pl-error-header {
   font-weight: 600;
   font-family: var(--pl-font-mono, monospace);

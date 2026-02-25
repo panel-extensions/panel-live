@@ -83,6 +83,12 @@ pn.Column("## panel-live in HTML Pane", html_pane).servable()
 
 `pn.pane.Markdown` passes raw HTML blocks through unchanged. The `<panel-live>` element receives the same Shadow DOM treatment automatically.
 
+!!! warning "Empty lines break the HTML block"
+    CommonMark ends an HTML block at the first blank line. Any blank line inside the `<panel-live>` tag splits it — the opening tag is passed through as HTML, but everything after the blank line is rendered as Markdown text outside the element.
+
+    **Use `pn.pane.HTML` instead when the Python code contains blank lines.**
+    If you must use `pn.pane.Markdown`, write code without blank lines or replace blank lines with a single `#` comment to preserve visual grouping:
+
 ```python
 import panel as pn
 
@@ -92,10 +98,10 @@ pn.extension(
     css_files=[f"{CDN}/css/panel-live.css"],
 )
 
-CODE = """
+# No blank lines inside the tag — CommonMark would split the HTML block at the first one.
+CODE = """\
 import panel as pn
 import numpy as np
-
 x = np.linspace(0, 10, 100)
 y = np.sin(x)
 df = __import__("pandas").DataFrame({"x": x, "y": y})
