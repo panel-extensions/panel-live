@@ -95,7 +95,7 @@ def create_mcp_server() -> FastMCP:
 
     @mcp.tool(name="show_panel_live", app=AppConfig(resource_uri=RESOURCE_URI))
     async def show_panel_live(code: str, ctx: Context | None = None) -> str:
-        """Render interactive Python data apps in the chat using Panel + Pyodide.
+        """Render interactive Python data apps in the chat using Panel + Pyodide (browser WASM).
 
         ## Use when
         - User asks for an interactive visualization, dashboard, or data app
@@ -104,17 +104,22 @@ def create_mcp_server() -> FastMCP:
         - User wants to explore data interactively
 
         ## Don't use when
-        - User asks for a simple text/table answer
+        - User asks for a simple text/table answer with no interactivity
         - Code needs server-side resources (databases, filesystem, network APIs)
 
         ## Code requirements
         - Code runs in Pyodide (browser Python). Available: panel, bokeh, holoviews,
           hvplot, plotly, matplotlib, altair, numpy, pandas, scipy, plus pure-Python pkgs.
-        - MUST call `.servable()` on the final Panel object.
+        - Two code styles are supported:
+          1. **Panel code**: build a layout and call `.servable()` on the final object.
+          2. **Regular Python**: the last expression is rendered automatically
+             (e.g., a matplotlib figure on the last line).
+        - Do NOT use `.show()`, `.plot()`, or Panel template classes (e.g., `FastListTemplate`).
         - Use `pn.extension(...)` if loading JS extensions (e.g., `pn.extension("plotly")`).
-        - Heavy libs (scikit-learn, xarray, seaborn) work but add 10-30s to first load.
+        - Heavy libs (scikit-learn, xarray, seaborn) work but add extra time to first load.
 
-        ## Example
+        ## Examples
+        Panel with widgets:
         ```python
         import panel as pn
         import numpy as np
@@ -122,11 +127,20 @@ def create_mcp_server() -> FastMCP:
         pn.Column(freq, pn.bind(lambda f: f"Value: {f}", freq)).servable()
         ```
 
+        Plain matplotlib (no Panel needed):
+        ```python
+        import matplotlib.pyplot as plt
+        import numpy as np
+        x = np.linspace(0, 10, 100)
+        fig, ax = plt.subplots()
+        ax.plot(x, np.sin(x))
+        fig  # last expression is rendered
+        ```
+
         Parameters
         ----------
         code : str
             Python code to run inside the panel-live Pyodide runtime.
-            Must call ``.servable()`` on the final Panel object.
         ctx : Context | None, optional
             FastMCP execution context (injected automatically).
 
