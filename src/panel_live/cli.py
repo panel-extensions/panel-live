@@ -6,22 +6,34 @@ Usage::
     panel-live pre-render CODE
     panel-live pre-render --file script.py
     panel-live pre-render CODE --cache-dir .cache --setup-code "import panel as pn" --timeout 60
+    panel-live mcp
+    panel-live mcp --transport http --port 5002
+    panel-live --version
 
 The ``serve`` command starts a Panel server with the showcase example app,
 demonstrating all PanelLive display modes.
 
 The ``pre-render`` command executes Panel code and prints the resulting
 Bokeh JSON to stdout.  Exit code 0 on success, 1 on failure.
+
+The ``mcp`` command starts the MCP server for use with VS Code Copilot Chat,
+Claude Desktop, or other MCP-compatible clients.
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import sys
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="panel-live", description="panel-live CLI utilities")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {importlib.metadata.version('panel-live')}",
+    )
     sub = parser.add_subparsers(dest="command")
 
     # --- serve ---
@@ -35,6 +47,21 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--cache-dir", dest="cache_dir", default=".panel-live", help="Cache directory (default: .panel-live)")
     pr.add_argument("--setup-code", dest="setup_code", default="", help="Setup code prepended before the main code")
     pr.add_argument("--timeout", type=int, default=120, help="Subprocess timeout in seconds (default: 120)")
+
+    # --- mcp ---
+    mcp_parser = sub.add_parser("mcp", help="Start the MCP server")
+    mcp_parser.add_argument(
+        "--transport",
+        choices=["stdio", "http"],
+        default="stdio",
+        help="Transport protocol (default: stdio)",
+    )
+    mcp_parser.add_argument(
+        "--port",
+        type=int,
+        default=5002,
+        help="Port for HTTP transport (default: 5002)",
+    )
 
     return parser
 
@@ -53,6 +80,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "pre-render":
         return _cmd_pre_render(args)
+
+    if args.command == "mcp":
+        return _cmd_mcp(args)
 
     parser.print_help()
     return 1
@@ -137,4 +167,24 @@ def _cmd_pre_render(args: argparse.Namespace) -> int:
         return 1
 
     print(result)
+    return 0
+
+
+def _cmd_mcp(args: argparse.Namespace) -> int:
+    try:
+        from panel_live.mcp import create_mcp_server
+    except ModuleNotFoundError:
+        print(
+            "Error: fastmcp is not installed. Install it with:\n\n"
+            '    pip install "panel-live[mcp] @ git+https://github.com/panel-extensions/panel-live.git"\n\n'
+            "Then restart your MCP client.",
+            file=sys.stderr,
+        )
+        return 1
+
+    server = create_mcp_server()
+    kwargs: dict = {"transport": args.transport}
+    if args.transport == "http":
+        kwargs["port"] = args.port
+    server.run(**kwargs)
     return 0

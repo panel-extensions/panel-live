@@ -14,6 +14,7 @@ nav = [
     {"Getting Started with Panel" = "tutorials/getting-started-panel.md"},
     {"Getting Started with Quarto" = "tutorials/getting-started-quarto.md"},
     {"Getting Started with Sphinx" = "tutorials/getting-started-sphinx.md"},
+    {"Getting Started with MCP" = "tutorials/getting-started-mcp.md"},
   ]},
   {"How-to Guides" = [
     {"HTML Attributes" = [
@@ -52,6 +53,7 @@ nav = [
       {"MkDocs Integration" = "how-to/mkdocs-integration.md"},
       {"Sphinx Integration" = "how-to/sphinx-integration.md"},
       {"Quarto Integration" = "how-to/quarto-integration.md"},
+      {"MCP Integration" = "how-to/mcp-integration.md"},
     ]},
     {"Panel Component" = [
       {"PanelLive Component" = "how-to/panel-component.md"},

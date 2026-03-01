@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>panel-live</title>
+    <link
+      rel="stylesheet"
+      href="https://panel-extensions.github.io/panel-live/assets/css/panel-live.css"
+    />
+    <script>
+      window.PANEL_LIVE_CONFIG = { initTimeout: 300000 };
+    </script>
+    <script src="https://panel-extensions.github.io/panel-live/assets/js/panel-live.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        margin: 0;
+        padding: 4px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        box-sizing: border-box;
+      }
+
+      #runner {
+        width: 100%;
+      }
+
+      #runner panel-live {
+        min-height: 300px;
+      }
+
+      /* Loading state */
+      #loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        gap: 12px;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      #loading .spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid #e0e0e0;
+        border-top-color: #4a90d9;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #loading .elapsed {
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
+
+      /* Error state */
+      #error {
+        display: none;
+        padding: 16px;
+        margin: 8px 0;
+        border-radius: 6px;
+        background: #fff0f0;
+        border: 1px solid #ffcccc;
+        color: #cc0000;
+        font-size: 0.9rem;
+      }
+
+      #error .error-message {
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      #error button {
+        padding: 6px 16px;
+        border: 1px solid #cc0000;
+        border-radius: 4px;
+        background: white;
+        color: #cc0000;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      #error button:hover {
+        background: #fff0f0;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        #loading {
+          color: #aaa;
+        }
+
+        #loading .spinner {
+          border-color: #444;
+          border-top-color: #6ab0f3;
+        }
+
+        #error {
+          background: #2a1a1a;
+          border-color: #553333;
+          color: #ff6666;
+        }
+
+        #error button {
+          background: #2a1a1a;
+          border-color: #ff6666;
+          color: #ff6666;
+        }
+
+        #error button:hover {
+          background: #3a2020;
+        }
+      }
+
+      /* Override VS Code dark-mode CSS variables that Panel's native.css
+         picks up via shadow DOM inheritance, turning widget text light on
+         the white output background. */
+      .pl-output {
+        --vscode-editor-foreground: #1a1a2e;
+        --vscode-notebook-editorBackground: #ffffff;
+        --vscode-notebook-cellEditorBackground: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading">
+      <div class="spinner"></div>
+      <div class="status-text">Waiting for code&hellip;</div>
+      <div class="elapsed" style="display: none"></div>
+    </div>
+    <div id="error">
+      <div class="error-message"></div>
+      <button id="retry-btn">Retry</button>
+    </div>
+    <div id="runner"></div>
+
+    <script type="module">
+      const loadingEl = document.getElementById("loading");
+      const errorEl = document.getElementById("error");
+      const errorMsg = errorEl.querySelector(".error-message");
+      const retryBtn = document.getElementById("retry-btn");
+      const runner = document.getElementById("runner");
+      const statusText = loadingEl.querySelector(".status-text");
+      const elapsedEl = loadingEl.querySelector(".elapsed");
+
+      // Detect environment: VS Code has COOP/COEP headers → crossOriginIsolated
+      const isFastEnv = window.crossOriginIsolated;
+
+      if (!isFastEnv) {
+        statusText.textContent =
+          "Loading Python runtime\u2026 (first load may take a minute or more)";
+        elapsedEl.style.display = "";
+      }
+
+      let lastPayload = null;
+      let elapsedTimer = null;
+
+      function startElapsedTimer() {
+        if (isFastEnv) return;
+        const start = Date.now();
+        elapsedEl.style.display = "";
+        elapsedTimer = setInterval(() => {
+          const s = Math.floor((Date.now() - start) / 1000);
+          elapsedEl.textContent = `${s}s elapsed`;
+        }, 1000);
+      }
+
+      function stopElapsedTimer() {
+        if (elapsedTimer) {
+          clearInterval(elapsedTimer);
+          elapsedTimer = null;
+        }
+        elapsedEl.style.display = "none";
+      }
+
+      function showError(msg) {
+        stopElapsedTimer();
+        loadingEl.style.display = "none";
+        errorMsg.textContent = msg;
+        errorEl.style.display = "block";
+      }
+
+      function hideError() {
+        errorEl.style.display = "none";
+      }
+
+      async function renderCode(code) {
+        hideError();
+        runner.innerHTML = "";
+        loadingEl.style.display = "flex";
+        statusText.textContent = isFastEnv
+          ? "Running\u2026"
+          : "Loading Python runtime\u2026 (first load may take a minute or more)";
+        startElapsedTimer();
+
+        try {
+          await window.PanelLive.mount(
+            {
+              mode: "editor",
+              layout: "vertical",
+              theme: "auto",
+              codeVisibility: "collapsed",
+              code: code,
+              autoRun: true,
+            },
+            runner,
+          );
+
+          // Set code-position="last" (mount() doesn't support this option)
+          const el = runner.querySelector("panel-live");
+          if (el) {
+            el.setAttribute("code-position", "last");
+
+            // Auto-expand code on error
+            el.addEventListener("pl-error", () => {
+              el.setAttribute("code-visibility", "visible");
+            });
+
+            // Hide loading when ready or on first status update
+            el.addEventListener("pl-ready", () => {
+              stopElapsedTimer();
+              loadingEl.style.display = "none";
+            });
+
+            el.addEventListener("pl-status", (e) => {
+              const status = e.detail?.status;
+              if (status === "running" || status === "ready") {
+                stopElapsedTimer();
+                loadingEl.style.display = "none";
+              }
+            });
+          }
+        } catch (err) {
+          showError("Failed to render: " + (err.message || String(err)));
+        }
+      }
+
+      // Retry button
+      retryBtn.addEventListener("click", () => {
+        if (lastPayload?.code) {
+          renderCode(lastPayload.code);
+        }
+      });
+
+      // Import ext-apps SDK with fallback
+      let App;
+      try {
+        ({ App } = await import(
+          "https://unpkg.com/@modelcontextprotocol/ext-apps@0.4.0/app-with-deps"
+        ));
+      } catch (err) {
+        loadingEl.style.display = "none";
+        document.body.innerHTML =
+          '<div style="padding:20px;color:red;">' +
+          "Failed to load MCP Apps SDK. Check network access to unpkg.com." +
+          "</div>";
+        throw err;
+      }
+
+      const app = new App({ name: "panel-live-show", version: "0.1.0" });
+
+      app.ontoolresult = async ({ content }) => {
+        const textContent = content?.find((entry) => entry.type === "text");
+        if (!textContent?.text) {
+          showError("No tool text payload received.");
+          return;
+        }
+
+        let payload;
+        try {
+          payload = JSON.parse(textContent.text);
+        } catch {
+          showError("Invalid JSON payload: " + textContent.text);
+          return;
+        }
+
+        if (payload.error) {
+          showError(payload.error);
+          return;
+        }
+
+        const code = payload.code ?? "";
+        if (!code.trim()) {
+          showError("No code provided.");
+          return;
+        }
+
+        lastPayload = payload;
+        await renderCode(code);
+      };
+
+      await app.connect();
+    </script>
+  </body>
+</html>
