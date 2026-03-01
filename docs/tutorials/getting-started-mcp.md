@@ -102,7 +102,7 @@ Restart Claude Desktop and ask for an interactive visualization.
 
     Claude.ai's MCP App webview does not provide cross-origin isolation headers
     (COOP/COEP), so Pyodide falls back to a much slower initialization path.
-    **First load takes 2+ minutes.** We have reported it [here](https://github.com/modelcontextprotocol/ext-apps/issues/513).
+    **First load takes 2+ minutes.** We have reported it [here](https://github.com/modelcontextprotocol/ext-apps/issues/513) and at claude.ai.
 
 Claude.ai supports remote MCP servers via Streamable HTTP. This requires
 a publicly accessible MCP server. We hope to host a public panel-live MCP
