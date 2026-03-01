@@ -46,6 +46,7 @@ Homepage = "https://github.com/panel-extensions/panel-live"
 Source = "https://github.com/panel-extensions/panel-live"
 
 [project.optional-dependencies]
+mcp = ["fastmcp>=3.0,<4"]
 dev = [
     "zensical",
     "mkdocstrings[python]",

@@ -181,6 +181,17 @@ depends-on = ["_quarto-postinstall", "_quarto-link-extension", "_quarto-sync-ass
 cmd = "quarto preview docs-quarto"
 depends-on = ["_quarto-postinstall", "_quarto-link-extension", "_quarto-sync-assets"]
 
+[feature.mcp.dependencies]
+pytest-asyncio = "*"
+
+[feature.mcp.pypi-dependencies]
+fastmcp = ">=3.0,<4"
+
+[feature.mcp.tasks]
+mcp = { cmd = "panel-live mcp", depends-on = ["postinstall"] }
+mcp-http = { cmd = "panel-live mcp --transport http --port 5002", depends-on = ["postinstall"] }
+test-mcp = { cmd = "pytest tests/test_mcp.py -x", depends-on = ["postinstall"] }
+
 [environments]
 default = ["test"]
 py312 = ["py312", "test"]
@@ -189,4 +200,5 @@ docs = ["docs"]
 sphinx = ["sphinx"]
 quarto = ["quarto"]
 build = ["build"]
+mcp = ["test", "mcp"]
 lint = { features = ["lint"], no-default-feature = true }

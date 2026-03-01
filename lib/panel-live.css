@@ -185,13 +185,30 @@ panel-live[data-resolved-theme="dark"] {
   padding: 0;
   overflow: hidden;
   /* Override dark-theme CSS custom properties that cascade through shadow DOM
-     boundaries. pydata-sphinx-theme sets --pst-color-text-base: #ced6dd in dark
-     mode, which leaks into Bokeh's nested shadow DOMs and turns text light on a
-     white background. CSS custom properties inherit through all shadow boundaries,
-     so we reset them here to ensure Panel/Bokeh output always renders with dark
-     text on a light background regardless of the host page's theme. */
+     boundaries and leak into Bokeh's nested shadow DOMs, turning text light on
+     a white background. CSS custom properties inherit through all shadow
+     boundaries, so we reset them here to ensure Panel/Bokeh output always
+     renders with dark text on a light background regardless of the host page's
+     theme.
+     Panel's native.css (theme/css/native.css) resolves --background-text-color
+     via a fallback chain: --design-background-text-color → --vscode-editor-foreground
+     → --jp-widgets-label-color → --pst-color-text-base → --panel-on-background-color.
+     Each environment variable must be overridden at this level so Panel widgets
+     inside shadow DOMs always get dark text and a light background. */
+  /* pydata-sphinx-theme */
   --pst-color-text-base: var(--pl-output-color, #1a1a2e);
   --pst-color-text-muted: var(--pl-output-color, #1a1a2e);
+  --pst-color-background: var(--pl-output-bg, #ffffff);
+  --pst-color-surface: var(--pl-output-bg, #ffffff);
+  /* VS Code webviews */
+  --vscode-editor-foreground: var(--pl-output-color, #1a1a2e);
+  --vscode-notebook-editorBackground: var(--pl-output-bg, #ffffff);
+  --vscode-notebook-cellEditorBackground: var(--pl-output-bg, #ffffff);
+  /* JupyterLab */
+  --jp-widgets-label-color: var(--pl-output-color, #1a1a2e);
+  --jp-layout-color0: var(--pl-output-bg, #ffffff);
+  --jp-cell-editor-background: var(--pl-output-bg, #ffffff);
+  --jp-ui-font-color1: var(--pl-output-color, #1a1a2e);
 }
 /* Prevent page dark-theme CSS from leaking into Panel/Bokeh output.
    Bokeh shadow hosts don't set color themselves — they inherit from the light DOM.
