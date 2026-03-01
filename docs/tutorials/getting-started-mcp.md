@@ -60,6 +60,8 @@ Restart VS Code. In Copilot Chat, ask:
 
 Copilot will call the `show_panel_live` tool and render the app inline.
 
+![VS Code Copilot Chat demo](../assets/gifs/panel-live-vs-code.gif)
+
 ## Claude Desktop
 
 Add to your `claude_desktop_config.json`:
@@ -90,10 +92,46 @@ Alternatively, if panel-live is already installed:
 
 Restart Claude Desktop and ask for an interactive visualization.
 
+<!-- TODO: replace with actual GIF recording
+![Claude Desktop demo](../assets/gifs/mcp-claude-desktop.gif)
+-->
+
+## Claude.ai (remote connector)
+
+!!! warning "Extremely slow loading"
+
+    Claude.ai's MCP App webview does not provide cross-origin isolation headers
+    (COOP/COEP), so Pyodide falls back to a much slower initialization path.
+    **First load takes 2+ minutes.** We have reported it [here](https://github.com/modelcontextprotocol/ext-apps/issues/513) and at claude.ai.
+
+Claude.ai supports remote MCP servers via Streamable HTTP. This requires
+a publicly accessible MCP server. We hope to host a public panel-live MCP
+server in the future — for now, you can test with a local tunnel.
+
+!!! note "ngrok is for testing only"
+
+    The [ngrok](https://ngrok.com/) example below exposes your local MCP server to the internet.
+    This is **not recommended for production use** — it is included here
+    only to demonstrate that panel-live can work with Claude.ai.
+
+```bash
+panel-live mcp --transport streamable-http --port 5002
+# In another terminal:
+ngrok http 5002
+```
+
+Then in Claude.ai: **Settings > Connectors > Add custom connector**, paste
+the ngrok URL (e.g., `https://abc123.ngrok-free.app/mcp/`).
+
+See the [MCP Integration guide](../how-to/mcp-integration.md) for details.
+
+![Claude.ai](../assets/gifs/panel-live-claude-ai.gif)
+
 ## Your first app
 
-Ask the LLM to create any interactive Panel app. The code must call
-`.servable()` on the final Panel object. For example:
+Ask the LLM to create any interactive Panel app. You can use Panel code
+(with `.servable()`) or regular Python where the last expression is rendered.
+For example:
 
 ```python
 import panel as pn
@@ -118,7 +156,7 @@ Matplotlib, Altair, NumPy, Pandas, SciPy, and most pure-Python packages.
 
 ## Known limitations
 
-- **Claude.ai**: Loading takes 30–60 seconds without COOP/COEP headers.
+- **Claude.ai**: Loading takes +2 mins without COOP/COEP headers.
   VS Code Copilot Chat is faster because it provides these headers.
 - **Server-side resources**: Code runs in the browser. Databases, filesystem,
   and network APIs are not available.

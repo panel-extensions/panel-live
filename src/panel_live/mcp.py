@@ -56,36 +56,29 @@ def create_mcp_server() -> FastMCP:
         version=version,
     )
 
+    _cdn_domains = [
+        "https://unpkg.com",  # @modelcontextprotocol/ext-apps SDK
+        "https://panel-extensions.github.io",  # panel-live JS/CSS
+        "https://cdn.holoviz.org",
+        "https://cdn.jsdelivr.net",
+        "https://cdn.plot.ly",
+        "https://pyodide-cdn2.iodide.io",
+        "https://pypi.org",
+        "https://files.pythonhosted.org",
+        "https://cdn.bokeh.org",
+        "https://raw.githubusercontent.com",
+    ]
+
     csp = ResourceCSP(
-        resource_domains=[
+        resourceDomains=[
             "'unsafe-inline'",  # panel-live injects inline styles
             "'unsafe-eval'",  # Pyodide uses eval() for Python→JS interop
             "'wasm-unsafe-eval'",  # Pyodide loads WebAssembly modules
             "blob:",  # Pyodide creates blob URLs for workers
             "data:",  # Bokeh uses data: URIs for images
-            "https://unpkg.com",  # @modelcontextprotocol/ext-apps SDK
-            "https://panel-extensions.github.io",  # panel-live JS/CSS
-            "https://cdn.holoviz.org",
-            "https://cdn.jsdelivr.net",
-            "https://cdn.plot.ly",
-            "https://pyodide-cdn2.iodide.io",
-            "https://pypi.org",
-            "https://files.pythonhosted.org",
-            "https://cdn.bokeh.org",
-            "https://raw.githubusercontent.com",
+            *_cdn_domains,
         ],
-        connect_domains=[
-            "https://unpkg.com",  # ext-apps SDK module fetch
-            "https://panel-extensions.github.io",
-            "https://cdn.holoviz.org",
-            "https://cdn.jsdelivr.net",
-            "https://cdn.plot.ly",
-            "https://pyodide-cdn2.iodide.io",
-            "https://pypi.org",
-            "https://files.pythonhosted.org",
-            "https://cdn.bokeh.org",
-            "https://raw.githubusercontent.com",
-        ],
+        connectDomains=_cdn_domains,
     )
 
     @mcp.resource(RESOURCE_URI, app=AppConfig(csp=csp))
@@ -93,9 +86,9 @@ def create_mcp_server() -> FastMCP:
         """Return the MCP App HTML."""
         return TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    @mcp.tool(name="show_panel_live", app=AppConfig(resource_uri=RESOURCE_URI))
+    @mcp.tool(name="show_panel_live", app=AppConfig(resourceUri=RESOURCE_URI))
     async def show_panel_live(code: str, ctx: Context | None = None) -> str:
-        """Render interactive Python data apps in the chat using Panel + Pyodide.
+        """Render interactive Python data apps in the chat using Panel + Pyodide (browser WASM).
 
         ## Use when
         - User asks for an interactive visualization, dashboard, or data app
@@ -104,17 +97,22 @@ def create_mcp_server() -> FastMCP:
         - User wants to explore data interactively
 
         ## Don't use when
-        - User asks for a simple text/table answer
+        - User asks for a simple text/table answer with no interactivity
         - Code needs server-side resources (databases, filesystem, network APIs)
 
         ## Code requirements
         - Code runs in Pyodide (browser Python). Available: panel, bokeh, holoviews,
           hvplot, plotly, matplotlib, altair, numpy, pandas, scipy, plus pure-Python pkgs.
-        - MUST call `.servable()` on the final Panel object.
+        - Two code styles are supported:
+          1. **Panel code**: build a layout and call `.servable()` on the final object.
+          2. **Regular Python**: the last expression is rendered automatically
+             (e.g., a matplotlib figure on the last line).
+        - Do NOT use `.show()`, `.plot()`, or Panel template classes (e.g., `FastListTemplate`).
         - Use `pn.extension(...)` if loading JS extensions (e.g., `pn.extension("plotly")`).
-        - Heavy libs (scikit-learn, xarray, seaborn) work but add 10-30s to first load.
+        - Heavy libs (scikit-learn, xarray, seaborn) work but add extra time to first load.
 
-        ## Example
+        ## Examples
+        Panel with widgets:
         ```python
         import panel as pn
         import numpy as np
@@ -122,11 +120,20 @@ def create_mcp_server() -> FastMCP:
         pn.Column(freq, pn.bind(lambda f: f"Value: {f}", freq)).servable()
         ```
 
+        Plain matplotlib (no Panel needed):
+        ```python
+        import matplotlib.pyplot as plt
+        import numpy as np
+        x = np.linspace(0, 10, 100)
+        fig, ax = plt.subplots()
+        ax.plot(x, np.sin(x))
+        fig  # last expression is rendered
+        ```
+
         Parameters
         ----------
         code : str
             Python code to run inside the panel-live Pyodide runtime.
-            Must call ``.servable()`` on the final Panel object.
         ctx : Context | None, optional
             FastMCP execution context (injected automatically).
 

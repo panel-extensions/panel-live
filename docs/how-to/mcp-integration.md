@@ -20,16 +20,58 @@ panel-live mcp
 Used by VS Code Copilot Chat and Claude Desktop. The MCP client starts the
 server as a subprocess and communicates via stdin/stdout.
 
-### HTTP (SSE)
+### Streamable HTTP (for Claude.ai and remote access)
+
+```bash
+panel-live mcp --transport streamable-http --port 5002
+```
+
+Starts a Streamable HTTP server. This is the transport Claude.ai uses for
+remote MCP connectors. Expose it via ngrok or a public server to use from
+Claude.ai. The server listens on `http://localhost:5002` by default.
+
+### HTTP / SSE
 
 ```bash
 panel-live mcp --transport http --port 5002
+panel-live mcp --transport sse --port 5002
 ```
 
-Starts an HTTP server with Server-Sent Events transport. Useful for testing
-and remote setups. The server listens on `http://localhost:5002` by default.
+Legacy SSE-based transports. Useful for testing and tools that don't yet
+support Streamable HTTP. Note: SSE may be deprecated by MCP clients in the
+future.
 
 ## Configuration examples
+
+### Claude.ai (remote connector)
+
+!!! warning "Extremely slow loading"
+
+    Claude.ai's MCP App webview does not provide cross-origin isolation headers
+    (COOP/COEP), so Pyodide falls back to a much slower initialization path.
+    **First load takes 2+ minutes.** We have reported it [here](https://github.com/modelcontextprotocol/ext-apps/issues/513) and at claude.ai.
+
+Claude.ai requires a publicly accessible MCP server. We hope to host a public
+panel-live MCP server in the future — for now, you can test with a local tunnel.
+
+!!! note "ngrok is for testing only"
+
+    The [ngrok](https://ngrok.com/) example below exposes your local MCP server to the internet.
+    This is **not recommended for production use** — it is included here
+    only to demonstrate that panel-live can work with Claude.ai.
+
+1. Start the server and expose it via ngrok:
+
+    ```bash
+    panel-live mcp --transport streamable-http --port 5002
+    # In another terminal:
+    ngrok http 5002
+    ```
+
+2. In Claude.ai, go to **Settings > Connectors > Add custom connector**.
+3. Paste the ngrok URL (e.g., `https://abc123.ngrok-free.app/mcp/`).
+
+Available on free plans (1 connector) and Pro/Max/Team/Enterprise.
 
 ### VS Code Copilot Chat
 
@@ -111,8 +153,8 @@ environment and the `Scripts`/`bin` directory is on your PATH.
 ### Slow loading in Claude.ai
 
 Claude.ai does not provide COOP/COEP headers, so Pyodide falls back to a
-slower initialization path (30–60 seconds). VS Code Copilot Chat provides
-these headers and loads in 5–15 seconds. This is a known limitation of the
+much slower initialization path (2+ minutes). VS Code Copilot Chat provides
+these headers and loads in ~5 seconds. This is a known limitation of the
 MCP Apps runtime environment.
 
 ### Network errors
