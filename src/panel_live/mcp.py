@@ -56,36 +56,29 @@ def create_mcp_server() -> FastMCP:
         version=version,
     )
 
+    _cdn_domains = [
+        "https://unpkg.com",  # @modelcontextprotocol/ext-apps SDK
+        "https://panel-extensions.github.io",  # panel-live JS/CSS
+        "https://cdn.holoviz.org",
+        "https://cdn.jsdelivr.net",
+        "https://cdn.plot.ly",
+        "https://pyodide-cdn2.iodide.io",
+        "https://pypi.org",
+        "https://files.pythonhosted.org",
+        "https://cdn.bokeh.org",
+        "https://raw.githubusercontent.com",
+    ]
+
     csp = ResourceCSP(
-        resource_domains=[
+        resourceDomains=[
             "'unsafe-inline'",  # panel-live injects inline styles
             "'unsafe-eval'",  # Pyodide uses eval() for Python→JS interop
             "'wasm-unsafe-eval'",  # Pyodide loads WebAssembly modules
             "blob:",  # Pyodide creates blob URLs for workers
             "data:",  # Bokeh uses data: URIs for images
-            "https://unpkg.com",  # @modelcontextprotocol/ext-apps SDK
-            "https://panel-extensions.github.io",  # panel-live JS/CSS
-            "https://cdn.holoviz.org",
-            "https://cdn.jsdelivr.net",
-            "https://cdn.plot.ly",
-            "https://pyodide-cdn2.iodide.io",
-            "https://pypi.org",
-            "https://files.pythonhosted.org",
-            "https://cdn.bokeh.org",
-            "https://raw.githubusercontent.com",
+            *_cdn_domains,
         ],
-        connect_domains=[
-            "https://unpkg.com",  # ext-apps SDK module fetch
-            "https://panel-extensions.github.io",
-            "https://cdn.holoviz.org",
-            "https://cdn.jsdelivr.net",
-            "https://cdn.plot.ly",
-            "https://pyodide-cdn2.iodide.io",
-            "https://pypi.org",
-            "https://files.pythonhosted.org",
-            "https://cdn.bokeh.org",
-            "https://raw.githubusercontent.com",
-        ],
+        connectDomains=_cdn_domains,
     )
 
     @mcp.resource(RESOURCE_URI, app=AppConfig(csp=csp))
@@ -93,7 +86,7 @@ def create_mcp_server() -> FastMCP:
         """Return the MCP App HTML."""
         return TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    @mcp.tool(name="show_panel_live", app=AppConfig(resource_uri=RESOURCE_URI))
+    @mcp.tool(name="show_panel_live", app=AppConfig(resourceUri=RESOURCE_URI))
     async def show_panel_live(code: str, ctx: Context | None = None) -> str:
         """Render interactive Python data apps in the chat using Panel + Pyodide (browser WASM).
 

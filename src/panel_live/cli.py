@@ -7,7 +7,7 @@ Usage::
     panel-live pre-render --file script.py
     panel-live pre-render CODE --cache-dir .cache --setup-code "import panel as pn" --timeout 60
     panel-live mcp
-    panel-live mcp --transport http --port 5002
+    panel-live mcp --transport streamable-http --port 5002
     panel-live --version
 
 The ``serve`` command starts a Panel server with the showcase example app,
@@ -52,9 +52,9 @@ def _build_parser() -> argparse.ArgumentParser:
     mcp_parser = sub.add_parser("mcp", help="Start the MCP server")
     mcp_parser.add_argument(
         "--transport",
-        choices=["stdio", "http"],
+        choices=["stdio", "http", "streamable-http", "sse"],
         default="stdio",
-        help="Transport protocol (default: stdio)",
+        help="Transport protocol (default: stdio). Use 'streamable-http' for Claude.ai remote connectors.",
     )
     mcp_parser.add_argument(
         "--port",
@@ -184,7 +184,7 @@ def _cmd_mcp(args: argparse.Namespace) -> int:
 
     server = create_mcp_server()
     kwargs: dict = {"transport": args.transport}
-    if args.transport == "http":
+    if args.transport in ("http", "streamable-http", "sse"):
         kwargs["port"] = args.port
     server.run(**kwargs)
     return 0
