@@ -8,12 +8,14 @@
     you run into problems or have suggestions.
 
 This tutorial shows how to use panel-live as an MCP server so that LLM clients
-(VS Code Copilot Chat, Claude Desktop) can render interactive Panel apps
-directly in the chat.
+(VS Code Copilot Chat, Claude Desktop) can render any Python object — from
+plain values and standard library types to Matplotlib figures, DataFrames,
+interactive data visualizations, and full data apps built with Panel and the
+wider HoloViz ecosystem.
 
 MCP (Model Context Protocol) Apps let tools return rich, interactive UI.
 The `show_panel_live` tool sends Python code to a browser-based Pyodide
-runtime that renders Panel dashboards — no server needed.
+runtime that renders the output — no server needed.
 
 ## Install
 
@@ -60,7 +62,9 @@ Restart VS Code. In Copilot Chat, ask:
 
 Copilot will call the `show_panel_live` tool and render the app inline.
 
-![VS Code Copilot Chat demo](../assets/gifs/panel-live-vs-code.gif)
+<video controls muted style="width: 100%; max-width: 800px;">
+  <source src="../assets/mp4/panel-live-vs-code.mp4" type="video/mp4">
+</video>
 
 ## Claude Desktop
 
@@ -96,6 +100,21 @@ Restart Claude Desktop and ask for an interactive visualization.
 ![Claude Desktop demo](../assets/gifs/mcp-claude-desktop.gif)
 -->
 
+## Claude Code
+
+Add to `.mcp.json` or your settings:
+
+```json
+{
+  "mcpServers": {
+    "panel-live": {
+      "command": "uvx",
+      "args": ["--from", "panel-live[mcp] @ git+https://github.com/panel-extensions/panel-live.git", "panel-live", "mcp"]
+    }
+  }
+}
+```
+
 ## Claude.ai (remote connector)
 
 !!! warning "Extremely slow loading"
@@ -125,13 +144,14 @@ the ngrok URL (e.g., `https://abc123.ngrok-free.app/mcp/`).
 
 See the [MCP Integration guide](../how-to/mcp-integration.md) for details.
 
-![Claude.ai](../assets/gifs/panel-live-claude-ai.gif)
+<video controls muted style="width: 100%; max-width: 800px;">
+  <source src="../assets/mp4/panel-live-claude-ai.mp4" type="video/mp4">
+</video>
 
 ## Your first app
 
-Ask the LLM to create any interactive Panel app. You can use Panel code
-(with `.servable()`) or regular Python where the last expression is rendered.
-For example:
+Ask the LLM to create anything — regular Python code works out of the box,
+with the last expression automatically rendered. For example:
 
 ```python
 import panel as pn
@@ -160,8 +180,11 @@ Matplotlib, Altair, NumPy, Pandas, SciPy, and most pure-Python packages.
   VS Code Copilot Chat is faster because it provides these headers.
 - **Server-side resources**: Code runs in the browser. Databases, filesystem,
   and network APIs are not available.
-- **Heavy packages**: Libraries like scikit-learn, xarray, and seaborn work
-  but add 10–30 seconds to the first load.
+- **Unsupported APIs**: Methods that open a GUI window (e.g. `plt.show()`,
+  `.plot()`) do not work — return the figure object instead. Panel templates
+  like `FastListTemplate` are not supported in panel-live.
+- **Server-based frameworks**: Dash, Gradio, and Streamlit require a running
+  server and are not supported.
 
 ## Next steps
 

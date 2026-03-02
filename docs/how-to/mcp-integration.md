@@ -8,6 +8,7 @@
     you run into problems or have suggestions.
 
 This guide covers advanced configuration for the panel-live MCP server.
+For a quick introduction, see the [Getting Started with MCP](../tutorials/getting-started-mcp.md) tutorial.
 
 ## Transport options
 
@@ -17,8 +18,8 @@ This guide covers advanced configuration for the panel-live MCP server.
 panel-live mcp
 ```
 
-Used by VS Code Copilot Chat and Claude Desktop. The MCP client starts the
-server as a subprocess and communicates via stdin/stdout.
+Used by VS Code Copilot Chat, Claude Desktop, and Claude Code. The MCP client
+starts the server as a subprocess and communicates via stdin/stdout.
 
 ### Streamable HTTP (for Claude.ai and remote access)
 
@@ -182,6 +183,16 @@ requests. The CSP allows:
 
 All code execution happens in the browser via Pyodide (WebAssembly). No code
 is sent to any external server. The Python runtime is completely client-side.
+
+## Known limitations
+
+- **Server-side resources**: Code runs in the browser via Pyodide. Databases,
+  filesystem, and network APIs are not available.
+- **Unsupported APIs**: Methods that open a GUI window (e.g. `plt.show()`,
+  `.plot()`) do not work — return the figure object instead. Panel templates
+  like `FastListTemplate` are not supported in panel-live.
+- **Server-based frameworks**: Dash, Gradio, and Streamlit require a running
+  server and are not supported.
 
 ## FastMCP direct usage
 
