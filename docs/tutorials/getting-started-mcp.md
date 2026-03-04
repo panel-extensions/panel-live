@@ -63,7 +63,7 @@ Restart VS Code. In Copilot Chat, ask:
 Copilot will call the `show_panel_live` tool and render the app inline.
 
 <video controls muted style="width: 100%; max-width: 800px;">
-  <source src="../assets/mp4/panel-live-vs-code.mp4" type="video/mp4">
+  <source src="../../assets/mp4/panel-live-vs-code.mp4" type="video/mp4">
 </video>
 
 ## Claude Desktop
@@ -145,7 +145,7 @@ the ngrok URL (e.g., `https://abc123.ngrok-free.app/mcp/`).
 See the [MCP Integration guide](../how-to/mcp-integration.md) for details.
 
 <video controls muted style="width: 100%; max-width: 800px;">
-  <source src="../assets/mp4/panel-live-claude-ai.mp4" type="video/mp4">
+  <source src="../../assets/mp4/panel-live-claude-ai.mp4" type="video/mp4">
 </video>
 
 ## Your first app
